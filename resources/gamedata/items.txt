@@ -1,0 +1,341 @@
+{
+"ID":"ITEM_PROPERTIES",
+"default":{
+	"name":"Missingno",
+	"placeable":false,
+	"smeltable":false,
+	"tool":"none",
+	"atk":0,
+	"durability":-1,
+	"power":1,
+	"fuelTime":0
+}
+"0":{
+	"name":"Air",
+	"placeable":false
+},
+"1":{
+	"name":"Grass",
+	"placeable":true
+},
+"2":{
+	"name":"Dirt",
+	"placeable":true
+},
+"3":{
+	"name":"Log",
+	"placeable":true,
+	"fuelTime":2
+},
+"4":{
+	"name":"Planks",
+	"placeable":true,
+	"fuelTime":2
+},
+"5":{
+	"name":"Leaves",
+	"placeable":true
+},
+"6":{
+	"name":"Sand",
+	"placeable":true
+	"fuelTime":2
+},
+"7":{
+	"name":"Gravel",
+	"placeable":true
+},
+"8":{
+	"name":"Snowy Grass",
+	"placeable":true
+},
+"9":{
+	"name":"Ladder",
+	"placeable":true
+},
+"10":{
+	"name":"Torch",
+	"placeable":true
+},
+"11":{
+	"name":"Water",
+	"placeable":true
+},
+"12":{
+	"name":"Flowing Water",
+	"placeable":true
+},
+"13":{
+	"name":"Lava",
+	"placeable":true
+},
+"14":{
+	"name":"Flowing Lava",
+	"placeable":true
+},
+"15":{
+	"name":"Obsidian",
+	"placeable":true
+},
+"16":{
+	"name":"Stone",
+	"placeable":true
+},
+"17":{
+	"name":"Coal Ore",
+	"placeable":true
+},
+"18":{
+	"name":"Iron Ore",
+	"placeable":true
+},
+"19":{
+	"name":"Gold Ore",
+	"placeable":true
+},
+"20":{
+	"name":"Diamond Ore",
+	"placeable":true
+},
+"21":{
+	"name":"Redstone Ore",
+	"placeable":true
+},
+"22":{
+	"name":"Lapis Ore",
+	"placeable":true
+},
+"23":{
+	"name":"Stone",
+	"placeable":true
+},
+"24":{
+	"name":"Bedrock",
+	"placeable":true
+},
+"25":{
+	"name":"Crafting Table",
+	"placeable":true
+},
+"26":{
+	"name":"Furnace",
+	"placeable":true
+},
+"27":{
+	"name":"Lit Furnace",
+	"placeable":true
+},
+"28":{
+	"name":"Snow",
+	"placeable":true
+},
+"29":{
+	"name":"Glass",
+	"placeable":true
+},
+"30":{
+	"name":"Ice",
+	"placeable":true
+},
+"31":{
+	"name":"Netherrack",
+	"placeable":true
+}
+"256":{
+	"name":"Stick",
+	"fuelTime":1
+},
+"257":{
+	"name":"Coal",
+	"fuelTime":20
+},
+"258":{
+	"name":"Iron Bar"
+},
+"259":{
+	"name":"Gold Bar"
+},
+"260":{
+	"name":"Diamond"
+},
+"261":{
+	"name":"Lapis"
+},
+"262":{
+	"name":"Redstone"
+},
+"272":{
+	"name":"Wooden Sword",
+	"tool":"sword",
+	"atk":4,
+	"durability":20
+},
+"273":{
+	"name":"Stone Sword",
+	"tool":"sword",
+	"atk":5,
+	"durability":40
+},
+"274":{
+	"name":"Iron Sword",
+	"tool":"sword",
+	"durability":60,
+	"atk":6
+},
+"275":{
+	"name":"Gold Sword",
+	"tool":"sword",
+	"durability":10,
+	"atk":7
+},
+"276":{
+	"name":"Diamond Sword",
+	"tool":"sword",
+	"durability":100,
+	"atk":7
+},
+"277":{
+	"name":"Adamantite Sword",
+	"tool":"sword",
+	"durability":400,
+	"atk":6
+},
+"278":{
+	"name":"Wooden Pickaxe",
+	"tool":"pickaxe",
+	"power":4,
+	"durability":20
+},
+"279":{
+	"name":"Stone Pickaxe",
+	"tool":"pickaxe",
+	"power":6,
+	"durability":40
+},
+"280":{
+	"name":"Iron Pickaxe",
+	"tool":"pickaxe",
+	"power":10,
+	"durability":60
+},
+"281":{
+	"name":"Gold Pickaxe",
+	"tool":"pickaxe",
+	"power":20,
+	"durability":10
+},
+"282":{
+	"name":"Diamond Pickaxe",
+	"tool":"pickaxe",
+	"power":15,
+	"durability":100
+},
+"283":{
+	"name":"Adamantite Pickaxe",
+	"tool":"pickaxe",
+	"power":10,
+	"durability":400
+},
+"288":{
+	"name":"Wooden Axe",
+	"tool":"axe",
+	"power":4,
+	"durability":20
+},
+"289":{
+	"name":"Stone Axe",
+	"tool":"axe",
+	"power":6,
+	"durability":40
+},
+"290":{
+	"name":"Iron Axe",
+	"tool":"axe",
+	"power":10,
+	"durability":60
+},
+"291":{
+	"name":"Gold Axe",
+	"tool":"axe",
+	"power":20,
+	"durability":10
+},
+"292":{
+	"name":"Diamond Axe",
+	"tool":"axe",
+	"power":15,
+	"durability":100
+},
+"293":{
+	"name":"Adamantite Axe",
+	"tool":"axe",
+	"power":10,
+	"durability":400
+},
+"294":{
+	"name":"Wooden Shovel",
+	"tool":"shovel",
+	"power":4,
+	"durability":20
+},
+"295":{
+	"name":"Stone Shovel",
+	"tool":"shovel",
+	"power":6,
+	"durability":40
+},
+"296":{
+	"name":"Iron Shovel",
+	"tool":"shovel",
+	"power":10,
+	"durability":60
+},
+"297":{
+	"name":"Gold Shovel",
+	"tool":"shovel",
+	"power":20,
+	"durability":10
+},
+"298":{
+	"name":"Diamond Shovel",
+	"tool":"shovel",
+	"power":15,
+	"durability":100
+},
+"299":{
+	"name":"Adamantite Shovel",
+	"tool":"shovel",
+	"power":10,
+	"durability":400
+},
+"304":{
+	"name":"Wooden Hoe",
+	"tool":"hoe",
+	"durability":20
+},
+"305":{
+	"name":"Stone Hoe",
+	"tool":"hoe",
+	"durability":40
+},
+"306":{
+	"name":"Iron Hoe",
+	"tool":"hoe",
+	"durability":60
+},
+"307":{
+	"name":"Gold Hoe",
+	"tool":"hoe",
+	"durability":10
+},
+"308":{
+	"name":"Diamond Hoe",
+	"tool":"hoe",
+	"durability":100
+},
+"309":{
+	"name":"Adamantite Hoe",
+	"tool":"hoe",
+	"durability":400
+}
+}

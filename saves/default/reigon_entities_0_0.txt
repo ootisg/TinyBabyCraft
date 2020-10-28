@@ -1,0 +1,1 @@
+{x=72, y=504, UUID=ecfcd071-8bcc-46fc-800e-6d39ff7de16b, type=Zombie}

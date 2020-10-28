@@ -1,0 +1,48 @@
+{
+"ID":"DROP_POOL_LIST",
+"default":{
+    "id":0,
+    "count":1,
+    "min":0,
+    "max":0,
+    "chance":1.0,
+	"special":"none"
+},
+"Cobblestone":[
+    {
+        "id":23
+    }
+],
+"Coal":[
+    {
+        "id":257
+    }
+],
+"Diamond":[
+    {
+        "id":260
+    }
+],
+"Redstone":[
+    {
+        "id":262,
+        "min":3,
+        "max":8
+    }
+],
+"Lapis":[
+    {
+        "id":261,
+        "min":2,
+        "max":6
+    }
+],
+"Furnace":[
+	{
+		"id":26
+	},
+	{
+		"special":"container"
+	}
+]
+}

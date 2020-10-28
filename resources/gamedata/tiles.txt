@@ -1,0 +1,189 @@
+{
+"ID":"TILE_PROPERTIES",
+"default":{
+	"name":"Missingno",
+	"type":"stone",
+	"toughness":0,
+	"unbreakable":false,
+	"fluid":false,
+	"light":0,
+	"drop":"self",
+	"usable":true
+}
+"0":{
+	"name":"Air",
+	"unbreakable":true
+},
+"1":{
+	"name":"Grass",
+	"type":"soil",
+	"toughness":10
+},
+"2":{
+	"name":"Dirt",
+	"type":"soil",
+	"toughness":8
+},
+"3":{
+	"name":"Log",
+	"type":"wood",
+	"toughness":20
+},
+"4":{
+	"name":"Planks",
+	"type":"wood",
+	"toughness":20
+},
+"5":{
+	"name":"Leaves",
+	"type":"leaves",
+	"toughness":2
+},
+"6":{
+	"name":"Sand",
+	"type":"sand",
+	"toughness":5
+},
+"7":{
+	"name":"Gravel",
+	"type":"sand",
+	"toughness":5
+},
+"8":{
+	"name":"Snowy Grass",
+	"type":"soil",
+	"toughness":10
+},
+"9":{
+	"name":"Ladder",
+	"type":"wood",
+	"toughness":20
+},
+"10":{
+	"name":"Torch",
+	"type":"wood",
+	"toughness":0,
+	"light":15
+},
+"11":{
+	"name":"Water",
+	"type":"water",
+	"fluid":true,
+	"unbreakable":true
+},
+"12":{
+	"name":"Flowing Water",
+	"type":"water",
+	"fluid":true,
+	"unbreakable":true
+},
+"13":{
+	"name":"Lava",
+	"type":"lava",
+	"fluid":true,
+	"unbreakable":true,
+	"light":15
+},
+"14":{
+	"name":"Flowing Lava",
+	"type":"lava",
+	"fluid":true,
+	"unbreakable":true,
+	"light":15
+},
+"15":{
+	"name":"Obsidian",
+	"type":"stone",
+	"toughness":100
+},
+"16":{
+	"name":"Stone",
+	"type":"stone",
+	"toughness":50,
+	"drop":"Cobblestone"
+},
+"17":{
+	"name":"Coal Ore",
+	"type":"stone",
+	"toughness":50,
+	"drop":"Coal"
+},
+"18":{
+	"name":"Iron Ore",
+	"type":"stone",
+	"toughness":50,
+},
+"19":{
+	"name":"Gold Ore",
+	"type":"stone",
+	"toughness":50
+},
+"20":{
+	"name":"Diamond Ore",
+	"type":"stone",
+	"toughness":50,
+	"drop":"Diamond"
+},
+"21":{
+	"name":"Redstone Ore",
+	"type":"stone",
+	"toughness":50,
+	"drop":"Redstone"
+},
+"22":{
+	"name":"Lapis Ore",
+	"type":"stone",
+	"toughness":50,
+	"drop":"Lapis"
+},
+"23":{
+	"name":"Stone",
+	"type":"stone",
+	"toughness":30
+},
+"24":{
+	"name":"Bedrock",
+	"type":"stone",
+	"unbreakable":true
+},
+"25":{
+	"name":"Crafting Table",
+	"type":"wood",
+	"toughness":20
+},
+"26":{
+	"name":"Furnace",
+	"type":"stone",
+	"toughness":30,
+	"drop":"furnace"
+},
+"27":{
+	"name":"Lit Furnace",
+	"type":"stone",
+	"toughness":30,
+	"drop":"furnace"
+},
+"28":{
+	"name":"Snow",
+	"type":"snow",
+	"toughness":0,
+	"drop":"nothing"
+},
+"29":{
+	"name":"Glass",
+	"type":"glass",
+	"toughness":5,
+	"drop":"nothing"
+},
+"30":{
+	"name":"Ice",
+	"type":"ice",
+	"toughness":5,
+	"drop":"nothing"
+},
+"31":{
+	"name":"Netherrack",
+	"type":"stone",
+	"toughness":5,
+}
+}

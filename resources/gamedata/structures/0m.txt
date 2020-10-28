@@ -1,0 +1,4 @@
+name:tree
+center:2,5
+width:5
+height:6
