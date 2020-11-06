@@ -5,10 +5,12 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
+import gameObjects.Container;
 import json.JSONException;
 import json.JSONObject;
 import json.JSONUtil;
@@ -101,6 +103,7 @@ public class Inventory extends GameObject {
 	
 	private Item[] items;
 	private Item held;
+	private static Container container;
 	
 	public static int INVENTORY_INDEX = 0;
 	public static int ARMOR_INDEX = 20;
@@ -154,85 +157,86 @@ public class Inventory extends GameObject {
 			int cellIndex = -1;
 			int cellsStartX = menuOffsetX + INV_START_X;
 			int cellsStartY = menuOffsetY + INV_START_Y;
-			int cellsEndX = cellsStartX + CELL_SIZE * 5;
-			int cellsEndY = cellsStartY + CELL_SIZE * 4;
 			int armorStartX = menuOffsetX + ARMOR_START_X;
 			int armorStartY = menuOffsetY + ARMOR_START_Y;
-			int armorEndX = armorStartX + CELL_SIZE * 2;
-			int armorEndY = armorStartY + CELL_SIZE * 2;
 			//Different per crafting menu type
 			int craftingStartX = 0;
 			int craftingStartY = 0;
-			int craftingEndX = 0;
-			int craftingEndY = 0;
 			int craftResultX = 0;
 			int craftResultY = 0;
 			if (craftingSize == 2) {
 				craftingStartX = craftingOffsetX + CRAFTING_2X2_START_X;
 				craftingStartY = craftingOffsetY + CRAFTING_2X2_START_Y;
-				craftingEndX = craftingStartX + CELL_SIZE * craftingSize;
-				craftingEndY = craftingStartY + CELL_SIZE * craftingSize;
 				craftResultX = craftingOffsetX + CRAFTING_2X2_RESULT_X;
 				craftResultY = craftingOffsetY + CRAFTING_2X2_RESULT_Y;
 			} else if (craftingSize == 3) {
 				craftingStartX = craftingOffsetX + CRAFTING_3X3_START_X;
 				craftingStartY = craftingOffsetY + CRAFTING_3X3_START_Y;
-				craftingEndX = craftingStartX + CELL_SIZE * craftingSize;
-				craftingEndY = craftingStartY + CELL_SIZE * craftingSize;
 				craftResultX = craftingOffsetX + CRAFTING_3X3_RESULT_X;
 				craftResultY = craftingOffsetY + CRAFTING_3X3_RESULT_Y;
 			}
+			//Time to do furnace yay
+			int furnaceInX = furnaceOffsetX + FURNACE_ITEM_X;
+			int furnaceInY = furnaceOffsetY + FURNACE_ITEM_Y;
+			int furnaceFuelX = furnaceOffsetX + FURNACE_FUEL_X;
+			int furnaceFuelY = furnaceOffsetY + FURNACE_FUEL_Y;
+			int furnaceResX = furnaceOffsetX + FURNACE_RESULT_X;
+			int furnaceResY = furnaceOffsetY + FURNACE_RESULT_Y;
+			//And the chest
 			int chestStartX = chestOffsetX;
 			int chestStartY = chestOffsetY;
-			int chestEndX = chestStartX + CELL_SIZE * 5;
-			int chestEndY = chestStartY + CELL_SIZE * 3;
 			
+			//Make us some rectangles
+			Rectangle invBounds = new Rectangle (cellsStartX, cellsStartY, CELL_SIZE * 5, CELL_SIZE * 4);
+			Rectangle armorBounds = new Rectangle (armorStartX, armorStartY, CELL_SIZE * 2, CELL_SIZE * 2);
+			//Crafting stuff
+			Rectangle craftingBounds = new Rectangle (craftingStartX, craftingStartY, CELL_SIZE * craftingSize, CELL_SIZE * craftingSize);
+			Rectangle craftResultBounds = new Rectangle (craftResultX, craftResultY, CELL_SIZE, CELL_SIZE);
+			//Furnace stuff
+			Rectangle furnaceInBounds = new Rectangle (furnaceInX, furnaceInY, CELL_SIZE, CELL_SIZE);
+			Rectangle furnaceFuelBounds = new Rectangle (furnaceFuelX, furnaceFuelY, CELL_SIZE, CELL_SIZE);
+			Rectangle furnaceResultBounds = new Rectangle (furnaceResX, furnaceResY, CELL_SIZE, CELL_SIZE);
+			//Chest stuff
+			Rectangle chestBounds = new Rectangle (chestStartX, chestStartY, CELL_SIZE * 5, CELL_SIZE * 3);
 			int menuClicked = 0; //0 for inventory
 			
 			//Check for mouse clicks in the relevant areas
-			if (getCursorX () >= cellsStartX
-				&& getCursorX () < cellsEndX
-				&& getCursorY () >= cellsStartY
-				&& getCursorY () < cellsEndY) {
+			if (cursorInBounds (invBounds)) {
 				//Inside the items menu
 				int cellX = (getCursorX () - cellsStartX) / CELL_SIZE;
 				int cellY = (getCursorY () - cellsStartY) / CELL_SIZE;
 				cellIndex = cellY * 5 + cellX; //We now have the clicked-on cell
-			} else if (getCursorX () >= armorStartX
-				&& getCursorX () < armorEndX
-				&& getCursorY () >= armorStartY
-				&& getCursorY () < armorEndY) {
+			} else if (cursorInBounds (armorBounds)) {
 				//Inside the armor menu
 				int cellX = (getCursorX () - armorStartX) / CELL_SIZE;
 				int cellY = (getCursorY () - armorStartY) / CELL_SIZE;
 				cellIndex = ARMOR_INDEX + cellY * 2 + cellX; //Here's the clicked-on armor cell
-			} else if (getCursorX () >= craftingStartX
-				&& getCursorX () < craftingEndX
-				&& getCursorY () >= craftingStartY
-				&& getCursorY () < craftingEndY) {
+			} else if (craftingSize != 0 && cursorInBounds (craftingBounds)) {
 				//Inside the crafting menu
 				int cellX = (getCursorX () - craftingStartX) / CELL_SIZE;
 				int cellY = (getCursorY () - craftingStartY) / CELL_SIZE;
 				cellIndex = CRAFTING_INDEX + cellY * craftingSize + cellX; //Here's the clicked-on crafting cell
 				menuClicked = 1; //1 for crafting menu
-			} else if (getCursorX () >= craftResultX
-				&& getCursorX () < craftResultX + CELL_SIZE
-				&& getCursorY () >= craftResultY
-				&& getCursorY () < craftResultY + CELL_SIZE) {
+			} else if (craftingSize != 0 && cursorInBounds (craftResultBounds)) {
 				//Clicked on the crafting result
 				cellIndex = CRAFTING_RESULT_INDEX; //Here's the clicked-on crafting cell
 				menuClicked = 2; //2 for crafted item
-			} else if (getCursorX () >= chestStartX
-				&& getCursorX () < chestEndX
-				&& getCursorY () >= chestStartY
-				&& getCursorY () < chestEndY) {
+			} else if (showChest && cursorInBounds (chestBounds)) {
 				//Inside the chest menu
 				int cellX = (getCursorX () - chestStartX) / CELL_SIZE;
 				int cellY = (getCursorY () - chestStartY) / CELL_SIZE;
 				cellIndex = cellY * craftingSize + cellX; //Here's the clicked-on chest cell
 				menuClicked = 3; //3 for chest
+			} else if (showFurnace && cursorInBounds (furnaceInBounds)) {
+				cellIndex = FURNACE_ITEM_INDEX;
+				menuClicked = 4;
+			} else if (showFurnace && cursorInBounds (furnaceFuelBounds)) {
+				cellIndex = FURNACE_FUEL_INDEX;
+				menuClicked = 4;
+			} else if (showFurnace && cursorInBounds (furnaceResultBounds)) {
+				cellIndex = FURNACE_RESULT_INDEX;
+				menuClicked = 4;
 			}
-			
 			
 			if (cellIndex != -1) {
 				
@@ -270,7 +274,7 @@ public class Inventory extends GameObject {
 				}
 				
 				//Crafting result
-				if (menuClicked == 2) {
+				if (menuClicked == 2 || (menuClicked == 4 && cellIndex == FURNACE_RESULT_INDEX)) {
 					if (mouseButtonClicked (0)) {
 						//Pick up the whole stack
 						if (held == null && items [cellIndex].id != 0) {
@@ -295,10 +299,21 @@ public class Inventory extends GameObject {
 						}
 					}
 				}
+				
+				if (menuClicked == 4) {
+					for (int i = 0; i < 3; i++) {
+						container.setItem (i, items [FURNACE_ITEM_INDEX + i]);
+					}
+				}
+				
 			}
 			
 			predictCraft ();
 		}
+	}
+	
+	private boolean cursorInBounds (Rectangle r) {
+		return r.contains (getCursorX (), getCursorY ());
 	}
 	
 	public void placeHeldItem (int slot) {
@@ -517,6 +532,10 @@ public class Inventory extends GameObject {
 			}
 			return 1;
 		}
+	}
+	
+	public static void setContainer (Container c) {
+		container = c;
 	}
 	
 	public void enable () {

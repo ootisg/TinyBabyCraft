@@ -3,11 +3,14 @@ package ui;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import gameObjects.Furnace;
 import json.JSONArray;
 import json.JSONObject;
 import main.GameObject;
 import main.MainLoop;
+import world.Entity;
 import world.World;
 
 public class TileInterface extends GameObject {
@@ -65,8 +68,21 @@ public class TileInterface extends GameObject {
 					}
 					World.setTile (0, getHoveredTileX (), getHoveredTileY ());
 				} else if (currentTile != 24) {
-					if (workingId == 0 || World.getPlayer ().useSelectedItem () == 1) {
+					if (World.getPlayer ().useSelectedItem () == 1) {
 						World.setTile (workingId, getHoveredTileX (), getHoveredTileY ());
+						if (workingId == 26) {
+							//Furnace
+							HashMap<String, String> furnaceMap = Entity.getEntityMap ();
+							furnaceMap.put ("type", "Furnace");
+							furnaceMap.put ("s0", "0x0");
+							furnaceMap.put ("s1", "0x0");
+							furnaceMap.put ("s2", "0x0");
+							furnaceMap.put ("x", String.valueOf (getHoveredTileX () * 8));
+							furnaceMap.put ("y", String.valueOf (getHoveredTileY () * 8));
+							Entity furnaceEntity = new Entity (furnaceMap);
+							Furnace furnace = new Furnace (furnaceEntity);
+							World.addEntity (furnaceEntity);
+						}
 					}
 				}
 			}
