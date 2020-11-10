@@ -132,7 +132,7 @@ public class Inventory extends GameObject {
 			String ind = String.valueOf (i);
 			JSONObject jobj = itemProperties.getJSONObject (ind);
 			if (jobj != null) {
-				System.out.println (jobj);
+				//System.out.println (jobj);
 			}
 		}
 		
@@ -151,6 +151,12 @@ public class Inventory extends GameObject {
 	
 	@Override
 	public void frameEvent () {
+		
+		//Sync entity contents with inventory
+		if (container != null) {
+			syncContainerToInventory ();
+		}
+		
 		if ((mouseButtonClicked (0) || mouseButtonClicked (2)) && enabled) {
 			
 			//Calculate click areas
@@ -241,7 +247,7 @@ public class Inventory extends GameObject {
 			if (cellIndex != -1) {
 				
 				//Inventory or crafting grid
-				if (menuClicked == 0 || menuClicked == 1) {
+				if (menuClicked == 0 || menuClicked == 1 || (menuClicked == 4 && cellIndex != FURNACE_RESULT_INDEX)) {
 					if (mouseButtonClicked (0)) {
 						//Deal with held item-ness
 						if (held == null && items [cellIndex].id != 0) {
@@ -300,11 +306,8 @@ public class Inventory extends GameObject {
 					}
 				}
 				
-				if (menuClicked == 4) {
-					for (int i = 0; i < 3; i++) {
-						container.setItem (i, items [FURNACE_ITEM_INDEX + i]);
-					}
-				}
+				//Sync inventory with container
+				syncInventoryToContainer ();
 				
 			}
 			
@@ -414,6 +417,30 @@ public class Inventory extends GameObject {
 			
 			//Draw the background
 			FURNACE_BACKGROUND.draw (furnaceOffsetX, furnaceOffsetY);
+			
+			//Draw the furnace in item
+			int xdraw = furnaceOffsetX + FURNACE_ITEM_X + ITEM_OFFSET_X;
+			int ydraw = furnaceOffsetY + FURNACE_ITEM_Y + ITEM_OFFSET_Y;
+			if (items [FURNACE_ITEM_INDEX].id != 0) {
+				Item working = items [FURNACE_ITEM_INDEX];
+				drawItem (working.id, working.amount, xdraw, ydraw);
+			}
+			
+			//Draw the furnace fuel item
+			xdraw = furnaceOffsetX + FURNACE_FUEL_X + ITEM_OFFSET_X;
+			ydraw = furnaceOffsetY + FURNACE_FUEL_Y + ITEM_OFFSET_Y;
+			if (items [FURNACE_FUEL_INDEX].id != 0) {
+				Item working = items [FURNACE_FUEL_INDEX];
+				drawItem (working.id, working.amount, xdraw, ydraw);
+			}
+			
+			//Draw the furnace result item
+			xdraw = furnaceOffsetX + FURNACE_RESULT_X + ITEM_OFFSET_X;
+			ydraw = furnaceOffsetY + FURNACE_RESULT_Y + ITEM_OFFSET_Y;
+			if (items [FURNACE_RESULT_INDEX].id != 0) {
+				Item working = items [FURNACE_RESULT_INDEX];
+				drawItem (working.id, working.amount, xdraw, ydraw);
+			}
 			
 		}
 		
@@ -536,6 +563,24 @@ public class Inventory extends GameObject {
 	
 	public static void setContainer (Container c) {
 		container = c;
+	}
+	
+	public void syncContainerToInventory () {
+		//TODO support mappings other than furnace?
+		if (container != null) {
+			for (int i = 0; i < container.getCapacity (); i++) {
+				items [FURNACE_ITEM_INDEX + i] = container.getItem (i);
+			}
+		}
+	}
+	
+	public void syncInventoryToContainer () {
+		//TODO support mappings other than furnace?
+		if (container != null) {
+			for (int i = 0; i < container.getCapacity (); i++) {
+				container.setItem (i, items [FURNACE_ITEM_INDEX + i]);
+			}
+		}
 	}
 	
 	public void enable () {

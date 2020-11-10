@@ -12,9 +12,9 @@ public class Recipes {
 	
 	public static void init () {
 		loadRecipes ();
-		for (int i = 0; i < recipes.size (); i++) {
-			System.out.println (recipes.get (i));
-		}
+		//for (int i = 0; i < recipes.size (); i++) {
+		//	System.out.println (recipes.get (i));
+		//}
 	}
 	
 	public static void loadRecipes () {

@@ -155,13 +155,13 @@
 	"name":"Furnace",
 	"type":"stone",
 	"toughness":30,
-	"drop":"furnace"
+	"drop":"Furnace"
 },
 "27":{
 	"name":"Lit Furnace",
 	"type":"stone",
 	"toughness":30,
-	"drop":"furnace"
+	"drop":"Furnace"
 },
 "28":{
 	"name":"Snow",

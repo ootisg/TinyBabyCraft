@@ -8,11 +8,12 @@ public class Furnace extends Container {
 
 	public Furnace (Entity e) {
 		super (e);
-		Inventory.setContainer (this);
+		setCapacity (3);
 		setAiTime (1);
 	}
 	
 	public boolean placeItem (int slot, Item item) {
+		setItem (slot, item);
 		return false;
 	}
 	

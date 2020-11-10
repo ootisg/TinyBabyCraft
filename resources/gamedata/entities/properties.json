@@ -1,0 +1,10 @@
+{
+	"Furnace": {
+		"tileEntity":true,
+		"FMT": {
+			"s0":"item",
+			"s1":"item",
+			"s2":"item"
+		}
+	}
+}

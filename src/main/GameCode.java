@@ -17,13 +17,6 @@ public class GameCode extends GameAPI {
 		gameWindow = MainLoop.getWindow ();
 		gameWindow.setResolution (192, 144);
 		World.initWorld ();
-		HashMap<String, String> mappers = new HashMap<String, String> ();
-		mappers.put ("YOLO1", "YEETUS");
-		mappers.put ("YOLO2", "YOITIS");
-		mappers.put ("YOLO3", "YOITIS");
-		System.out.println (mappers);
-		double[] fromFile = FileUtil.populateFromFile ("resources/gamedata/furnace.txt");
-		System.out.println(Arrays.toString (fromFile));
 	}
 	public void gameLoop () {
 		World.worldFrame ();

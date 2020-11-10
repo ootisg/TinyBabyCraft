@@ -25,6 +25,7 @@ import json.JSONArray;
 import json.JSONException;
 import json.JSONObject;
 import json.JSONUtil;
+import main.GameObject;
 import main.MainLoop;
 import resources.Sprite;
 import resources.Spritesheet;
@@ -54,6 +55,7 @@ public class World {
 	
 	private static ArrayList<WorldReigon> reigons;
 	private static LinkedList<Entity> entities;
+	private static HashMap<Point, Entity> tileEntities;
 	
 	private static Player player;
 	
@@ -69,6 +71,7 @@ public class World {
 	public static JSONObject dropList;
 	
 	public static void initWorld () {
+		
 		try {
 			tileProperties = JSONUtil.loadJSONFile ("resources/gamedata/tiles.txt");
 			dropList = JSONUtil.loadJSONFile ("resources/gamedata/drops.txt");
@@ -94,7 +97,14 @@ public class World {
 		for (int i = 0; i < LOAD_SIZE; i++) {
 			tiles.add (null);
 		} //Size the tile list
+		
+		//Init entity properties
+		Entity.initTypeProperties ();
+		
+		//Setup entity maps
 		entities = new LinkedList<Entity> (); //Make the world entities list
+		tileEntities = new HashMap<Point, Entity> ();
+		
 		updateReigons ();
 		updateWorld (); //Fill the world
 		xBuffer = new int[LOAD_SIZE];
@@ -110,6 +120,7 @@ public class World {
 		solidMap [10] = false; //torch
 		//Make the player
 		spawnPlayer ();
+		System.out.println(tileEntities);
 	}
 	
 	public static void worldFrame () {
@@ -284,6 +295,28 @@ public class World {
 		
 	}
 	
+	public static Entity getTileEntity (int x, int y) {
+		Point p = new Point (x * 8, y * 8);
+		return tileEntities.get (p);
+	}
+	
+	public static void removeTileEntity (int x, int y) {
+		Point p = new Point (x * 8, y * 8);
+		tileEntities.remove (p);
+	}
+	
+	public static void breakTile (int x, int y) {
+		
+		//Clear out the tile
+		setTile (0, x, y);
+		
+		//Remove tile entities, if applicable
+		Entity e = getTileEntity (x, y);
+		if (e != null) {
+			removeEntity (e);
+		}
+	}
+	
 	public static int getReigonId (int x) {
 		return Math.floorDiv (x, WorldReigon.REIGON_SIZE);
 	}
@@ -418,11 +451,29 @@ public class World {
 	
 	public static void addEntity (Entity e) {
 		
+		addEntity (e, true);
+		
+	}
+	
+	private static void addEntity (Entity e, boolean doReigonUpdate) {
+		
 		//Add entity to global list of entites
 		entities.add (e);
 		
 		//Add entity to its reigon
-		updateReigon (e);
+		if (doReigonUpdate) {
+			updateReigon (e);
+		}
+		
+		//Add to the tile entities (if applicable)
+		JSONObject typeProperties = e.getTypeProperties ();
+		if (typeProperties != null) {
+			Boolean b = (Boolean)typeProperties.get ("tileEntity");
+			if (b != null && b) {
+				Point p = new Point (e.getInt ("x"), e.getInt ("y"));
+				tileEntities.put (p, e);
+			}
+		}
 	}
 	
 	public static void removeEntity (Entity e) {
@@ -434,6 +485,15 @@ public class World {
 		for (int i = 0; i < reigons.size (); i++) {
 			if (reigons.get (i).hasEntity (e.getUUID ())) {
 				reigons.get (i).removeEntity (e);
+			}
+		}
+		
+		//Remove entity from tile entities (if applicable)
+		Boolean b = (Boolean)e.getTypeProperties ().get ("tileEntity");
+		if (b != null && b) {
+			Point p = new Point (e.getInt ("x"), e.getInt ("y"));
+			if (tileEntities.containsKey (p)) {
+				tileEntities.remove (p);
 			}
 		}
 	}
@@ -530,8 +590,8 @@ public class World {
 					
 					//Add entity to the world
 					Entity newEntity = new Entity (s.nextLine ());
-					World.entities.add (newEntity);
-					entities.add (newEntity);
+					this.addEntity (newEntity);
+					World.addEntity (newEntity, false);
 					
 					//Create the entity's associated EntityObject
 					String entityType = newEntity.getType ();

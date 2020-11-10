@@ -1,1 +1,2 @@
 {x=72, y=504, UUID=ecfcd071-8bcc-46fc-800e-6d39ff7de16b, type=Zombie}
+{x=128, y=496, UUID=df5fb5f1-e925-48c4-abbb-31e58b27829d, type=Furnace, s0=256x22, s1=0x0, s2=0x0}

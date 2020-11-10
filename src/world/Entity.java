@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import gameObjects.EntityObject;
+import json.JSONException;
+import json.JSONObject;
+import json.JSONUtil;
 import main.GameObject;
 
 public class Entity implements Comparable<Entity> {
@@ -17,6 +20,8 @@ public class Entity implements Comparable<Entity> {
 	
 	private String entityType;
 	private EntityObject obj;
+	
+	private static JSONObject typeProperties;
 	
 	public Entity (String properties) {
 		this.properties = new HashMap<String, String> ();
@@ -78,6 +83,18 @@ public class Entity implements Comparable<Entity> {
 		return properties;
 	}
 	
+	public String getProperty (String propertyName) {
+		return properties.get (propertyName);
+	}
+	
+	public int getInt (String propertyName) {
+		return Integer.parseInt (properties.get (propertyName));
+	}
+	
+	public JSONObject getTypeProperties () {
+		return typeProperties.getJSONObject (getType ());
+	}
+	
 	public GameObject getObject () {
 		return obj;
 	}
@@ -100,6 +117,15 @@ public class Entity implements Comparable<Entity> {
 		HashMap<String, String> newMap = new HashMap<String, String> ();
 		newMap.put ("UUID", UUID.randomUUID ().toString ());
 		return newMap;
+	}
+	
+	public static void initTypeProperties () {
+		try {
+			typeProperties = JSONUtil.loadJSONFile ("resources/gamedata/entities/properties.json");
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	@Override

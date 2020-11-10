@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import gameObjects.Container;
 import gameObjects.Furnace;
 import json.JSONArray;
 import json.JSONObject;
@@ -40,10 +41,13 @@ public class TileInterface extends GameObject {
 					} else {
 						//Drop the appropriate drop table
 						JSONArray dropTable = World.getDropTable (dropName);
+						System.out.println(dropTable);
 						ArrayList<Object> drops = dropTable.getContents ();
 						for (int i = 0; i < drops.size (); i++) {
 							JSONObject workingDrop = (JSONObject)drops.get (i);
-							if (workingDrop.get ("min") != null && workingDrop.get ("max") != null) {
+							if (workingDrop.get ("special") != null) {
+								System.out.println ("SPECIAL STUFF HERE");
+							} else if (workingDrop.get ("min") != null && workingDrop.get ("max") != null) {
 								//Amount is in a range from min to max
 								int minAmt = workingDrop.getInt ("min");
 								int maxAmt = workingDrop.getInt ("max");
@@ -66,7 +70,7 @@ public class TileInterface extends GameObject {
 							}
 						}
 					}
-					World.setTile (0, getHoveredTileX (), getHoveredTileY ());
+					World.breakTile (getHoveredTileX (), getHoveredTileY ());
 				} else if (currentTile != 24) {
 					if (World.getPlayer ().useSelectedItem () == 1) {
 						World.setTile (workingId, getHoveredTileX (), getHoveredTileY ());
@@ -91,7 +95,12 @@ public class TileInterface extends GameObject {
 				if (currentTile == 25) {
 					World.getPlayer ().open3x3CraftingGrid ();
 				} else if (currentTile == 26) {
-					World.getPlayer ().openFurnace ();
+					Entity e = World.getTileEntity (getHoveredTileX (), getHoveredTileY ());
+					GameObject eObj = e.getObject ();
+					if (eObj instanceof Furnace) {
+						Inventory.setContainer ((Container)eObj);
+						World.getPlayer ().openFurnace ();
+					}
 				}
 			}
 		}
