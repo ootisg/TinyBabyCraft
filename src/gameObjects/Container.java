@@ -32,7 +32,6 @@ public abstract class Container extends EntityObject {
 	public void setItem (int slot, Item it) {
 		String slotVal = "s" + slot;
 		String itemStr = it.id + "x" + it.amount;
-		System.out.println(itemStr);
 		getPairedEntity ().getProperties ().put (slotVal, itemStr);
 	}
 	

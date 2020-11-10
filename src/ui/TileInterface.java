@@ -74,7 +74,7 @@ public class TileInterface extends GameObject {
 				} else if (currentTile != 24) {
 					if (World.getPlayer ().useSelectedItem () == 1) {
 						World.setTile (workingId, getHoveredTileX (), getHoveredTileY ());
-						if (workingId == 26) {
+						if (workingId == 26 || workingId == 27) {
 							//Furnace
 							HashMap<String, String> furnaceMap = Entity.getEntityMap ();
 							furnaceMap.put ("type", "Furnace");
@@ -83,6 +83,8 @@ public class TileInterface extends GameObject {
 							furnaceMap.put ("s2", "0x0");
 							furnaceMap.put ("x", String.valueOf (getHoveredTileX () * 8));
 							furnaceMap.put ("y", String.valueOf (getHoveredTileY () * 8));
+							furnaceMap.put ("fuel", "0");
+							furnaceMap.put ("time", "0");
 							Entity furnaceEntity = new Entity (furnaceMap);
 							Furnace furnace = new Furnace (furnaceEntity);
 							World.addEntity (furnaceEntity);

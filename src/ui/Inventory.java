@@ -11,6 +11,7 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
 import gameObjects.Container;
+import gameObjects.Furnace;
 import json.JSONException;
 import json.JSONObject;
 import json.JSONUtil;
@@ -255,7 +256,7 @@ public class Inventory extends GameObject {
 							held = items [cellIndex];
 							items [cellIndex] = new Item (0, 0);
 						} else if (held != null) {
-							placeHeldItem (cellIndex);
+							placeHeldItem (cellIndex, held.amount);
 						}
 					} else if (mouseButtonClicked (2)) {
 						if (held == null && items [cellIndex].id != 0) {
@@ -267,14 +268,7 @@ public class Inventory extends GameObject {
 							}
 						} else if (held != null) {
 							//If placing down one
-							if ((items [cellIndex].id == held.id || items [cellIndex].id == 0) && items [cellIndex].amount != MAX_STACK) {
-								items [cellIndex].id = held.id;
-								items [cellIndex].amount += 1;
-								held.amount -= 1;
-								if (held.amount == 0) {
-									held = null;
-								}
-							}
+							placeHeldItem (cellIndex, 1);
 						}
 					}
 				}
@@ -313,32 +307,38 @@ public class Inventory extends GameObject {
 			
 			predictCraft ();
 		}
+		
 	}
 	
 	private boolean cursorInBounds (Rectangle r) {
 		return r.contains (getCursorX (), getCursorY ());
 	}
 	
-	public void placeHeldItem (int slot) {
+	public void placeHeldItem (int slot, int amt) {
 		if (items [slot].id == 0) {
 			//Place item down
-			items [slot] = held;
-			held = null;
+			if (isCompatable (slot, held)) {
+				items [slot] = new Item (held.id, amt);
+				held.amount -= amt;
+			}
 		} else if (items [slot].id == held.id) {
 			//Merge the stacks
-			int total = held.amount + items [slot].amount;
+			int total = amt + items [slot].amount;
 			if (total > MAX_STACK) {
 				items [slot].amount = MAX_STACK;
-				held.amount = total - MAX_STACK;
+				held.amount = (held.amount + items [slot].amount) - MAX_STACK;
 			} else {
 				items [slot].amount = total;
-				held = null;
+				held.amount -= amt;
 			}
-		} else {
-			//Swap the items
+		} else if (amt == held.amount) {
+			//Swap the items, only applies for full amount
 			Item temp = held;
 			held = items [slot];
 			items [slot] = temp;
+		}
+		if (held.amount <= 0) {
+			held = null;
 		}
 	}
 	
@@ -580,6 +580,14 @@ public class Inventory extends GameObject {
 			for (int i = 0; i < container.getCapacity (); i++) {
 				container.setItem (i, items [FURNACE_ITEM_INDEX + i]);
 			}
+		}
+	}
+	
+	public boolean isCompatable (int slot, Item it) {
+		if (slot <= FURNACE_ITEM_INDEX) {
+			return true;
+		} else {
+			return container.isCompatable (slot - FURNACE_ITEM_INDEX, it);
 		}
 	}
 	

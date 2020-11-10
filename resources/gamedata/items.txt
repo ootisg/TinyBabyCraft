@@ -9,6 +9,7 @@
 	"durability":-1,
 	"power":1,
 	"fuelTime":0
+	"smelt":"null"
 }
 "0":{
 	"name":"Air",
@@ -25,12 +26,12 @@
 "3":{
 	"name":"Log",
 	"placeable":true,
-	"fuelTime":2
+	"fuelTime":200
 },
 "4":{
 	"name":"Planks",
 	"placeable":true,
-	"fuelTime":2
+	"fuelTime":200
 },
 "5":{
 	"name":"Leaves",
@@ -38,8 +39,9 @@
 },
 "6":{
 	"name":"Sand",
-	"placeable":true
-	"fuelTime":2
+	"placeable":true,
+	"fuelTime":200,
+	"smelt":"29"
 },
 "7":{
 	"name":"Gravel",
@@ -87,27 +89,33 @@
 },
 "18":{
 	"name":"Iron Ore",
-	"placeable":true
+	"placeable":true,
+	"smelt":"258"
 },
 "19":{
 	"name":"Gold Ore",
-	"placeable":true
+	"placeable":true,
+	"smelt":"259"
 },
 "20":{
 	"name":"Diamond Ore",
-	"placeable":true
+	"placeable":true,
+	"smelt":"260"
 },
 "21":{
 	"name":"Redstone Ore",
-	"placeable":true
+	"placeable":true,
+	"smelt":"262"
 },
 "22":{
 	"name":"Lapis Ore",
-	"placeable":true
+	"placeable":true,
+	"smelt":"261"
 },
 "23":{
-	"name":"Stone",
-	"placeable":true
+	"name":"Cobblestone",
+	"placeable":true,
+	"smelt":"16"
 },
 "24":{
 	"name":"Bedrock",
@@ -147,7 +155,7 @@
 },
 "257":{
 	"name":"Coal",
-	"fuelTime":20
+	"fuelTime":2000
 },
 "258":{
 	"name":"Iron Bar"
