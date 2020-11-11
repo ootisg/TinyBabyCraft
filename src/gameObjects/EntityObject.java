@@ -35,6 +35,14 @@ public class EntityObject extends GameObject {
 		pairedEntity = e;
 	}
 	
+	public String getProperty (String name) {
+		return pairedEntity.getProperty (name);
+	}
+	
+	public void setProperty (String name, String value) {
+		pairedEntity.getProperties ().put (name, value);
+	}
+	
 	public void setAiTime (int time) {
 		aiTime = time;
 	}
@@ -44,7 +52,7 @@ public class EntityObject extends GameObject {
 	}
 	
 	public void aiStep () {
-		
+		//Do nothing, this is intentional
 	}
 	
 	@Override

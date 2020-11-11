@@ -74,7 +74,7 @@ public class TileInterface extends GameObject {
 				} else if (currentTile != 24) {
 					if (World.getPlayer ().useSelectedItem () == 1) {
 						World.setTile (workingId, getHoveredTileX (), getHoveredTileY ());
-						if (workingId == 26 || workingId == 27) {
+						if (workingId == 26) {
 							//Furnace
 							HashMap<String, String> furnaceMap = Entity.getEntityMap ();
 							furnaceMap.put ("type", "Furnace");
@@ -84,6 +84,7 @@ public class TileInterface extends GameObject {
 							furnaceMap.put ("x", String.valueOf (getHoveredTileX () * 8));
 							furnaceMap.put ("y", String.valueOf (getHoveredTileY () * 8));
 							furnaceMap.put ("fuel", "0");
+							furnaceMap.put ("maxFuel", "200");
 							furnaceMap.put ("time", "0");
 							Entity furnaceEntity = new Entity (furnaceMap);
 							Furnace furnace = new Furnace (furnaceEntity);
@@ -96,7 +97,7 @@ public class TileInterface extends GameObject {
 				int currentTile = World.getTile (getHoveredTileX (), getHoveredTileY ());
 				if (currentTile == 25) {
 					World.getPlayer ().open3x3CraftingGrid ();
-				} else if (currentTile == 26) {
+				} else if (currentTile == 26 || currentTile == 27) {
 					Entity e = World.getTileEntity (getHoveredTileX (), getHoveredTileY ());
 					GameObject eObj = e.getObject ();
 					if (eObj instanceof Furnace) {

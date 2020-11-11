@@ -1,6 +1,10 @@
 package gameObjects;
 
+import java.awt.image.BufferedImage;
+
 import json.JSONObject;
+import resources.Sprite;
+import resources.Spritesheet;
 import ui.Inventory;
 import ui.Inventory.Item;
 import world.Entity;
@@ -9,6 +13,12 @@ import world.World;
 public class Furnace extends Container {
 
 	public static final int SMELT_TIME = 150;
+	
+	public static final Spritesheet FUEL_SHEET = new Spritesheet ("resources/sprites/furnace_flames.png");
+	public static final Spritesheet PROGRESS_SHEET = new Spritesheet ("resources/sprites/arrow_strip_overlay.png");
+	
+	public static final Sprite FUEL_SPRITES = new Sprite (FUEL_SHEET, 11, 11);
+	public static final Sprite PROGRESS_SPRITES = new Sprite (PROGRESS_SHEET, 16, 16);
 	
 	public Furnace (Entity e) {
 		super (e);
@@ -19,6 +29,10 @@ public class Furnace extends Container {
 	public boolean placeItem (int slot, Item item) {
 		setItem (slot, item);
 		return false;
+	}
+	
+	public int getMaxFuel () {
+		return getPairedEntity ().getInt ("maxFuel");
 	}
 	
 	public int getFuel () {
@@ -100,6 +114,7 @@ public class Furnace extends Container {
 			
 			//Set the fuel accordingly
 			getPairedEntity ().getProperties ().put ("fuel", String.valueOf (fuelTime));
+			getPairedEntity ().getProperties ().put ("maxFuel", String.valueOf (fuelTime));
 			
 			//Deplete fuel slot
 			if (it.amount <= 1) {
@@ -109,6 +124,16 @@ public class Furnace extends Container {
 			}
 			
 		}
+	}
+	
+	public BufferedImage getFuelSprite () {
+		int index = (int)((((double)getFuel () - 1) / getMaxFuel ()) * (FUEL_SPRITES.getFrameCount ()));
+		return FUEL_SPRITES.getImageArray ()[index];
+	}
+	
+	public BufferedImage getProgressSprite () {
+		int index = (int)(((double)getTime () / SMELT_TIME) * PROGRESS_SPRITES.getFrameCount ()); 
+		return PROGRESS_SPRITES.getImageArray ()[index];
 	}
 	
 	@Override
@@ -143,7 +168,7 @@ public class Furnace extends Container {
 		
 		if (fuel == 0) {
 			World.setTile (26, (int)getX () / 8, (int)getY () / 8);
-			time = 0;
+			//time = 0; TODO stuff n things
 		} else {
 			World.setTile (27, (int)getX () / 8, (int)getY () / 8);
 		}

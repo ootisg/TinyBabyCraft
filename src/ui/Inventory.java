@@ -92,6 +92,11 @@ public class Inventory extends GameObject {
 	public static int TEXT_OFFSET_Y = 9;
 	public static int TEXT_CHAR_WIDTH = 5;
 	
+	public static int FURNACE_SMELT_X = 5;
+	public static int FURNACE_SMELT_Y = 30;
+	public static int FURNACE_PROGRESS_X = 20;
+	public static int FURNACE_PROGRESS_Y = 16;
+	
 	public static int MAX_STACK = 64;
 	
 	public static Sprite INVENTORY_BACKGROUND = new Sprite ("resources/sprites/inventory.png");
@@ -417,6 +422,13 @@ public class Inventory extends GameObject {
 			
 			//Draw the background
 			FURNACE_BACKGROUND.draw (furnaceOffsetX, furnaceOffsetY);
+			
+			//Draw the furnace flames and progress arrow
+			Furnace f = (Furnace)container;
+			BufferedImage flameSprite = f.getFuelSprite ();
+			BufferedImage pogSprite = f.getProgressSprite ();
+			Sprite.draw (flameSprite, furnaceOffsetX + FURNACE_SMELT_X, furnaceOffsetY + FURNACE_SMELT_Y);
+			Sprite.draw (pogSprite, furnaceOffsetX + FURNACE_PROGRESS_X, furnaceOffsetY + FURNACE_PROGRESS_Y);
 			
 			//Draw the furnace in item
 			int xdraw = furnaceOffsetX + FURNACE_ITEM_X + ITEM_OFFSET_X;
