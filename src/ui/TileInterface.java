@@ -70,9 +70,11 @@ public class TileInterface extends GameObject {
 							}
 						}
 					}
+					World.doPlacementLightCalculation (0, getHoveredTileX (), getHoveredTileY ());
 					World.breakTile (getHoveredTileX (), getHoveredTileY ());
 				} else if (currentTile != 24) {
 					if (World.getPlayer ().useSelectedItem () == 1) {
+						World.doPlacementLightCalculation (workingId, getHoveredTileX (), getHoveredTileY ());
 						World.setTile (workingId, getHoveredTileX (), getHoveredTileY ());
 						if (workingId == 26) {
 							//Furnace

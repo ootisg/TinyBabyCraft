@@ -63,7 +63,7 @@
 	"name":"Torch",
 	"type":"wood",
 	"toughness":0,
-	"light":15
+	"light":8
 },
 "11":{
 	"name":"Water",
@@ -82,14 +82,14 @@
 	"type":"lava",
 	"fluid":true,
 	"unbreakable":true,
-	"light":15
+	"light":8
 },
 "14":{
 	"name":"Flowing Lava",
 	"type":"lava",
 	"fluid":true,
 	"unbreakable":true,
-	"light":15
+	"light":8
 },
 "15":{
 	"name":"Obsidian",

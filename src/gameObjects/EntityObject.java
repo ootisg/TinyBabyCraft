@@ -58,7 +58,9 @@ public class EntityObject extends GameObject {
 	@Override
 	public void frameEvent () {
 		if (aiTime != 0 && World.getWorldTime () % aiTime < 33) {
-			aiStep ();
+			if (World.inLoadBounds ((int)getX () / 8)) {
+				aiStep ();
+			}
 		}
 	}
 	

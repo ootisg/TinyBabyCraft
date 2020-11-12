@@ -113,6 +113,9 @@ public class Player extends GameObject {
 			inventory.setSelected (4);
 		}
 		doMove (0, 0);
+		
+		//Load/unload important stuff about the player
+		World.refreshLoadAround ((int)(getX () / 8));
 	}
 	
 	public void doMove (int xOffset, int yOffset) {

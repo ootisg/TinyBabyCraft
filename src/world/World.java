@@ -1,5 +1,6 @@
 package world;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
@@ -34,18 +35,24 @@ public class World {
 	
 	public static final int WORLD_HEIGHT = 128;
 	public static final int LOAD_SIZE = 256;
+	public static final int SECONDARY_LOAD_RADIUS = 64;
 	public static final int SCREEN_SIZE_H = 24; //Number of tiles that fit on the screen horizontally
 	public static final int SCREEN_SIZE_V = 18; //Number of tiles that fit on the screen vertically
 	
 	public static final Spritesheet TILE_SHEET = new Spritesheet ("resources/sprites/tiles.png");
 	public static final Spritesheet ITEM_SHEET = new Spritesheet ("resources/sprites/items.png");
+	public static final Spritesheet LIGHT_SHEET = new Spritesheet ("resources/sprites/lighting.png");
 	public static final Sprite PARSED_TILES = new Sprite (TILE_SHEET, 8, 8);
 	public static final Sprite PARSED_ITEMS = new Sprite (ITEM_SHEET, 8, 8);
+	public static final Sprite PARSED_LIGHTING = new Sprite (LIGHT_SHEET, 8, 8);
 	
 	private static boolean[] solidMap;
 	
 	private static ArrayList<ArrayList<Integer>> tiles;
-	private static int[] xBuffer;
+	private static ArrayList<ArrayList<Integer>> bgTiles;
+	private static ArrayList<ArrayList<Integer>> lighting;
+	private static ArrayList<ArrayList<ArrayList<Point>>> lights;
+	private static int[] xBuffer = new int[LOAD_SIZE];
 	
 	private static int viewX;
 	private static int viewY;
@@ -69,6 +76,13 @@ public class World {
 	
 	public static JSONObject tileProperties;
 	public static JSONObject dropList;
+	
+	private static int[] tileLightTable = new int[256];
+	
+	private static int[] highestTile = new int[LOAD_SIZE];
+	private static boolean[] loaded = new boolean[LOAD_SIZE];
+	
+	private static int skylight = 15;
 	
 	public static void initWorld () {
 		
@@ -94,8 +108,15 @@ public class World {
 		
 		reigons = new ArrayList<WorldReigon> ();
 		tiles = new ArrayList<ArrayList<Integer>> (); //Make the world tiles
+		lighting = new ArrayList<ArrayList<Integer>> (); //Make the lighting table
 		for (int i = 0; i < LOAD_SIZE; i++) {
 			tiles.add (null);
+			//Fill up the lighting table
+			ArrayList<Integer> lightVals = new ArrayList<Integer> ();
+			for (int j = 0; j < WORLD_HEIGHT; j++) {
+				lightVals.add (-1);
+			}
+			lighting.add (lightVals);
 		} //Size the tile list
 		
 		//Init entity properties
@@ -120,7 +141,33 @@ public class World {
 		solidMap [10] = false; //torch
 		//Make the player
 		spawnPlayer ();
-		System.out.println(tileEntities);
+		initLighting ();
+	}
+	
+	public static void initLighting () {
+		lights = new ArrayList<ArrayList<ArrayList<Point>>> ();
+		for (int wx = 0; wx < LOAD_SIZE; wx++) {
+			ArrayList<ArrayList<Point>> column = new ArrayList<ArrayList<Point>> ();
+			for (int wy = 0; wy < WORLD_HEIGHT; wy++) {
+				ArrayList<Point> pts = new ArrayList<Point> ();
+				column.add (pts);
+			}
+			lights.add (column);
+		}
+		
+		//Populate light source strength table
+		for (int i = 0; i < 256; i++) {
+			JSONObject tileProperties = getTileProperties (i);
+			if (tileProperties != null && tileProperties.get ("light") != null) {
+				tileLightTable [i] = tileProperties.getInt ("light");
+			} else {
+				tileLightTable [i] = 0;
+			}
+		}
+		
+		for (int i = 0; i < LOAD_SIZE; i++) {
+			highestTile [i] = -1;
+		}
 	}
 	
 	public static void worldFrame () {
@@ -240,11 +287,25 @@ public class World {
 	}
 	
 	public static void draw () {
+		
+		//Draw the background (sky)
+		Graphics g = MainLoop.getWindow ().getBufferGraphics ();
+		g.setColor (new Color (0x97ECEF));
+		g.fillRect (0, 0, SCREEN_SIZE_H * 8, SCREEN_SIZE_V * 8);
+		
+		//Draw the tiles
 		for (int wy = 0; wy < SCREEN_SIZE_V; wy++) {
 			for (int wx = 0; wx < SCREEN_SIZE_H; wx++) {
 				int tileId = tiles.get (Math.floorMod (viewX + wx, LOAD_SIZE)).get (viewY + wy);
+				int lightVal = getLightStrength (viewX + wx, viewY + wy);
+				
+				//Render the proper tile
 				PARSED_TILES.setFrame (tileId);
 				PARSED_TILES.draw (wx * 8, wy * 8);
+				
+				//Render the proper lighting
+				PARSED_LIGHTING.setFrame (lightVal);
+				PARSED_LIGHTING.draw (wx * 8, wy * 8);
 			}
 		}
 	}
@@ -289,10 +350,140 @@ public class World {
 		loadRight = right;
 	}
 	
+	public static int getCeilingHeight (int x) {
+		int realX = Math.floorMod (x, LOAD_SIZE);
+		if (highestTile [realX] == -1) {
+			ArrayList<Integer> column = tiles.get (realX);
+			for (int i = 0; i < column.size (); i++) {
+				if (column.get (i) != 0) {
+					//TODO allow skylight to pass through transparent tiles
+					highestTile [realX] = i;
+					ArrayList<Integer> lightCol = lighting.get (realX);
+					for (int j = 0; j < column.size (); j++) {
+						lightCol.set (j, -1);
+					}
+					return i;
+				}
+			}
+			return 255;
+		} else {
+			return highestTile [realX];
+		}
+	}
+	
 	public static void setTile (int id, int x, int y) {
-		tiles.get (Math.floorMod (x, LOAD_SIZE)).set (y, id);
+		int realX = Math.floorMod (x, LOAD_SIZE);
+		tiles.get (realX).set (y, id);
 		WorldReigon rg = getReigon (id);
-		
+		//UPDATE THE HEIGHT
+		highestTile [realX] = -1;
+		getCeilingHeight (realX);
+	}
+	
+	public static void doPlacementLightCalculation (int id, int x, int y) {
+		if (tileLightTable [getTile (x, y)] != 0) {
+			removeLightSource (tileLightTable [getTile (x, y)], x, y);
+		}
+		if (tileLightTable [id] != 0) {
+			putLightSource (tileLightTable [id], x, y);
+		}
+	}
+	
+	public static void putLightSource (int strength, int x, int y) {
+		Point source = new Point (x, y);
+		for (int wx = -strength; wx <= strength; wx++) {
+			for (int wy = -strength; wy <= strength; wy++) {
+				int putX = x + wx;
+				int putY = y + wy;
+				if (putY >= 0 && putY < WORLD_HEIGHT) {
+					int realX = Math.floorMod (putX, LOAD_SIZE);
+					lights.get (realX).get (putY).add (source);
+					lighting.get (realX).set (putY, -1);
+				}
+			}
+		}
+	}
+	
+	public static void removeLightSource (int strength, int x, int y) {
+		Point source = new Point (x, y);
+		for (int wx = -strength; wx <= strength; wx++) {
+			for (int wy = -strength; wy <= strength; wy++) {
+				int putX = x + wx;
+				int putY = y + wy;
+				if (putY >= 0 && putY < WORLD_HEIGHT) {
+					int realX = Math.floorMod (putX, LOAD_SIZE);
+					lights.get (realX).get (putY).remove (source);
+					lighting.get (realX).set (putY, -1);
+				}
+			}
+		}
+	}
+	
+	public static void lightColumn (int x) {
+		int realX = Math.floorMod (x, LOAD_SIZE);
+		ArrayList<Integer> col = tiles.get (realX);
+		for (int i = 0; i < WORLD_HEIGHT; i++) {
+			if (tileLightTable [col.get (i)] != 0) {
+				putLightSource (tileLightTable [col.get (i)], x, i);
+			}
+		}
+	}
+	
+	public static void unlightColumn (int x) {
+		int realX = Math.floorMod (x, LOAD_SIZE);
+		ArrayList<Integer> col = tiles.get (realX);
+		for (int i = 0; i < WORLD_HEIGHT; i++) {
+			if (tileLightTable [col.get (i)] != 0) {
+				removeLightSource (tileLightTable [col.get (i)], x, i);
+			}
+		}
+	}
+	
+	public static int getLightStrength (int x, int y) {
+		int realX = Math.floorMod (x, LOAD_SIZE);
+		int preLight = lighting.get (realX).get (y);
+		if (preLight != -1) {
+			return preLight;
+		} else {
+			int lightVal = computeLight (x, y);
+			lighting.get (realX).set (y, lightVal);
+			return lightVal;
+		}
+	}
+	
+	public static int computeLight (int x, int y) {
+		//TODO add skylight computation
+		int realX = Math.floorMod (x, LOAD_SIZE);
+		ArrayList<Point> lightList = lights.get (realX).get (y);
+		int totalLight;
+		if (getCeilingHeight (x) >= y) {
+			totalLight = skylight;
+		} else {
+			totalLight = 0;
+		}
+		for (int i = 0; i < lightList.size (); i++) {
+			
+			//Get our wonderful point
+			Point ls = lightList.get (i);
+			
+			//Get the light strength
+			int tId = getTile (ls.x, ls.y);
+			JSONObject properties = getTileProperties (tId);
+			int strength = tileLightTable [tId];
+			
+			//Compute lighting based on the given strength value
+			int xDif = ls.x - x;
+			int yDif = ls.y - y;
+			double dist = Math.sqrt (xDif * xDif + yDif * yDif);
+			if (dist < strength) {
+				int shineStrength = (int)(((strength - dist) / strength) * 15);
+				totalLight += shineStrength;
+				if (totalLight > 15) {
+					return 15;
+				}
+			}
+		}
+		return totalLight;
 	}
 	
 	public static Entity getTileEntity (int x, int y) {
@@ -317,6 +508,43 @@ public class World {
 		}
 	}
 	
+	public static void refreshLoadAround (int x) {
+		//System.out.println (Arrays.toString (xBuffer));
+		for (int i = 0; i < LOAD_SIZE; i++) {
+			int colX = xBuffer [i];
+			if (colX > x - SECONDARY_LOAD_RADIUS && colX < x + SECONDARY_LOAD_RADIUS) {
+				if (!loaded [i]) {
+					loadColumn (colX);
+					loaded [i] = true;
+				}
+			} else {
+				if (loaded [i]) {
+					unloadColumn (colX);
+					loaded [i] = false;
+				}
+			}
+		}
+	}
+	
+	public static void loadColumn (int x) {
+		lightColumn (x);
+	}
+	
+	public static void unloadColumn (int x) {
+		unlightColumn (x);
+	}
+	
+	public static void unloadAllColumns () {
+		for (int i = 0; i < LOAD_SIZE; i++) {
+			loaded [i] = false;
+		}
+	}
+	
+	public static boolean inLoadBounds (int x) {
+		int realX = Math.floorMod (x, LOAD_SIZE);
+		return loaded [realX];
+	}
+	
 	public static int getReigonId (int x) {
 		return Math.floorDiv (x, WorldReigon.REIGON_SIZE);
 	}
@@ -330,6 +558,11 @@ public class World {
 		}
 		
 		//Reigon was not loaded, load it then return it
+		try {
+			throw new Exception ();
+		} catch (Exception e) {
+			e.printStackTrace ();
+		}
 		return loadReigon (getReigonId (x), 0);
 	}
 	
@@ -378,6 +611,7 @@ public class World {
 			int tileX = Math.floorMod (wx, LOAD_SIZE);
 			WorldReigon currRg = getReigon (wx);
 			tiles.set (tileX, currRg.getColumn (wx)); //Update the column of tiles to match the loaded reigon
+			xBuffer [tileX] = wx;
 		}
 	}
 	
@@ -605,10 +839,7 @@ public class World {
 				}
 				s.close (); //Close the file
 			} else {
-				for (int wx = 0; wx < REIGON_SIZE; wx++) {
-					ArrayList<Integer> tiles = generateColumn (id * REIGON_SIZE + wx);
-					data.set (wx, tiles);
-				} //Generate the tiles
+				//TODO spawn in entities
 			}
 		}
 		
