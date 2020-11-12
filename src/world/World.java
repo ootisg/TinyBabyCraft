@@ -17,11 +17,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.UUID;
 
 import gameObjects.EntityObject;
 import gameObjects.Player;
+import gameObjects.StructSpawner;
 import json.JSONArray;
 import json.JSONException;
 import json.JSONObject;
@@ -66,7 +68,7 @@ public class World {
 	
 	private static Player player;
 	
-	private static long seed;
+	private static long seed = 69;
 	
 	private static String worldName = "default";
 	
@@ -509,7 +511,6 @@ public class World {
 	}
 	
 	public static void refreshLoadAround (int x) {
-		//System.out.println (Arrays.toString (xBuffer));
 		for (int i = 0; i < LOAD_SIZE; i++) {
 			int colX = xBuffer [i];
 			if (colX > x - SECONDARY_LOAD_RADIUS && colX < x + SECONDARY_LOAD_RADIUS) {
@@ -527,6 +528,12 @@ public class World {
 	}
 	
 	public static void loadColumn (int x) {
+		for (int i = 0; i < WORLD_HEIGHT; i++) {
+			Point p = new Point (x * 8, i * 8);
+			if (tileEntities.get (p) != null && tileEntities.get (p).getObject () instanceof StructSpawner) {
+				((StructSpawner)tileEntities.get (p).getObject ()).spawnStructure ();
+			}
+		}
 		lightColumn (x);
 	}
 	
@@ -683,6 +690,17 @@ public class World {
 		}
 	}
 	
+	public static void putStructure (String id, int x, int y) {
+		HashMap<String, String> em = Entity.getEntityMap ();
+		em.put ("type", "StructSpawner");
+		em.put ("x", String.valueOf (x));
+		em.put ("y", String.valueOf (y));
+		em.put ("structName", "tree");
+		Entity et = new Entity (em);
+		StructSpawner sm = new StructSpawner (et);
+		World.addEntity (et);
+	}
+	
 	public static void addEntity (Entity e) {
 		
 		addEntity (e, true);
@@ -761,6 +779,18 @@ public class World {
 		return dropList.getJSONArray (name);
 	}
 	
+	public static void populateReigon (int id) {
+		//Scatter some trees
+		int reigonX = id * WorldReigon.REIGON_SIZE;
+		Random r = new Random (seed + id * 49390927); //Prime number witchcraft
+		int numTrees = r.nextInt (5) + 2; //Number of trees is between 2 and 7
+		System.out.println (numTrees);
+		for (int i = 0; i < numTrees; i++) {
+			int treeX = r.nextInt (WorldReigon.REIGON_SIZE) + reigonX;
+			putStructure ("tree", treeX * 8, 496);
+		}
+	}
+	
 	public static class WorldReigon {
 		
 		public static final int REIGON_SIZE = LOAD_SIZE;
@@ -805,6 +835,7 @@ public class World {
 					ArrayList<Integer> tiles = generateColumn (id * REIGON_SIZE + wx);
 					data.set (wx, tiles);
 				} //Generate the tiles
+				World.populateReigon (id); //Populate the reigon with structures
 			}
 			
 			//Load in the entities

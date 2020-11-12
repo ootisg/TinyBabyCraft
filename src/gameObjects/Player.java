@@ -11,6 +11,7 @@ import resources.Sprite;
 import resources.Spritesheet;
 import ui.Inventory;
 import ui.TileInterface;
+import world.Entity;
 import world.World;
 
 public class Player extends GameObject {
@@ -80,7 +81,7 @@ public class Player extends GameObject {
 			doMove (0, -8);
 		}
 		if (keyPressed ('T')) {
-			World.spawnStructure ("tree", (int)getX () / 8, (int)getY () / 8);
+			World.putStructure ("tree", (int)getX (), (int)getY ());
 		}
 		if (keyPressed ('Z')) {
 			new Zombie (getX (), getY ());
