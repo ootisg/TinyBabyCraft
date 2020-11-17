@@ -32,6 +32,7 @@ import main.GameObject;
 import main.MainLoop;
 import resources.Sprite;
 import resources.Spritesheet;
+import worldgen.TerrainHeightGen;
 
 public class World {
 	
@@ -80,11 +81,15 @@ public class World {
 	public static JSONObject dropList;
 	
 	private static int[] tileLightTable = new int[256];
+	private static int[] tileSolidTable = new int[256];
+	private static int[] tileTpTable = new int[256];
 	
 	private static int[] highestTile = new int[LOAD_SIZE];
 	private static boolean[] loaded = new boolean[LOAD_SIZE];
 	
 	private static int skylight = 15;
+	
+	static TerrainHeightGen heightGen;
 	
 	public static void initWorld () {
 		
@@ -101,7 +106,14 @@ public class World {
 		loadLeft = -128;
 		loadRight = 128; //Initialize loading bounds
 		
+		//Load the world resources
 		loadStructures ();
+		
+		//Load the various tile properties
+		populateTileProperties ();
+		
+		//Load the worldgen resources
+		makeWorldGenResources ();
 		
 		File f = new File ("saves/" + worldName);
 		if (!f.exists ()) {
@@ -146,6 +158,10 @@ public class World {
 		initLighting ();
 	}
 	
+	public static void makeWorldGenResources () {
+		heightGen = new TerrainHeightGen (seed);
+	}
+	
 	public static void initLighting () {
 		lights = new ArrayList<ArrayList<ArrayList<Point>>> ();
 		for (int wx = 0; wx < LOAD_SIZE; wx++) {
@@ -157,18 +173,38 @@ public class World {
 			lights.add (column);
 		}
 		
-		//Populate light source strength table
-		for (int i = 0; i < 256; i++) {
-			JSONObject tileProperties = getTileProperties (i);
-			if (tileProperties != null && tileProperties.get ("light") != null) {
-				tileLightTable [i] = tileProperties.getInt ("light");
-			} else {
-				tileLightTable [i] = 0;
-			}
-		}
-		
 		for (int i = 0; i < LOAD_SIZE; i++) {
 			highestTile [i] = -1;
+		}
+	}
+	
+	public static void populateTileProperties () {
+		populateTilePropertyArray ("light", tileLightTable);
+		populateTilePropertyArray ("transparent", tileTpTable);
+	}
+	
+	public static void populateTilePropertyArray (String propertyName, int[] propertyArr) {
+		for (int i = 0; i < 256; i++) {
+			JSONObject workingProperties = getTileProperties (i);
+			if (workingProperties != null) {
+				if (workingProperties.get (propertyName) != null) {
+					Object val = workingProperties.get (propertyName);
+					putTilePropertyElem (val, propertyArr, i);
+				} else {
+					Object val = tileProperties.getJSONObject ("default").get (propertyName);
+					putTilePropertyElem (val, propertyArr, i);
+				}
+			}
+		}
+	}
+	
+	private static void putTilePropertyElem (Object value, int[] arr, int pos) {
+		if (value instanceof Integer) {
+			arr [pos] = (int)value;
+		} else if (value instanceof Boolean) {
+			if ((boolean)value) {
+				arr [pos] = 1;
+			}
 		}
 	}
 	
@@ -357,7 +393,7 @@ public class World {
 		if (highestTile [realX] == -1) {
 			ArrayList<Integer> column = tiles.get (realX);
 			for (int i = 0; i < column.size (); i++) {
-				if (column.get (i) != 0) {
+				if (tileTpTable [column.get (i)] == 0) {
 					//TODO allow skylight to pass through transparent tiles
 					highestTile [realX] = i;
 					ArrayList<Integer> lightCol = lighting.get (realX);
@@ -565,11 +601,6 @@ public class World {
 		}
 		
 		//Reigon was not loaded, load it then return it
-		try {
-			throw new Exception ();
-		} catch (Exception e) {
-			e.printStackTrace ();
-		}
 		return loadReigon (getReigonId (x), 0);
 	}
 	
@@ -639,13 +670,21 @@ public class World {
 	}
 	
 	public static ArrayList<Integer> generateColumn (int x) {
+		int SEA_LEVEL = 63;
 		Integer[] result = new Integer[WORLD_HEIGHT];
-		for (int i = 0; i < 63; i++) {
-			result [i] = 0;
+		int genHeight = heightGen.getTerrainHeight (x);
+		for (int i = 0; i < genHeight; i++) {
+			if (i < SEA_LEVEL) {
+				result [i] = 0;
+			} else if (i == SEA_LEVEL) {
+				result [i] = 12;
+			} else {
+				result [i] = 11;
+			}
 		}
-		result[63] = 1;
-		result[64] = 2;
-		for (int i = 65; i < WORLD_HEIGHT; i++) {
+		result[genHeight] = 1;
+		result[genHeight + 1] = 2;
+		for (int i = genHeight + 2; i < WORLD_HEIGHT; i++) {
 			result [i] = 16;
 		}
 		ArrayList<Integer> arrList = new ArrayList<Integer> ();
@@ -779,15 +818,15 @@ public class World {
 		return dropList.getJSONArray (name);
 	}
 	
-	public static void populateReigon (int id) {
+	public static void populateReigon (WorldReigon rg) {
 		//Scatter some trees
-		int reigonX = id * WorldReigon.REIGON_SIZE;
-		Random r = new Random (seed + id * 49390927); //Prime number witchcraft
+		int reigonX = rg.id * WorldReigon.REIGON_SIZE;
+		Random r = new Random (seed + rg.id * 49390927); //Prime number witchcraft
 		int numTrees = r.nextInt (5) + 2; //Number of trees is between 2 and 7
 		System.out.println (numTrees);
 		for (int i = 0; i < numTrees; i++) {
 			int treeX = r.nextInt (WorldReigon.REIGON_SIZE) + reigonX;
-			putStructure ("tree", treeX * 8, 496);
+			putStructure ("tree", treeX * 8, rg.getCeilingHeight (treeX) * 8 - 8);
 		}
 	}
 	
@@ -835,7 +874,7 @@ public class World {
 					ArrayList<Integer> tiles = generateColumn (id * REIGON_SIZE + wx);
 					data.set (wx, tiles);
 				} //Generate the tiles
-				World.populateReigon (id); //Populate the reigon with structures
+				World.populateReigon (this); //Populate the reigon with structures
 			}
 			
 			//Load in the entities
@@ -992,6 +1031,18 @@ public class World {
 		
 		public void setTile (int id, int x, int y) {
 			data.get (Math.floorMod(x, REIGON_SIZE)).set (y, id);
+		}
+		
+		//Various generation stuffs
+		public int getCeilingHeight (int x) {
+			int realX = Math.floorMod (x, REIGON_SIZE);
+			ArrayList<Integer> column = data.get (realX);
+			for (int i = 0; i < column.size (); i++) {
+				if (tileTpTable [column.get (i)] == 0) {
+					return i;
+				}
+			}
+			return 255;
 		}
 		
 		//ENTITY STUFF

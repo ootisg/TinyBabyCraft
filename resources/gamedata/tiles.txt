@@ -6,13 +6,17 @@
 	"toughness":0,
 	"unbreakable":false,
 	"fluid":false,
+	"transparent":false,
+	"solid":true,
 	"light":0,
 	"drop":"self",
 	"usable":true
 }
 "0":{
 	"name":"Air",
-	"unbreakable":true
+	"unbreakable":true,
+	"transparent":true,
+	"solid":false
 },
 "1":{
 	"name":"Grass",
@@ -69,13 +73,15 @@
 	"name":"Water",
 	"type":"water",
 	"fluid":true,
-	"unbreakable":true
+	"unbreakable":true,
+	"transparent":true
 },
 "12":{
 	"name":"Flowing Water",
 	"type":"water",
 	"fluid":true,
-	"unbreakable":true
+	"unbreakable":true,
+	"transparent":true
 },
 "13":{
 	"name":"Lava",
@@ -173,7 +179,8 @@
 	"name":"Glass",
 	"type":"glass",
 	"toughness":5,
-	"drop":"nothing"
+	"drop":"nothing",
+	"transparent":true
 },
 "30":{
 	"name":"Ice",
