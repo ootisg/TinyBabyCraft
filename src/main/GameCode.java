@@ -22,6 +22,7 @@ public class GameCode extends GameAPI {
 	}
 	public void gameLoop () {
 		World.worldFrame ();
+		World.tick ();
 		World.draw ();
 		//inv.draw ();
 	}

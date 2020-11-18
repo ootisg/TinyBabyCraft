@@ -1,7 +1,9 @@
 package world;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -24,6 +26,7 @@ import java.util.UUID;
 import gameObjects.EntityObject;
 import gameObjects.Player;
 import gameObjects.StructSpawner;
+import gameObjects.Zombie;
 import json.JSONArray;
 import json.JSONException;
 import json.JSONObject;
@@ -270,6 +273,7 @@ public class World {
 			if (found) {
 				World.structures.put (structure.getName (), structure);
 			}
+			iter++;
 		}
 	}
 	
@@ -410,12 +414,28 @@ public class World {
 	}
 	
 	public static void setTile (int id, int x, int y) {
-		int realX = Math.floorMod (x, LOAD_SIZE);
-		tiles.get (realX).set (y, id);
-		WorldReigon rg = getReigon (id);
-		//UPDATE THE HEIGHT
-		highestTile [realX] = -1;
-		getCeilingHeight (realX);
+		try {
+			int realX = Math.floorMod (x, LOAD_SIZE);
+			tiles.get (realX).set (y, id);
+			WorldReigon rg = getReigon (id);
+			//UPDATE THE HEIGHT
+			highestTile [realX] = -1;
+			getCeilingHeight (realX);
+		} catch (ArrayIndexOutOfBoundsException e) {
+			//Do nothing
+		}
+	}
+	
+	public static void markTile (int x, int y, int val) {
+		int drawX = x * 8 - viewX * 8;
+		int drawY = y * 8 - viewY * 8;
+		System.out.println (viewY);
+		System.out.println (drawX + ", " + drawY);
+		Font f = new Font ("courier", 1, 8);
+		Graphics2D g = (Graphics2D)MainLoop.getWindow ().getBufferGraphics ();
+		g.setFont (f);
+		g.setColor (new Color (0xFF0000));
+		g.drawString (String.valueOf (val), drawX, drawY);
 	}
 	
 	public static void doPlacementLightCalculation (int id, int x, int y) {
@@ -714,16 +734,39 @@ public class World {
 		Point topLeft = new Point (x - origin.x, y - origin.y);
 		
 		//Get important attributes
+		//Replace tiles attribute
 		boolean replace = false;
 		if (s.getProperty ("replace") != null) {
 			replace = true;
 		}
+		//Spawn over attribute
+		int spawnOver = -1;
+		if (s.getProperty ("spawn_over") != null) {
+			spawnOver = Integer.parseInt (s.getProperty ("spawn_over"));
+		}
+		//Spawn odds attribute
+		double spawnOdds = Double.NaN;
+		if (s.getProperty ("spawn_odds") != null) {
+			spawnOdds = Double.parseDouble (s.getProperty ("spawn_odds"));
+		}
+		
+		//Make our random
+		Random r = new Random ();
 		
 		for (int wx = 0; wx < s.getWidth (); wx++) {
 			int[] slice = s.getSlice (wx - origin.x);
 			for (int wy = 0; wy < s.getHeight (); wy++) {
 				if (!(!replace && slice [wy] == 0)) {
-					setTile (slice [wy], topLeft.x + wx, topLeft.y + wy);
+					int putX = topLeft.x + wx;
+					int putY = topLeft.y + wy;
+					r.setSeed (seed + putY * 2860486313L + putX * 49390927L); //More prime number magic
+					//Big chungus of an if statement
+					if (
+							(spawnOver == -1 || spawnOver == getTile (putX, putY)) &&
+							(spawnOdds == Double.NaN || r.nextDouble () < spawnOdds)
+					) {
+						setTile (slice [wy], topLeft.x + wx, topLeft.y + wy);
+					}
 				}
 			}
 		}
@@ -734,7 +777,7 @@ public class World {
 		em.put ("type", "StructSpawner");
 		em.put ("x", String.valueOf (x));
 		em.put ("y", String.valueOf (y));
-		em.put ("structName", "tree");
+		em.put ("structName", id);
 		Entity et = new Entity (em);
 		StructSpawner sm = new StructSpawner (et);
 		World.addEntity (et);
@@ -827,6 +870,33 @@ public class World {
 		for (int i = 0; i < numTrees; i++) {
 			int treeX = r.nextInt (WorldReigon.REIGON_SIZE) + reigonX;
 			putStructure ("tree", treeX * 8, rg.getCeilingHeight (treeX) * 8 - 8);
+		}
+		int numCoal = r.nextInt (200);
+		for (int i = 0; i < numCoal; i++) {
+			int randX = r.nextInt (WORLD_HEIGHT);
+			int randY = r.nextInt (WorldReigon.REIGON_SIZE) + reigonX;
+			putStructure ("coal_ore", randX * 8, randY * 8);
+		}
+		int numIron = r.nextInt (100);
+		for (int i = 0; i < numCoal; i++) {
+			int randX = r.nextInt (WORLD_HEIGHT);
+			int randY = r.nextInt (WorldReigon.REIGON_SIZE) + reigonX;
+			putStructure ("iron_ore", randX * 8, randY * 8);
+		}
+	}
+	
+	public static void tick () {
+		//The ever-important random number generator
+		Random r = new Random ();
+		
+		//Do spawning ticks
+		int SPAWNING_ATTEMPTS = 2;
+		for (int i = 0; i < SPAWNING_ATTEMPTS; i++) {
+			int spawnX = (int)player.getX () + (r.nextInt (SECONDARY_LOAD_RADIUS * 2) - SECONDARY_LOAD_RADIUS) * 8;
+			int spawnY = r.nextInt (WORLD_HEIGHT) * 8;
+			if (getLightStrength (spawnX / 8, spawnY / 8) < 4 && getTile (spawnX / 8, spawnY / 8) == 0 && getTile (spawnX / 8, spawnY / 8 + 1) == 0 && getTile (spawnX / 8, spawnY / 8 - 1) != 0) {
+				new Zombie (spawnX, spawnY + 8);
+			}
 		}
 	}
 	
@@ -1026,6 +1096,9 @@ public class World {
 		}
 		
 		public int getTile (int x, int y) {
+			if (y < 0 || y >= WORLD_HEIGHT) {
+				return 24;
+			}
 			return data.get (Math.floorMod(x, REIGON_SIZE)).get (y);
 		}
 		

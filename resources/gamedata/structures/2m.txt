@@ -1,0 +1,6 @@
+name:iron_ore
+center:1,1
+width:3
+height:3
+spawn_over:16
+spawn_odds:0.6
