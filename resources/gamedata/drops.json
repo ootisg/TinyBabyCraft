@@ -44,5 +44,33 @@
 	{
 		"special":"container"
 	}
+],
+"Fire Crystal":[
+	{
+		"id":263,
+		"min":1,
+		"max":2
+	}
+],
+"Earth Crystal":[
+	{
+		"id":264,
+		"min":1,
+		"max":2
+	}
+],
+"Water Crystal":[
+	{
+		"id":265,
+		"min":1,
+		"max":2
+	}
+],
+"Air Crystal":[
+	{
+		"id":266,
+		"min":1,
+		"max":2
+	}
 ]
 }

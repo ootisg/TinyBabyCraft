@@ -191,6 +191,60 @@
 "31":{
 	"name":"Netherrack",
 	"type":"stone",
-	"toughness":5,
+	"toughness":5
+},
+"32":{
+	"name":"Fire Crystal Ore",
+	"type":"stone",
+	"toughness":10,
+	"drop":"Fire Crystal"
+},
+"33":{
+	"name":"Earth Crystal Ore",
+	"type":"stone",
+	"toughness":10,
+	"drop":"Earth Crystal"
+},
+"34":{
+	"name":"Water Crystal Ore",
+	"type":"stone",
+	"toughness":10,
+	"drop":"Water Crystal"
+},
+"35":{
+	"name":"Air Crystal Ore",
+	"type":"stone",
+	"toughness":10,
+	"drop":"Air Crystal"
+},
+"36":{
+	"name":"Enchanted Log",
+	"type":"wood",
+	"toughness":30
+},
+"37":{
+	"name":"Enchanted Planks",
+	"type":"wood",
+	"toughness":30
+},
+"38":{
+	"name":"Enchanted Leaves",
+	"type":"leaves",
+	"toughness":10
+},
+"39":{
+	"name":"Cauldron",
+	"type":"metal",
+	"toughness":50
+},
+"40":{
+	"name":"Depletion Cauldron",
+	"type":"metal",
+	"toughness":50
+},
+"41":{
+	"name":"Enchanting Table",
+	"type":"stone",
+	"toughness":70
 }
 }

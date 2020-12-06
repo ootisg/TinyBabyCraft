@@ -148,7 +148,47 @@
 "31":{
 	"name":"Netherrack",
 	"placeable":true
-}
+},
+"32":{
+	"name":"Fire Crystal Ore",
+	"placeable":true
+},
+"33":{
+	"name":"Earth Crystal Ore",
+	"placeable":true
+},
+"34":{
+	"name":"Water Crystal Ore",
+	"placeable":true
+},
+"35":{
+	"name":"Air Crystal Ore",
+	"placeable":true
+},
+"36":{
+	"name":"Enchanted Log",
+	"placeable":true
+},
+"37":{
+	"name":"Enchanted Planks",
+	"placeable":true
+},
+"38":{
+	"name":"Enchanted Leaves",
+	"placeable":true
+},
+"39":{
+	"name":"Cauldron",
+	"placeable":true
+},
+"40":{
+	"name":"Depletion Cauldron",
+	"placeable":true
+},
+"41":{
+	"name":"Enchanting Table",
+	"placeable":true
+},
 "256":{
 	"name":"Stick",
 	"fuelTime":1
@@ -171,6 +211,18 @@
 },
 "262":{
 	"name":"Redstone"
+},
+"263":{
+	"name":"Fire Crystal"
+},
+"264":{
+	"name":"Earth Crystal"
+},
+"265":{
+	"name":"Water Crystal"
+},
+"266":{
+	"name":"Air Crystal"
 },
 "272":{
 	"name":"Wooden Sword",
@@ -345,5 +397,20 @@
 	"name":"Adamantite Hoe",
 	"tool":"hoe",
 	"durability":400
+},
+"320":{
+	"name":"Bottle"
+},
+"321":{
+	"name":"Bottle of Fire"
+},
+"322":{
+	"name":"Bottle of Earth"
+},
+"323":{
+	"name":"Bottle of Water"
+},
+"324":{
+	"name":"Bottle of Air"
 }
 }

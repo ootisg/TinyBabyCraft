@@ -128,7 +128,7 @@ public class Inventory extends GameObject {
 	public Inventory () {
 		//Load up the item properties
 		try {
-			itemProperties = JSONUtil.loadJSONFile ("resources/gamedata/items.txt");
+			itemProperties = JSONUtil.loadJSONFile ("resources/gamedata/items.json");
 		} catch (JSONException e) {
 			e.printStackTrace ();
 			System.exit (1);

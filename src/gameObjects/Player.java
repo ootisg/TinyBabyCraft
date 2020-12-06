@@ -86,12 +86,10 @@ public class Player extends GameObject {
 		if (keyPressed ('Z')) {
 			new Zombie (getX (), getY ());
 		}
-		if (keyPressed ('E')) {
+		if (keyPressed ('E') || (keyPressed (KeyEvent.VK_ESCAPE) && uiState != 0)) {
 			toggleInventory ();
-		}
-		
-		//Handle ESC key
-		if (keyPressed (KeyEvent.VK_ESCAPE)) {
+		} else if (keyPressed (KeyEvent.VK_ESCAPE) && uiState == 0) {
+			//Handle ESC key when inventory is closed
 			World.savePlayer ();
 			World.saveReigons ();
 			System.exit (0);

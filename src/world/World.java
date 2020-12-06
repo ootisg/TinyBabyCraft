@@ -97,8 +97,8 @@ public class World {
 	public static void initWorld () {
 		
 		try {
-			tileProperties = JSONUtil.loadJSONFile ("resources/gamedata/tiles.txt");
-			dropList = JSONUtil.loadJSONFile ("resources/gamedata/drops.txt");
+			tileProperties = JSONUtil.loadJSONFile ("resources/gamedata/tiles.json");
+			dropList = JSONUtil.loadJSONFile ("resources/gamedata/drops.json");
 		} catch (JSONException e) {
 			e.printStackTrace ();
 			System.exit (1);
@@ -763,7 +763,7 @@ public class World {
 					//Big chungus of an if statement
 					if (
 							(spawnOver == -1 || spawnOver == getTile (putX, putY)) &&
-							(spawnOdds == Double.NaN || r.nextDouble () < spawnOdds)
+							(Double.isNaN (spawnOdds) || r.nextDouble () < spawnOdds)
 					) {
 						setTile (slice [wy], topLeft.x + wx, topLeft.y + wy);
 					}

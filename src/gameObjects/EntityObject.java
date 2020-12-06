@@ -16,6 +16,9 @@ public class EntityObject extends GameObject {
 		pairedEntity = new Entity ();
 		pairedEntity.setPairedObject (this);
 		World.addEntity (pairedEntity);
+		//Set the entity's x and y properties so the game doesn't get confused
+		pairedEntity.getProperties ().put ("x", String.valueOf ((int)x));
+		pairedEntity.getProperties ().put ("y", String.valueOf ((int)y));
 		declare (x, y);
 	}
 	
