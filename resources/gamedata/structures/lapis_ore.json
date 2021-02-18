@@ -1,0 +1,24 @@
+{
+"entities": [
+],
+"tiles": {
+	"base":	[[22,22,22,22,22],
+			 [22,22,22,22,22],
+			 [22,22,22,22,22],
+			 [22,22,22,22,22],
+			 [22,22,22,22,22]]
+},
+"meta": {
+	"name":"lapis_ore",
+	"center":[2,2],
+	"width":5,
+	"height":5,
+	"spawn_over":16,
+	"spawn_odds":0.2,
+	"spawn_type":"regular",
+	"min_height":10,
+	"max_height":20,
+	"min_attempts":7,
+	"max_attempts":15
+}
+}

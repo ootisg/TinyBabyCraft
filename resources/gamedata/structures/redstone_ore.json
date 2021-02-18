@@ -1,0 +1,22 @@
+{
+"entities": [
+],
+"tiles": {
+	"base":	[[21,21,21],
+			 [21,21,21],
+			 [21,21,21]]
+},
+"meta": {
+	"name":"redstone_ore",
+	"center":[1,1],
+	"width":3,
+	"height":3,
+	"spawn_over":16,
+	"spawn_odds":0.7,
+	"spawn_type":"regular",
+	"min_height":0,
+	"max_height":16,
+	"min_attempts":15,
+	"max_attempts":30
+}
+}

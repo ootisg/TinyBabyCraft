@@ -5,10 +5,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
+import json.JSONArray;
+import json.JSONObject;
+
 public class Structure {
 	
 	int[][] tiles;
-	HashMap<String, String> properties;
+	JSONObject properties;
 	
 	public Structure () {
 		
@@ -18,59 +21,55 @@ public class Structure {
 		this.tiles = tiles;
 	}
 	
-	public void setTiles (ArrayList<String> rowStrings) {
+	public void setTiles (JSONArray tileArray) {
+		
+		//Make the tiles array
 		tiles = new int[getWidth ()][getHeight ()];
-		int wx = 0;
-		for (int wy = 0; wy < rowStrings.size (); wy++) {
-			Scanner tileScanner = new Scanner (rowStrings.get (wy));
-			while (tileScanner.hasNextInt ()) {
-				tiles [wx][wy] = tileScanner.nextInt ();
-				wx++;
+		
+		//Fill with the required tiles
+		ArrayList<Object> rows = tileArray.getContents ();
+		for (int row = 0; row < rows.size (); row++) {
+			ArrayList<Object> cols = ((JSONArray) rows.get (row)).getContents ();
+			for (int col = 0; col < cols.size (); col++) {
+				Integer tile = (Integer)cols.get (col);
+				tiles [col][row] = tile;
 			}
-			wx = 0;
 		}
 	}
 	
-	public void setProperties (HashMap<String, String> properties) {
+	public void setProperties (JSONObject properties) {
 		this.properties = properties;
+		setTiles (properties.getJSONObject ("tiles").getJSONArray ("base"));
 	}
 	
-	public void setProperties (ArrayList<String> propertyStrings) {
-		properties = new HashMap<String, String> ();
-		for (int i = 0; i < propertyStrings.size (); i++) {
-			String[] working = propertyStrings.get (i).split (":");
-			properties.put (working [0], working [1]);
-		}
+	public JSONObject getProperties () {
+		return properties;
 	}
 	
 	public int[][] getTiles () {
 		return tiles;
 	}
 	
-	public HashMap<String, String> getProperties () {
-		return properties;
-	}
-	
-	public String getProperty (String s) {
-		return properties.get (s);
+	public Object getMetaProperty (String s) {
+		return getProperties ().getJSONObject ("meta").get (s);
 	}
 	
 	public int getWidth () {
-		return Integer.parseInt (properties.get ("width"));
+		return (int) getMetaProperty ("width");
 	}
 	
 	public int getHeight () {
-		return Integer.parseInt (properties.get ("height"));
+		return (int) getMetaProperty ("height");
 	}
 	
 	public Point getOrigin () {
-		String[] coords = properties.get ("center").split (",");
-		return new Point (Integer.parseInt (coords [0]), Integer.parseInt (coords [1]));
+		JSONArray coords = ((JSONArray)getMetaProperty ("center"));
+		return new Point ((int)coords.get (0), (int)coords.get (1));
 	}
 	
 	public String getName () {
-		if (properties.get ("name") != null) {
-			return properties.get ("name");
+		if (getMetaProperty ("name") != null) {
+			return ((String)getMetaProperty ("name"));
 		} else {
 			return "undefined";
 		}

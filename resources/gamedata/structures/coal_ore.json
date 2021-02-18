@@ -1,0 +1,22 @@
+{
+"entities": [
+],
+"tiles": {
+	"base":	[[17,17,17],
+			 [17,17,17],
+			 [17,17,17]]
+},
+"meta": {
+	"name":"coal_ore",
+	"center":[1,1],
+	"width":3,
+	"height":3,
+	"spawn_over":16,
+	"spawn_odds":0.8,
+	"spawn_type":"regular",
+	"min_height":0,
+	"max_height":63,
+	"min_attempts":100,
+	"max_attempts":125
+}
+}

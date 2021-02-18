@@ -1,0 +1,22 @@
+{
+"entities": [
+],
+"tiles": {
+	"base":	[[19,19,19],
+			 [19,19,19],
+			 [19,19,19]]
+},
+"meta": {
+	"name":"gold_ore",
+	"center":[1,1],
+	"width":3,
+	"height":3,
+	"spawn_over":16,
+	"spawn_odds":0.5,
+	"spawn_type":"regular",
+	"min_height":0,
+	"max_height":32,
+	"min_attempts":10,
+	"max_attempts":20
+}
+}

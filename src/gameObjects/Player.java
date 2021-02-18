@@ -46,6 +46,8 @@ public class Player extends GameObject {
 	private long lastMove = 0;
 	private int moveTime = 60;
 	
+	private boolean noclip = false;
+	
 	public Player () {
 		setSprite (PLAYER_SPRITES);
 		getAnimationHandler ().setAnimationSpeed (0);
@@ -94,6 +96,9 @@ public class Player extends GameObject {
 			World.saveReigons ();
 			System.exit (0);
 		}
+		if (keyPressed ('N')) {
+			noclip = !noclip;
+		}
 		
 		//Handle loading of the world
 		//World.updateReigons ();
@@ -133,23 +138,27 @@ public class Player extends GameObject {
 		setX (getX () + xOffset);
 		setY (getY () + yOffset);
 		//Collision checks
-		if (checkTile (0, -1)) {
-			forceMove (-xOffset, -yOffset); //"no thats illegal move"
-		}
-		if (checkTile (0, 0)) {
-			if (!checkTile (0, -1) && !checkTile (0, -2)) {
-				forceMove (0, -8); //"go up the stairs move"
-			} else {
+		if (!noclip) {
+			if (checkTile (0, -1)) {
 				forceMove (-xOffset, -yOffset); //"no thats illegal move"
 			}
-		} else if (!checkTile (0, 1)) {
-			int offs = 1;
-			while (!checkTile (0, offs) && getTile (0, offs) != 9) {
-				//Tile 9 is a ladder
-				offs += 1;
+			if (checkTile (0, 0)) {
+				if (!checkTile (0, -1) && !checkTile (0, -2)) {
+					forceMove (0, -8); //"go up the stairs move"
+				} else {
+					forceMove (-xOffset, -yOffset); //"no thats illegal move"
+				}
+			} else if (!checkTile (0, 1)) {
+				int offs = 1;
+				while (!checkTile (0, offs) && getTile (0, offs) != 9) {
+					//Tile 9 is a ladder
+					offs += 1;
+				}
+				forceMove (0, (offs - 1) * 8); //Falling
 			}
-			forceMove (0, (offs - 1) * 8); //Falling
 		}
+		
+		//Scroll the screen to match
 		scrollAboutPlayer ();
 		
 		//Update the world n stuff

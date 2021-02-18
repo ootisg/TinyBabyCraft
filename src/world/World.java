@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.UUID;
@@ -220,11 +221,29 @@ public class World {
 		
 		File dir = new File ("resources/gamedata/structures");
 		File[] structPaths = dir.listFiles ();
-		HashMap<String, File> structures = new HashMap<String, File> ();
 		for (int i = 0; i < structPaths.length; i++) {
-			structures.put (structPaths [i].getName (), structPaths [i]);
+			
+			//Check if the file is a JSON file
+			String filename = structPaths [i].getName ();
+			String[] fileSplit = filename.split ("\\.");
+			if (fileSplit.length == 2 && fileSplit [1].equals ("json")) {
+				
+				//Read the file and make a structure object
+				Structure struct = new Structure ();
+				try {
+					struct.setProperties (JSONUtil.loadJSONFile (structPaths [i].getPath ()));
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				//Put the structure in the list of structures
+				structures.put (struct.getName (), struct);
+			}
 		}
-		int count = 0;
+		
+		
+		/*int count = 0;
 		int iter = 0;
 		boolean found = false;
 		while (count < structPaths.length && iter < 1000) {
@@ -274,7 +293,7 @@ public class World {
 				World.structures.put (structure.getName (), structure);
 			}
 			iter++;
-		}
+		}*/
 	}
 	
 	public static void spawnPlayer () {
@@ -346,8 +365,10 @@ public class World {
 				PARSED_TILES.draw (wx * 8, wy * 8);
 				
 				//Render the proper lighting
-				PARSED_LIGHTING.setFrame (lightVal);
-				PARSED_LIGHTING.draw (wx * 8, wy * 8);
+				if (tileId != 0) {
+					PARSED_LIGHTING.setFrame (lightVal);
+					PARSED_LIGHTING.draw (wx * 8, wy * 8);
+				}
 			}
 		}
 	}
@@ -421,7 +442,7 @@ public class World {
 			//UPDATE THE HEIGHT
 			highestTile [realX] = -1;
 			getCeilingHeight (realX);
-		} catch (ArrayIndexOutOfBoundsException e) {
+		} catch (IndexOutOfBoundsException e) {
 			//Do nothing
 		}
 	}
@@ -514,10 +535,13 @@ public class World {
 		int realX = Math.floorMod (x, LOAD_SIZE);
 		ArrayList<Point> lightList = lights.get (realX).get (y);
 		int totalLight;
-		if (getCeilingHeight (x) >= y) {
+		int ceilingY = getCeilingHeight (x);
+		if (ceilingY >= y) {
 			totalLight = skylight;
-		} else {
+		} else if (y - ceilingY >= 4) {
 			totalLight = 0;
+		} else {
+			totalLight = (int)((double)(skylight / 4) * (4 - (y - ceilingY)));
 		}
 		for (int i = 0; i < lightList.size (); i++) {
 			
@@ -736,18 +760,20 @@ public class World {
 		//Get important attributes
 		//Replace tiles attribute
 		boolean replace = false;
-		if (s.getProperty ("replace") != null) {
+		if (s.getMetaProperty ("replace") != null) {
 			replace = true;
 		}
+		
 		//Spawn over attribute
 		int spawnOver = -1;
-		if (s.getProperty ("spawn_over") != null) {
-			spawnOver = Integer.parseInt (s.getProperty ("spawn_over"));
+		if (s.getMetaProperty ("spawn_over") != null) {
+			spawnOver = (int)s.getMetaProperty ("spawn_over");
 		}
+		
 		//Spawn odds attribute
 		double spawnOdds = Double.NaN;
-		if (s.getProperty ("spawn_odds") != null) {
-			spawnOdds = Double.parseDouble (s.getProperty ("spawn_odds"));
+		if (s.getMetaProperty ("spawn_odds") != null) {
+			spawnOdds = (double)s.getMetaProperty ("spawn_odds");
 		}
 		
 		//Make our random
@@ -863,25 +889,46 @@ public class World {
 	
 	public static void populateReigon (WorldReigon rg) {
 		//Scatter some trees
-		int reigonX = rg.id * WorldReigon.REIGON_SIZE;
-		Random r = new Random (seed + rg.id * 49390927); //Prime number witchcraft
-		int numTrees = r.nextInt (5) + 2; //Number of trees is between 2 and 7
-		System.out.println (numTrees);
-		for (int i = 0; i < numTrees; i++) {
-			int treeX = r.nextInt (WorldReigon.REIGON_SIZE) + reigonX;
-			putStructure ("tree", treeX * 8, rg.getCeilingHeight (treeX) * 8 - 8);
-		}
-		int numCoal = r.nextInt (200);
-		for (int i = 0; i < numCoal; i++) {
-			int randX = r.nextInt (WORLD_HEIGHT);
-			int randY = r.nextInt (WorldReigon.REIGON_SIZE) + reigonX;
-			putStructure ("coal_ore", randX * 8, randY * 8);
-		}
-		int numIron = r.nextInt (100);
-		for (int i = 0; i < numCoal; i++) {
-			int randX = r.nextInt (WORLD_HEIGHT);
-			int randY = r.nextInt (WorldReigon.REIGON_SIZE) + reigonX;
-			putStructure ("iron_ore", randX * 8, randY * 8);
+		
+		//Get the list of structures
+		Iterator<Entry<String, Structure>> iter = structures.entrySet ().iterator ();
+		
+		//Iterate through all structures and spawn them accordingly
+		while (iter.hasNext ()) {
+			//TODO allow biome-specific structure spawning
+			Entry<String, Structure> curr = iter.next ();
+			Structure struct = curr.getValue ();
+			String structName = curr.getKey ();
+			
+			//Get the reigon x and make the RNG
+			int reigonX = rg.id * WorldReigon.REIGON_SIZE;
+			Random r = new Random (seed + rg.id * 49390927); //Prime number witchcraft
+			
+			//Generate spawn attempt values for the struct
+			int minAttempts = (int)struct.getMetaProperty ("min_attempts");
+			int maxAttempts = (int)struct.getMetaProperty ("max_attempts");
+			int numAttempts = minAttempts + (int)(r.nextDouble () * (maxAttempts - minAttempts));
+			
+			//Spawn for surface structures
+			if (struct.getMetaProperty ("spawn_type").equals ("surface")) {
+				for (int i = 0; i < numAttempts; i++) {
+					int spawnX = r.nextInt (WorldReigon.REIGON_SIZE) + reigonX;
+					putStructure (structName, spawnX * 8, rg.getCeilingHeight (spawnX) * 8 - 8);
+				}
+			}
+			
+			//Spawn for regular structures
+			else if (struct.getMetaProperty ("spawn_type").equals ("regular")) {
+				for (int i = 0; i < numAttempts; i++) {
+					//Get min and max y
+					int minHeight = WORLD_HEIGHT - (int)struct.getMetaProperty ("min_height");
+					int maxHeight = WORLD_HEIGHT - (int)struct.getMetaProperty ("max_height");
+					int randX = r.nextInt (WORLD_HEIGHT) + reigonX;
+					int randY = r.nextInt (minHeight - maxHeight) + maxHeight;
+					putStructure (structName, randX * 8, randY * 8);
+				}
+			}
+			
 		}
 	}
 	
