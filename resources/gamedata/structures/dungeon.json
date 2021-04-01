@@ -1,0 +1,25 @@
+{
+"entities": [
+],
+"tiles": {
+	"base":	[[44,44,44,44,44,44,44],
+			 [44, 0, 0, 0, 0, 0,44],
+			 [44, 0, 0, 0, 0, 0,44],
+			 [44, 0, 0, 0, 0, 0,44],
+			 [44, 0, 0, 0, 0, 0,44],
+			 [44, 0, 0,43, 0,42,44],
+			 [44,44,44,44,44,44,44]]
+},
+"meta": {
+	"name":"dungeon",
+	"center":[3,3],
+	"width":7,
+	"height":7,
+	"replace":true,
+	"spawn_type":"regular",
+	"min_height":0,
+	"max_height":64,
+	"min_attempts":1,
+	"max_attempts":2
+}
+}

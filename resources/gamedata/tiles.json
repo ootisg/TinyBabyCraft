@@ -143,9 +143,9 @@
 	"drop":"Lapis"
 },
 "23":{
-	"name":"Stone",
+	"name":"Cobblestone",
 	"type":"stone",
-	"toughness":30
+	"toughness":50
 },
 "24":{
 	"name":"Bedrock",
@@ -246,5 +246,20 @@
 	"name":"Enchanting Table",
 	"type":"stone",
 	"toughness":70
+},
+"42":{
+	"name":"Chest",
+	"type":"wood",
+	"toughness":30
+},
+"43":{
+	"name":"Spawner",
+	"type":"metal",
+	"toughness":50
+},
+"44":{
+	"name":"Mossy Cobblestone",
+	"type":"stone",
+	"toughness":50
 }
 }
