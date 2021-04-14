@@ -7,6 +7,26 @@
 			"s2":"item"
 		}
 	},
+	"Chest": {
+		"tileEntity":true,
+		"FMT": {
+			"s0":"item",
+			"s1":"item",
+			"s2":"item",
+			"s3":"item",
+			"s4":"item",
+			"s5":"item",
+			"s6":"item",
+			"s7":"item",
+			"s8":"item",
+			"s9":"item",
+			"s10":"item",
+			"s11":"item",
+			"s12":"item",
+			"s13":"item",
+			"s14":"item"
+		}
+	}
 	"StructSpawner": {
 		"tileEntity":true,
 		"FMT": {

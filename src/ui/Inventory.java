@@ -43,10 +43,10 @@ public class Inventory extends GameObject {
 															0, 0, 0, 
 															100, 40, true, 
 															0, 0, false);
-	public static final Layout LAYOUT_CHEST = new Layout (0, 0, 
+	public static final Layout LAYOUT_CHEST = new Layout (32, 23, 
 														  0, 0, 0, 
 														  0, 0, false, 
-														  0, 0, true);
+														  100, 40, true);
 	
 	public static int craftingSize = 3;
 	public static boolean showChest = true;
@@ -453,6 +453,13 @@ public class Inventory extends GameObject {
 				Item working = items [FURNACE_RESULT_INDEX];
 				drawItem (working.id, working.amount, xdraw, ydraw);
 			}
+			
+		}
+		
+		if (showChest) {
+			
+			//Draw the chest background
+			CHEST_BACKGROUND.draw (chestOffsetX, chestOffsetY);
 			
 		}
 		

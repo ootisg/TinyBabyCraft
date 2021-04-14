@@ -212,6 +212,14 @@ public class Player extends GameObject {
 		updateUi ();
 	}
 	
+	public void openChest () {
+		if (uiState != 4) {
+			storedUiState = uiState;
+			uiState = 4;
+		}
+		updateUi ();
+	}
+	
 	public void updateUi () {
 		tileInterface.disable ();
 		inventory.disable ();
@@ -229,6 +237,10 @@ public class Player extends GameObject {
 				break;
 			case 3:
 				Inventory.setLayout (Inventory.LAYOUT_FURNACE);
+				inventory.enable ();
+				break;
+			case 4:
+				Inventory.setLayout (Inventory.LAYOUT_CHEST);
 				inventory.enable ();
 				break;
 			default:
@@ -305,7 +317,7 @@ public class Player extends GameObject {
 		super.draw ();
 		setY (this.getY () + 4);
 		inventory.drawHotbar (); //Hotbar is always visible
-		if (uiState == 1 || uiState == 2 || uiState == 3) {
+		if (uiState == 1 || uiState == 2 || uiState == 3 ||  uiState == 4) {
 			inventory.drawMenu ();
 		}
 	}

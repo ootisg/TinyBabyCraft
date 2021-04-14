@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import gameObjects.Chest;
 import gameObjects.Container;
 import gameObjects.Furnace;
 import json.JSONArray;
@@ -91,6 +92,17 @@ public class TileInterface extends GameObject {
 							Entity furnaceEntity = new Entity (furnaceMap);
 							Furnace furnace = new Furnace (furnaceEntity);
 							World.addEntity (furnaceEntity);
+						} else if (workingId == 42) {
+							HashMap<String, String> chestMap = Entity.getEntityMap ();
+							chestMap.put ("type", "Chest");
+							chestMap.put ("x", String.valueOf (getHoveredTileX () * 8));
+							chestMap.put ("y", String.valueOf (getHoveredTileY () * 8));
+							for (int i = 0; i < 15; i++) {
+								chestMap.put ("s" + i, "0x0");
+							}
+							Entity chestEntity = new Entity (chestMap);
+							Chest chest = new Chest (chestEntity);
+							World.addEntity (chestEntity);
 						}
 					}
 				}
@@ -105,6 +117,14 @@ public class TileInterface extends GameObject {
 					if (eObj instanceof Furnace) {
 						Inventory.setContainer ((Container)eObj);
 						World.getPlayer ().openFurnace ();
+					}
+				} else if (currentTile == 42) {
+					Entity e = World.getTileEntity (getHoveredTileX (), getHoveredTileY ());
+					System.out.println (getHoveredTileX () * 8 + ", " + getHoveredTileY () * 8 + ", " + e);
+					GameObject eObj = e.getObject ();
+					if (eObj instanceof Chest) {
+						Inventory.setContainer ((Container)eObj);
+						World.getPlayer ().openChest ();
 					}
 				}
 			}
