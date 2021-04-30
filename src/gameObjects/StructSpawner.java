@@ -15,6 +15,7 @@ public class StructSpawner extends EntityObject {
 	
 	public void spawnStructure () {
 		Entity entity = getPairedEntity ();
+		System.out.println (entity.getProperty ("structName"));
 		int x = entity.getInt ("x");
 		int y = entity.getInt ("y");
 		String structType = entity.getProperty ("structName");

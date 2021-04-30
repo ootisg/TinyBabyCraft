@@ -923,7 +923,7 @@ public class World {
 					//Get min and max y
 					int minHeight = WORLD_HEIGHT - (int)struct.getMetaProperty ("min_height");
 					int maxHeight = WORLD_HEIGHT - (int)struct.getMetaProperty ("max_height");
-					int randX = r.nextInt (WORLD_HEIGHT) + reigonX;
+					int randX = r.nextInt (WorldReigon.REIGON_SIZE) + reigonX;
 					int randY = r.nextInt (minHeight - maxHeight) + maxHeight;
 					putStructure (structName, randX * 8, randY * 8);
 				}
