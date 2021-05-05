@@ -29,6 +29,7 @@ public class Zombie extends EntityObject {
 		super (entity);
 		setSprite (zombieSprites);
 		getAnimationHandler ().setAnimationSpeed (0);
+		ai = new ChaseAI (this);
 		setAiTime (1000);
 	}
 	

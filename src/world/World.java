@@ -941,8 +941,8 @@ public class World {
 		for (int i = 0; i < SPAWNING_ATTEMPTS; i++) {
 			int spawnX = (int)player.getX () + (r.nextInt (SECONDARY_LOAD_RADIUS * 2) - SECONDARY_LOAD_RADIUS) * 8;
 			int spawnY = r.nextInt (WORLD_HEIGHT) * 8;
-			if (getLightStrength (spawnX / 8, spawnY / 8) < 4 && getTile (spawnX / 8, spawnY / 8) == 0 && getTile (spawnX / 8, spawnY / 8 + 1) == 0 && getTile (spawnX / 8, spawnY / 8 - 1) != 0) {
-				new Zombie (spawnX, spawnY + 8);
+			if (getLightStrength (spawnX / 8, spawnY / 8) < 4 && getTile (spawnX / 8, spawnY / 8) == 0 && getTile (spawnX / 8, spawnY / 8 - 1) == 0 && getTile (spawnX / 8, spawnY / 8 + 1) != 0) {
+				new Zombie (spawnX, spawnY);
 			}
 		}
 	}

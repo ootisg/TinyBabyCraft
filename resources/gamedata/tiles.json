@@ -41,6 +41,7 @@
 "5":{
 	"name":"Leaves",
 	"type":"leaves",
+	"transparent":true,
 	"toughness":2
 },
 "6":{
