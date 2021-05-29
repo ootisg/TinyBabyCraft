@@ -189,6 +189,130 @@
 	"name":"Enchanting Table",
 	"placeable":true
 },
+"42":{
+	"name":"Chest",
+	"placeable":true
+},
+"43":{
+	"name":"Spawner",
+	"placeable":true
+},
+"44":{
+	"name":"Mossy Cobblestone",
+	"placeable":true
+},
+"45":{
+	"name":"Torch Left",
+	"placeable":false
+},
+"46":{
+	"name":"Torch Right",
+	"placeable":false
+},
+"48":{
+	"name":"Planks Bottom Slab",
+	"placeable":false
+},
+"49":{
+	"name":"Planks Top Slab",
+	"placeable":false
+},
+"50":{
+	"name":"Planks Stairs BR",
+	"placeable":false
+},
+"51":{
+	"name":"Planks Stairs BL",
+	"placeable":false
+},
+"52":{
+	"name":"Planks Stairs TR",
+	"placeable":false
+},
+"53":{
+	"name":"Planks Stairs TL",
+	"placeable":false
+},
+"54":{
+	"name":"Cobble Bottom Slab",
+	"placeable":false
+},
+"55":{
+	"name":"Cobble Top Slab",
+	"placeable":false
+},
+"56":{
+	"name":"Cobble Stairs BR",
+	"placeable":false
+},
+"57":{
+	"name":"Cobble Stairs BL",
+	"placeable":false
+},
+"58":{
+	"name":"Cobble Stairs TR",
+	"placeable":false
+},
+"59":{
+	"name":"Cobble Stairs TL",
+	"placeable":false
+},
+"60":{
+	"name":"Door Open Left Top",
+	"placeable":false
+},
+"61":{
+	"name":"Door Open Left Bottom",
+	"placeable":false
+},
+"62":{
+	"name":"Door Open Right Top",
+	"placeable":false
+},
+"63":{
+	"name":"Door Open Right Bottom",
+	"placeable":false
+},
+"64":{
+	"name":"Enchanted Planks Bottom Slab",
+	"placeable":false
+},
+"65":{
+	"name":"Enchanted Planks Top Slab",
+	"placeable":false
+},
+"66":{
+	"name":"Enchanted Planks Stairs BR",
+	"placeable":false
+},
+"67":{
+	"name":"Enchanted Planks Stairs BL",
+	"placeable":false
+},
+"68":{
+	"name":"Enchanted Planks Stairs TR",
+	"placeable":false
+},
+"69":{
+	"name":"Enchanted Planks Stairs TL",
+	"placeable":false
+},
+"76":{
+	"name":"Door Closed Left Top",
+	"placeable":false
+},
+"77":{
+	"name":"Door Closed Left Bottom",
+	"placeable":false
+},
+"78":{
+	"name":"Door Closed Right Top",
+	"placeable":false
+},
+"79":{
+	"name":"Door Closed Right Bottom",
+	"placeable":false
+},
 "256":{
 	"name":"Stick",
 	"fuelTime":1
