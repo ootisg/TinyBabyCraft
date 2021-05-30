@@ -72,5 +72,40 @@
 		"min":1,
 		"max":2
 	}
+],
+"Plank Slab":[
+	{
+		"id":48
+	}
+],
+"Plank Stairs":[
+	{
+		"id":50
+	}
+],
+"Cobble Slab":[
+	{
+		"id":54
+	}
+],
+"Cobble Stairs":[
+	{
+		"id":56
+	}
+],
+"Wood Door":[
+	{
+		"id":60
+	}
+],
+"Enchanted Plank Slab":[
+	{
+		"id":64
+	}
+],
+"Enchanted Plank Stairs":[
+	{
+		"id":66
+	}
 ]
 }

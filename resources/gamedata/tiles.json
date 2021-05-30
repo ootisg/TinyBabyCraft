@@ -262,5 +262,181 @@
 	"name":"Mossy Cobblestone",
 	"type":"stone",
 	"toughness":50
+},
+"45":{
+	"name":"Torch Left",
+	"type":"wood",
+	"toughness":0,
+	"light":8
+},
+"46":{
+	"name":"Torch Right",
+	"type":"wood",
+	"toughness":0,
+	"light":8
+},
+"48":{
+	"name":"Planks Bottom Slab",
+	"type":"wood",
+	"toughness":20,
+	"drop":"Plank Slab"
+},
+"49":{
+	"name":"Planks Top Slab",
+	"type":"wood",
+	"toughness":20,
+	"drop":"Plank Slab"
+},
+"50":{
+	"name":"Planks Stairs BR",
+	"type":"wood",
+	"toughness":20,
+	"drop":"Plank Stairs"
+},
+"51":{
+	"name":"Planks Stairs BL",
+	"type":"wood",
+	"toughness":20,
+	"drop":"Plank Stairs"
+},
+"52":{
+	"name":"Planks Stairs TR",
+	"type":"wood",
+	"toughness":20,
+	"drop":"Plank Stairs"
+},
+"53":{
+	"name":"Planks Stairs TL",
+	"type":"wood",
+	"toughness":20,
+	"drop":"Plank Stairs"
+},
+"54":{
+	"name":"Cobble Bottom Slab",
+	"type":"stone",
+	"toughness":50,
+	"drop":"Cobble Slab"
+},
+"55":{
+	"name":"Cobble Top Slab",
+	"type":"stone",
+	"toughness":50,
+	"drop":"Cobble Slab"
+},
+"56":{
+	"name":"Cobble Stairs BR",
+	"type":"stone",
+	"toughness":50,
+	"drop":"Cobble Stairs"
+},
+"57":{
+	"name":"Cobble Stairs BL",
+	"type":"stone",
+	"toughness":50,
+	"drop":"Cobble Stairs"
+},
+"58":{
+	"name":"Cobble Stairs TR",
+	"type":"stone",
+	"toughness":50,
+	"drop":"Cobble Stairs"
+},
+"59":{
+	"name":"Cobble Stairs TL",
+	"type":"stone",
+	"toughness":50,
+	"drop":"Cobble Stairs"
+},
+"60":{
+	"name":"Door Open Left Top",
+	"type":"wood",
+	"toughness":50,
+	"solid":false,
+	"drop":"Wood_door"
+},
+"61":{
+	"name":"Door Open Left Bottom",
+	"type":"wood",
+	"toughness":50,
+	"solid":false,
+	"drop":"Wood_door"
+},
+"62":{
+	"name":"Door Open Right Top",
+	"type":"wood",
+	"toughness":50,
+	"solid":false,
+	"drop":"Wood_door"
+},
+"63":{
+	"name":"Door Open Right Bottom",
+	"type":"wood",
+	"toughness":50,
+	"solid":false,
+	"drop":"Wood_door"
+},
+"64":{
+	"name":"Enchanted Planks Bottom Slab",
+	"type":"wood",
+	"toughness":30,
+	"drop":"Enchanted Plank Stairs"
+},
+"65":{
+	"name":"Enchanted Planks Top Slab",
+	"type":"wood",
+	"toughness":30,
+	"drop":"Enchanted Plank Slab"
+},
+"66":{
+	"name":"Enchanted Planks Stairs BR",
+	"type":"wood",
+	"toughness":30,
+	"drop":"Enchanted Plank Slab"
+},
+"67":{
+	"name":"Enchanted Planks Stairs BL",
+	"type":"wood",
+	"toughness":30,
+	"drop":"Enchanted Plank Stairs"
+},
+"68":{
+	"name":"Enchanted Planks Stairs TR",
+	"type":"wood",
+	"toughness":30,
+	"drop":"Enchanted Plank Stairs"
+},
+"69":{
+	"name":"Enchanted Planks Stairs TL",
+	"type":"wood",
+	"toughness":30,
+	"drop":"Enchanted Plank Stairs"
+},
+"76":{
+	"name":"Door Closed Left Top",
+	"type":"wood",
+	"toughness":50,
+	"solid":true,
+	"drop":"Wood_door"
+},
+"77":{
+	"name":"Door Closed Left Bottom",
+	"type":"wood",
+	"toughness":50,
+	"solid":true,
+	"drop":"Wood_door"
+},
+"78":{
+	"name":"Door Closed Right Top",
+	"type":"wood",
+	"toughness":50,
+	"solid":true,
+	"drop":"Wood_door"
+},
+"79":{
+	"name":"Door Closed Right Bottom",
+	"type":"wood",
+	"toughness":50,
+	"solid":true,
+	"drop":"Wood_door"
 }
 }
