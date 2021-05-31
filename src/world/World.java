@@ -53,8 +53,6 @@ public class World {
 	public static final Sprite PARSED_ITEMS = new Sprite (ITEM_SHEET, 8, 8);
 	public static final Sprite PARSED_LIGHTING = new Sprite (LIGHT_SHEET, 8, 8);
 	
-	private static boolean[] solidMap;
-	
 	private static ArrayList<ArrayList<Integer>> tiles;
 	private static ArrayList<ArrayList<Integer>> bgTiles;
 	private static ArrayList<ArrayList<Integer>> lighting;
@@ -150,13 +148,6 @@ public class World {
 		for (int i = 0; i < LOAD_SIZE; i++) {
 			xBuffer [i] = i;
 		} //Initialize the x coordinate buffer
-		solidMap = new boolean[PARSED_TILES.getFrameCount ()];
-		for (int i = 0; i < solidMap.length; i++) {
-			solidMap [i] = true;
-		}
-		solidMap [0] = false; //air
-		solidMap [9] = false; //ladder
-		solidMap [10] = false; //torch
 		//Make the player
 		spawnPlayer ();
 		initLighting ();
@@ -185,6 +176,7 @@ public class World {
 	public static void populateTileProperties () {
 		populateTilePropertyArray ("light", tileLightTable);
 		populateTilePropertyArray ("transparent", tileTpTable);
+		populateTilePropertyArray ("solid", tileSolidTable);
 	}
 	
 	public static void populateTilePropertyArray (String propertyName, int[] propertyArr) {
@@ -393,7 +385,7 @@ public class World {
 	}
 	
 	public static boolean isSolid (int id) {
-		return solidMap [id];
+		return tileSolidTable [id] == 1;
 	}
 	
 	public static Player getPlayer () {
@@ -588,6 +580,10 @@ public class World {
 		if (e != null) {
 			removeEntity (e);
 		}
+		
+		//Tick the surrounding area
+		tickNearby (x, y);
+		
 	}
 	
 	public static void refreshLoadAround (int x) {
@@ -945,6 +941,30 @@ public class World {
 				new Zombie (spawnX, spawnY);
 			}
 		}
+	}
+	
+	public static void tickNearby (int x, int y) {
+		doTileTick (x, y - 1);
+		doTileTick (x - 1, y);
+		doTileTick (x + 1, y);
+		doTileTick (x, y + 1);
+		doTileTick (x, y);
+	}
+	
+	public static void doTileTick (int x, int y) {
+		
+		int id = World.getTile (x, y);
+		if (id == 60 || id == 62 || id == 76 || id == 78) {
+			if (World.getTile (x, y + 1) - id != 1) {
+				World.setTile (0, x, y);
+			}
+		}
+		if (id == 61 || id == 63 || id == 77 || id == 79) {
+			if (World.getTile (x, y - 1) - id != -1) {
+				World.setTile (0, x, y);
+			}
+		}
+		
 	}
 	
 	public static class WorldReigon {

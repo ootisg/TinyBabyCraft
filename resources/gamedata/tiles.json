@@ -352,28 +352,36 @@
 	"type":"wood",
 	"toughness":50,
 	"solid":false,
-	"drop":"Wood_door"
+	"transparent":true,
+	"useScript":"DoorInteract",
+	"drop":"Wood Door"
 },
 "61":{
 	"name":"Door Open Left Bottom",
 	"type":"wood",
 	"toughness":50,
 	"solid":false,
-	"drop":"Wood_door"
+	"transparent":true,
+	"useScript":"DoorInteract",
+	"drop":"Wood Door"
 },
 "62":{
 	"name":"Door Open Right Top",
 	"type":"wood",
 	"toughness":50,
 	"solid":false,
-	"drop":"Wood_door"
+	"transparent":true,
+	"useScript":"DoorInteract",
+	"drop":"Wood Door"
 },
 "63":{
 	"name":"Door Open Right Bottom",
 	"type":"wood",
 	"toughness":50,
 	"solid":false,
-	"drop":"Wood_door"
+	"transparent":true,
+	"useScript":"DoorInteract",
+	"drop":"Wood Door"
 },
 "64":{
 	"name":"Enchanted Planks Bottom Slab",
@@ -416,27 +424,35 @@
 	"type":"wood",
 	"toughness":50,
 	"solid":true,
-	"drop":"Wood_door"
+	"transparent":true,
+	"useScript":"DoorInteract",
+	"drop":"Wood Door"
 },
 "77":{
 	"name":"Door Closed Left Bottom",
 	"type":"wood",
 	"toughness":50,
 	"solid":true,
-	"drop":"Wood_door"
+	"transparent":true,
+	"useScript":"DoorInteract",
+	"drop":"Wood Door"
 },
 "78":{
 	"name":"Door Closed Right Top",
 	"type":"wood",
 	"toughness":50,
 	"solid":true,
-	"drop":"Wood_door"
+	"transparent":true,
+	"useScript":"DoorInteract",
+	"drop":"Wood Door"
 },
 "79":{
 	"name":"Door Closed Right Bottom",
 	"type":"wood",
 	"toughness":50,
 	"solid":true,
-	"drop":"Wood_door"
+	"transparent":true,
+	"useScript":"DoorInteract",
+	"drop":"Wood Door"
 }
 }

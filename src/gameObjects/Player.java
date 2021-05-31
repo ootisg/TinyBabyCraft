@@ -272,6 +272,18 @@ public class Player extends GameObject {
 		uiState = state;
 	}
 	
+	public boolean facingLeft () {
+		return state == STATE_FACING_LEFT || state == STATE_WIELDING_LEFT;
+	}
+	
+	public boolean facingRight () {
+		return state == STATE_FACING_RIGHT || state == STATE_WIELDING_RIGHT;
+	}
+	
+	public boolean isWielding () {
+		return state == STATE_WIELDING_LEFT || state == STATE_WIELDING_RIGHT;
+	}
+	
 	public void scrollAboutPlayer () {
 		//Adjust scroll in x direction
 		int renderedX = (int)(getX () - World.getViewX () * 8);

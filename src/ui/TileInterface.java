@@ -21,6 +21,9 @@ public class TileInterface extends GameObject {
 	
 	private boolean enabled = true;
 	
+	private HashMap<String, PlaceScript> placeScripts;
+	private HashMap<String, UseScript> useScripts;
+	
 	@Override
 	public void frameEvent () {
 		if (enabled) {
@@ -74,58 +77,76 @@ public class TileInterface extends GameObject {
 					World.doPlacementLightCalculation (0, getHoveredTileX (), getHoveredTileY ());
 					World.breakTile (getHoveredTileX (), getHoveredTileY ());
 				} else if (currentTile != 24) {
-					if (World.getPlayer ().useSelectedItem () == 1) {
-						World.doPlacementLightCalculation (workingId, getHoveredTileX (), getHoveredTileY ());
-						World.setTile (workingId, getHoveredTileX (), getHoveredTileY ());
-						if (workingId == 26) {
-							//Furnace
-							HashMap<String, String> furnaceMap = Entity.getEntityMap ();
-							furnaceMap.put ("type", "Furnace");
-							furnaceMap.put ("s0", "0x0");
-							furnaceMap.put ("s1", "0x0");
-							furnaceMap.put ("s2", "0x0");
-							furnaceMap.put ("x", String.valueOf (getHoveredTileX () * 8));
-							furnaceMap.put ("y", String.valueOf (getHoveredTileY () * 8));
-							furnaceMap.put ("fuel", "0");
-							furnaceMap.put ("maxFuel", "200");
-							furnaceMap.put ("time", "0");
-							Entity furnaceEntity = new Entity (furnaceMap);
-							Furnace furnace = new Furnace (furnaceEntity);
-							World.addEntity (furnaceEntity);
-						} else if (workingId == 42) {
-							HashMap<String, String> chestMap = Entity.getEntityMap ();
-							chestMap.put ("type", "Chest");
-							chestMap.put ("x", String.valueOf (getHoveredTileX () * 8));
-							chestMap.put ("y", String.valueOf (getHoveredTileY () * 8));
-							for (int i = 0; i < 15; i++) {
-								chestMap.put ("s" + i, "0x0");
+					String placeScriptName = Inventory.itemProperties.getJSONObject (Integer.toString(workingId)).getString ("placeScript");
+					if (placeScriptName == null) {
+						if (World.getPlayer ().useSelectedItem () == 1) {
+							World.doPlacementLightCalculation (workingId, getHoveredTileX (), getHoveredTileY ());
+							World.setTile (workingId, getHoveredTileX (), getHoveredTileY ());
+							if (workingId == 26) {
+								//Furnace
+								HashMap<String, String> furnaceMap = Entity.getEntityMap ();
+								furnaceMap.put ("type", "Furnace");
+								furnaceMap.put ("s0", "0x0");
+								furnaceMap.put ("s1", "0x0");
+								furnaceMap.put ("s2", "0x0");
+								furnaceMap.put ("x", String.valueOf (getHoveredTileX () * 8));
+								furnaceMap.put ("y", String.valueOf (getHoveredTileY () * 8));
+								furnaceMap.put ("fuel", "0");
+								furnaceMap.put ("maxFuel", "200");
+								furnaceMap.put ("time", "0");
+								Entity furnaceEntity = new Entity (furnaceMap);
+								Furnace furnace = new Furnace (furnaceEntity);
+								World.addEntity (furnaceEntity);
+							} else if (workingId == 42) {
+								HashMap<String, String> chestMap = Entity.getEntityMap ();
+								chestMap.put ("type", "Chest");
+								chestMap.put ("x", String.valueOf (getHoveredTileX () * 8));
+								chestMap.put ("y", String.valueOf (getHoveredTileY () * 8));
+								for (int i = 0; i < 15; i++) {
+									chestMap.put ("s" + i, "0x0");
+								}
+								Entity chestEntity = new Entity (chestMap);
+								Chest chest = new Chest (chestEntity);
+								World.addEntity (chestEntity);
 							}
-							Entity chestEntity = new Entity (chestMap);
-							Chest chest = new Chest (chestEntity);
-							World.addEntity (chestEntity);
+						}
+					} else {
+						if (placeScripts == null) {
+							loadPlaceScripts ();
+						}
+						if (placeScripts.get (placeScriptName).doPlace (workingId, getHoveredTileX (), getHoveredTileY ())) {
+							World.getPlayer ().useSelectedItem ();
 						}
 					}
 				}
 			}
 			if (mouseButtonClicked (2)) {
 				int currentTile = World.getTile (getHoveredTileX (), getHoveredTileY ());
-				if (currentTile == 25) {
-					World.getPlayer ().open3x3CraftingGrid ();
-				} else if (currentTile == 26 || currentTile == 27) {
-					Entity e = World.getTileEntity (getHoveredTileX (), getHoveredTileY ());
-					GameObject eObj = e.getObject ();
-					if (eObj instanceof Furnace) {
-						Inventory.setContainer ((Container)eObj);
-						World.getPlayer ().openFurnace ();
+				String useScriptId = World.getTileProperties (currentTile).getString ("useScript");
+				if (useScriptId == null) {
+					if (currentTile == 25) {
+						World.getPlayer ().open3x3CraftingGrid ();
+					} else if (currentTile == 26 || currentTile == 27) {
+						Entity e = World.getTileEntity (getHoveredTileX (), getHoveredTileY ());
+						GameObject eObj = e.getObject ();
+						if (eObj instanceof Furnace) {
+							Inventory.setContainer ((Container)eObj);
+							World.getPlayer ().openFurnace ();
+						}
+					} else if (currentTile == 42) {
+						Entity e = World.getTileEntity (getHoveredTileX (), getHoveredTileY ());
+						System.out.println (getHoveredTileX () * 8 + ", " + getHoveredTileY () * 8 + ", " + e);
+						GameObject eObj = e.getObject ();
+						if (eObj instanceof Chest) {
+							Inventory.setContainer ((Container)eObj);
+							World.getPlayer ().openChest ();
+						}
 					}
-				} else if (currentTile == 42) {
-					Entity e = World.getTileEntity (getHoveredTileX (), getHoveredTileY ());
-					System.out.println (getHoveredTileX () * 8 + ", " + getHoveredTileY () * 8 + ", " + e);
-					GameObject eObj = e.getObject ();
-					if (eObj instanceof Chest) {
-						Inventory.setContainer ((Container)eObj);
-						World.getPlayer ().openChest ();
+				} else {
+					if (useScripts == null) {
+						loadUseScripts ();
 					}
+					useScripts.get (useScriptId).doUse (currentTile, getHoveredTileX (), getHoveredTileY ());
 				}
 			}
 		}
@@ -142,12 +163,12 @@ public class TileInterface extends GameObject {
 		}
 	}
 	
-	public int getHoveredTileX () {
+	public static int getHoveredTileX () {
 		int mouseTile = getCursorX () / 8;
 		return mouseTile + World.getViewX ();
 	}
 	
-	public int getHoveredTileY () {
+	public static int getHoveredTileY () {
 		int mouseTile = getCursorY () / 8;
 		return mouseTile + World.getViewY ();
 	}
@@ -159,4 +180,27 @@ public class TileInterface extends GameObject {
 	public void disable () {
 		enabled = false;
 	}
+	
+	public void loadPlaceScripts () {
+		
+		//Make the script map
+		placeScripts = new HashMap<String, PlaceScript> ();
+		
+		//Init all the scripts
+		placeScripts.put ("Stair", new PlaceScript.Stair ());
+		placeScripts.put ("Slab", new PlaceScript.Slab ());
+		placeScripts.put ("Door", new PlaceScript.Door ());
+		
+	}
+	
+	public void loadUseScripts () {
+		
+		//Make the script map
+		useScripts = new HashMap<String, UseScript> ();
+		
+		//Init all the scripts
+		useScripts.put ("DoorInteract", new UseScript.DoorInteract ());
+		
+	}
+	
 }

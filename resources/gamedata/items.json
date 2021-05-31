@@ -8,8 +8,9 @@
 	"atk":0,
 	"durability":-1,
 	"power":1,
-	"fuelTime":0
-	"smelt":"null"
+	"fuelTime":0,
+	"smelt":"null",
+	"placeScript":"null"
 }
 "0":{
 	"name":"Air",
@@ -203,11 +204,13 @@
 },
 "48":{
 	"name":"Planks Slab",
-	"placeable":true
+	"placeable":true,
+	"placeScript":"Slab"
 },
 "50":{
 	"name":"Planks Stairs",
-	"placeable":true
+	"placeable":true,
+	"placeScript":"Stair"
 },
 "54":{
 	"name":"Cobble Slab",
@@ -219,7 +222,8 @@
 },
 "60":{
 	"name":"Wooden Door",
-	"placeable":true
+	"placeable":true,
+	"placeScript":"Door"
 },
 "64":{
 	"name":"Enchanted Planks Slab",

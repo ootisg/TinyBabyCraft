@@ -112,7 +112,7 @@ public abstract class GameAPI {
 	 * Gets the current x-coordinate of the mouse cursor.
 	 * @return The cursor x-coordinate
 	 */
-	public int getCursorX () {
+	public static int getCursorX () {
 		return (int) (MainLoop.getInputImage ().getCursorX () * MainLoop.getWindow ().getResolution () [0]);
 	}
 	
@@ -120,7 +120,7 @@ public abstract class GameAPI {
 	 * Gets the current y-coordinate of the mouse cursor.
 	 * @return The cursor y-coordinate
 	 */
-	public int getCursorY () {
+	public static int getCursorY () {
 		return (int) (MainLoop.getInputImage ().getCursorY () * MainLoop.getWindow ().getResolution () [1]);
 	}
 	
