@@ -284,12 +284,16 @@ public class Inventory extends GameObject {
 						//Pick up the whole stack
 						if (held == null && items [cellIndex].id != 0) {
 							//Pick up to empty
-							doCraft ();
+							if (menuClicked == 2) {
+								doCraft ();
+							}
 							held = items [cellIndex];
 							items [cellIndex] = new Item (0, 0);
-						} else if (held.id == items [cellIndex].id && held.amount + items [cellIndex].amount <= MAX_STACK) {
+						} else if (held != null && held.id == items [cellIndex].id && held.amount + items [cellIndex].amount <= MAX_STACK) {
 							//Merge with held stack
-							doCraft ();
+							if (menuClicked == 2) {
+								doCraft ();
+							}
 							held.amount += items [cellIndex].amount;
 							items [cellIndex] = new Item (0, 0);
 						}
