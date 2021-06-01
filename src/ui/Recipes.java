@@ -200,12 +200,48 @@ public class Recipes {
 		
 		public boolean craft (Inventory.Item[] items) {
 			if (!matches (items)) {
+				System.out.println("oops");
 				return false;
 			}
-			if (type == 0) {
+			/**if (type == 0) {
 				for (int i = 0; i < 4; i++) {
 					if (cost [i].id != 0) {
 						removeAmt (items, i, cost [i].amount);
+					}
+				}
+			}*/
+			if (type == 0) {
+				if (items.length == 4) {
+					for (int i = 0; i < 4; i++) {
+						if (cost [i].id != 0) {
+							removeAmt (items, i, cost [i].amount);
+						}
+					}
+				} else {
+					for (int i = 0; i < 4; i++) {
+						int startIdx = INDEX_CHECKS[i];
+						boolean useSubgrid = true;
+						for (int j = 0; j < 5; j++) {
+							if (items [EMPTY_CHECKS [i][j]].id != 0) {
+								useSubgrid = false;
+							}
+						}
+						if (useSubgrid) {
+							boolean matches = true;
+							for (int j = 0; j < 4; j++) {
+								if (!itemMatch (cost [j], items [startIdx + INDEX_CHECK_OFFSETS[j]])) {
+									matches = false;
+								}
+							}
+							if (matches) {
+								for (int j = 0; j < 4; j++) {
+									if (cost [j].id != 0) {
+										removeAmt (items, startIdx + INDEX_CHECK_OFFSETS [j], cost [j].amount);
+									}
+								}
+								return true;
+							}
+						}
 					}
 				}
 			}
@@ -218,7 +254,7 @@ public class Recipes {
 			}
 			if (type == 2) {
 				for (int i = 0; i < cost.length; i++) {
-					for (int j = 0; j < 9; j++) {
+					for (int j = 0; j < items.length; j++) {
 						if (itemMatch (cost [i], items [j])) {
 							removeAmt (items, j, cost [i].amount);
 						}
