@@ -310,7 +310,9 @@ public class Inventory extends GameObject {
 				
 			}
 			
-			predictCraft ();
+			if (craftingSize >= 2) {
+				predictCraft ();
+			}
 		}
 		
 	}
