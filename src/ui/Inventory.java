@@ -556,6 +556,10 @@ public class Inventory extends GameObject {
 		Recipes.doCraft (items);
 	}
 	
+	public int getCraftingSize () {
+		return craftingSize;
+	}
+	
 	public int getSelected () {
 		return selectedCell;
 	}

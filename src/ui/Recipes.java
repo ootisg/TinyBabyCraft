@@ -6,9 +6,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 
+import world.World;
+
 public class Recipes {
 	
 	public static ArrayList<Recipe> recipes = new ArrayList<Recipe> ();
+	
+	public static final int[][] EMPTY_CHECKS = new int[][] {{2,5,6,7,8},{0,3,6,7,8},{0,1,2,5,8},{0,1,2,3,6}};
+	public static final int[] INDEX_CHECKS = new int[] {0,1,3,4};
+	public static final int[] INDEX_CHECK_OFFSETS = new int[] {0,1,3,4};
 	
 	public static void init () {
 		loadRecipes ();
@@ -102,8 +108,10 @@ public class Recipes {
 	}
 	
 	private static Inventory.Item[] getCraftingGrid (Inventory.Item[] inventory) {
-		Inventory.Item[] items = new Inventory.Item[9];
-		for (int i = 0; i < 9; i++) {
+		int gridSize = World.getPlayer ().getInventory ().getCraftingSize();
+		gridSize *= gridSize;
+		Inventory.Item[] items = new Inventory.Item[gridSize];
+		for (int i = 0; i < gridSize; i++) {
 			items [i] = inventory [Inventory.CRAFTING_INDEX + i];
 		}
 		return items;
@@ -123,14 +131,38 @@ public class Recipes {
 		
 		public boolean matches (Inventory.Item[] items) {
 			if (type == 0) {
-				for (int i = 0; i < 4; i++) {
-					if (!itemMatch (cost [i], items [i])) {
-						return false;
+				if (items.length == 4) {
+					for (int i = 0; i < 4; i++) {
+						if (!itemMatch (cost [i], items [i])) {
+							return false;
+						}
 					}
+					return true;
+				} else {
+					for (int i = 0; i < 4; i++) {
+						int startIdx = INDEX_CHECKS[i];
+						boolean useSubgrid = true;
+						for (int j = 0; j < 5; j++) {
+							if (items [EMPTY_CHECKS [i][j]].id != 0) {
+								useSubgrid = false;
+							}
+						}
+						if (useSubgrid) {
+							boolean matches = true;
+							for (int j = 0; j < 4; j++) {
+								if (!itemMatch (cost [j], items [startIdx + INDEX_CHECK_OFFSETS[j]])) {
+									matches = false;
+								}
+							}
+							if (matches) {
+								return true;
+							}
+						}
+					}
+					return false;
 				}
-				return true;
 			}
-			if (type == 1) {
+			if (type == 1 && items.length == 9) {
 				for (int i = 0; i < 9; i++) {
 					if (!itemMatch (cost [i], items [i])) {
 						return false;
@@ -140,7 +172,7 @@ public class Recipes {
 			}
 			if (type == 2) {
 				ArrayList<Inventory.Item> used = new ArrayList<Inventory.Item> ();
-				for (int i = 0; i < 9; i++) {
+				for (int i = 0; i < items.length; i++) {
 					if (items [i].id != 0) {
 						used.add (items [i]);
 					}
