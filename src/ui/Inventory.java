@@ -10,6 +10,7 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
+import gameObjects.Chest;
 import gameObjects.Container;
 import gameObjects.Furnace;
 import json.JSONException;
@@ -85,8 +86,8 @@ public class Inventory extends GameObject {
 	public static int FURNACE_RESULT_X = 41;
 	public static int FURNACE_RESULT_Y = 18;
 	
-	public static int CHEST_START_X = 0;
-	public static int CHEST_START_Y = 0;
+	public static int CHEST_START_X = 2;
+	public static int CHEST_START_Y = 18;
 	
 	public static int TEXT_OFFSET_X = 5;
 	public static int TEXT_OFFSET_Y = 9;
@@ -118,6 +119,7 @@ public class Inventory extends GameObject {
 	public static int FURNACE_ITEM_INDEX = 35;
 	public static int FURNACE_FUEL_INDEX = 36;
 	public static int FURNACE_RESULT_INDEX = 37;
+	public static int CHEST_INDEX = 38;
 	
 	private int selectedCell = 0;
 	
@@ -195,8 +197,8 @@ public class Inventory extends GameObject {
 			int furnaceResX = furnaceOffsetX + FURNACE_RESULT_X;
 			int furnaceResY = furnaceOffsetY + FURNACE_RESULT_Y;
 			//And the chest
-			int chestStartX = chestOffsetX;
-			int chestStartY = chestOffsetY;
+			int chestStartX = chestOffsetX + CHEST_START_X;
+			int chestStartY = chestOffsetY + CHEST_START_Y;
 			
 			//Make us some rectangles
 			Rectangle invBounds = new Rectangle (cellsStartX, cellsStartY, CELL_SIZE * 5, CELL_SIZE * 4);
@@ -237,7 +239,7 @@ public class Inventory extends GameObject {
 				//Inside the chest menu
 				int cellX = (getCursorX () - chestStartX) / CELL_SIZE;
 				int cellY = (getCursorY () - chestStartY) / CELL_SIZE;
-				cellIndex = cellY * craftingSize + cellX; //Here's the clicked-on chest cell
+				cellIndex = CHEST_INDEX + cellY * 5 + cellX; //Here's the clicked-on chest cell
 				menuClicked = 3; //3 for chest
 			} else if (showFurnace && cursorInBounds (furnaceInBounds)) {
 				cellIndex = FURNACE_ITEM_INDEX;
@@ -252,8 +254,8 @@ public class Inventory extends GameObject {
 			
 			if (cellIndex != -1) {
 				
-				//Inventory or crafting grid
-				if (menuClicked == 0 || menuClicked == 1 || (menuClicked == 4 && cellIndex != FURNACE_RESULT_INDEX)) {
+				//Inventory, crafting grid, furnace, or chest
+				if (menuClicked == 0 || menuClicked == 1 || menuClicked == 3 || (menuClicked == 4 && cellIndex != FURNACE_RESULT_INDEX)) {
 					if (mouseButtonClicked (0)) {
 						//Deal with held item-ness
 						if (held == null && items [cellIndex].id != 0) {
@@ -467,6 +469,17 @@ public class Inventory extends GameObject {
 			//Draw the chest background
 			CHEST_BACKGROUND.draw (chestOffsetX, chestOffsetY);
 			
+			//Draw the items in the chest
+			int xdraw, ydraw;
+			for (int i = 0; i < 15; i++) {
+				xdraw = chestOffsetX + CHEST_START_X + ITEM_OFFSET_X + (i % 5) * CELL_SIZE;
+				ydraw = chestOffsetY + CHEST_START_Y + ITEM_OFFSET_Y + (i / 5) * CELL_SIZE;
+				Item working = items [i + CHEST_INDEX];
+				if (working.id != 0) {
+					drawItem (working.id, working.amount, xdraw, ydraw);
+				}
+			}
+			
 		}
 		
 		//Draw the 'held' item
@@ -499,11 +512,13 @@ public class Inventory extends GameObject {
 		BufferedImage icon = World.getItem (id);
 		Graphics2D g = (Graphics2D)MainLoop.getWindow ().getBufferGraphics ();
 		g.drawImage (icon, x, y, null);
-		g.setColor (new Color (0xFFFFFF));
-		Font f = new Font ("Courier", 8, 8);
-		g.setFont (f);
-		int charOffset = (Integer.toString (amt).length () - 1) * -5;
-		g.drawString (Integer.toString (amt), x + TEXT_OFFSET_X + charOffset, y + TEXT_OFFSET_Y);
+		if (amt > 1) {
+			g.setColor (new Color (0xFFFFFF));
+			Font f = new Font ("Courier", 8, 8);
+			g.setFont (f);
+			int charOffset = (Integer.toString (amt).length () - 1) * -5;
+			g.drawString (Integer.toString (amt), x + TEXT_OFFSET_X + charOffset, y + TEXT_OFFSET_Y);
+		}
 	}
 	
 	public int addToInventory (int id, int amt) {
@@ -598,7 +613,11 @@ public class Inventory extends GameObject {
 		//TODO support mappings other than furnace?
 		if (container != null) {
 			for (int i = 0; i < container.getCapacity (); i++) {
-				items [FURNACE_ITEM_INDEX + i] = container.getItem (i);
+				if (container instanceof Furnace) {
+					items [FURNACE_ITEM_INDEX + i] = container.getItem (i);
+				} else if (container instanceof Chest) {
+					items [CHEST_INDEX + i] = container.getItem (i);
+				}
 			}
 		}
 	}
@@ -607,13 +626,17 @@ public class Inventory extends GameObject {
 		//TODO support mappings other than furnace?
 		if (container != null) {
 			for (int i = 0; i < container.getCapacity (); i++) {
-				container.setItem (i, items [FURNACE_ITEM_INDEX + i]);
+				if (container instanceof Furnace) {
+					container.setItem (i, items [FURNACE_ITEM_INDEX + i]);
+				} else if (container instanceof Chest) {
+					container.setItem (i, items [CHEST_INDEX + i]);
+				}
 			}
 		}
 	}
 	
 	public boolean isCompatable (int slot, Item it) {
-		if (slot <= FURNACE_ITEM_INDEX) {
+		if (slot <= FURNACE_ITEM_INDEX || slot > FURNACE_RESULT_INDEX) {
 			return true;
 		} else {
 			return container.isCompatable (slot - FURNACE_ITEM_INDEX, it);

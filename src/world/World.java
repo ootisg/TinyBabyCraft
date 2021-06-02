@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.UUID;
 
 import gameObjects.EntityObject;
@@ -775,6 +776,7 @@ public class World {
 		//Make our random
 		Random r = new Random ();
 		
+		//Spawn in the tiles
 		for (int wx = 0; wx < s.getWidth (); wx++) {
 			int[] slice = s.getSlice (wx - origin.x);
 			for (int wy = 0; wy < s.getHeight (); wy++) {
@@ -792,6 +794,44 @@ public class World {
 				}
 			}
 		}
+		
+		//Place in the entities
+		JSONArray entities = s.getProperties ().getJSONArray ("entities");
+		JSONObject curr;
+		if (entities != null) {
+			for (int i = 0; i < entities.getContents ().size (); i++) {
+				
+				curr = (JSONObject)entities.get (i);
+				String entityType = curr.getString ("type");
+				
+				//Add entity to the world
+				Entity newEntity = new Entity ();
+				newEntity.setPosition (topLeft.x * 8 + curr.getInt ("x"), topLeft.y * 8 + curr.getInt ("y"));
+				
+				//Create the entity's associated EntityObject
+				try {
+					Class<?> c = Class.forName ("gameObjects." + entityType);
+					Constructor<?> constructor = c.getConstructor (Entity.class);
+					EntityObject eObj = (EntityObject)constructor.newInstance (newEntity);
+					eObj.initPairedEntity (newEntity);
+					World.addEntity (newEntity);
+				} catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+					e.printStackTrace ();
+				}
+				
+				//Set the entity's parameters as specified
+				JSONObject data = curr.getJSONObject ("data");
+				HashMap<String, Object> dataMap = data.getContents ();
+				Set<Entry<String, Object>> dataSet = dataMap.entrySet ();
+				Iterator<Entry<String, Object>> iter = dataSet.iterator ();
+				while (iter.hasNext ()) {
+					Entry<String, Object> curr2 = iter.next ();
+					newEntity.getProperties ().put (curr2.getKey (), (String)curr2.getValue ());
+				}
+
+			}
+		}
+		
 	}
 	
 	public static void putStructure (String id, int x, int y) {

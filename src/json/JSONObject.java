@@ -179,6 +179,10 @@ public class JSONObject {
 		}
 	}
 	
+	public HashMap<String, Object> getContents () {
+		return values;
+	}
+	
 	@Override
 	public String toString () {
 		String working = "{";

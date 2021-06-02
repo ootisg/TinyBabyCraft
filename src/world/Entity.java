@@ -128,6 +128,11 @@ public class Entity implements Comparable<Entity> {
 		}
 	}
 	
+	public void setPosition (int x, int y) {
+		properties.put ("x", String.valueOf (x));
+		properties.put ("y", String.valueOf (y));
+	}
+	
 	@Override
 	public int compareTo (Entity entity) {
 		return (int)(obj.getX () - ((Entity)entity).getObject ().getX ());

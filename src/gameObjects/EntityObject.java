@@ -25,8 +25,14 @@ public class EntityObject extends GameObject {
 	public EntityObject (Entity e) {
 		pairedEntity = e;
 		e.setPairedObject (this);
-		int xPos = Integer.parseInt (pairedEntity.getProperties ().get ("x"));
-		int yPos = Integer.parseInt (pairedEntity.getProperties ().get ("y"));
+		int xPos, yPos;
+		if (pairedEntity.getProperties ().get ("x") != null && pairedEntity.getProperties ().get ("y") != null) {
+			xPos = Integer.parseInt (pairedEntity.getProperties ().get ("x"));
+			yPos = Integer.parseInt (pairedEntity.getProperties ().get ("y"));
+		} else {
+			xPos = -8;
+			yPos = -8;
+		}
 		declare (xPos, yPos);
 	}
 	
@@ -56,6 +62,15 @@ public class EntityObject extends GameObject {
 	
 	public void aiStep () {
 		//Do nothing, this is intentional
+	}
+	
+	public void initPairedEntity (Entity e) {
+		//Do nothing
+	}
+	
+	public void setPosition (int x, int y) {
+		setX (x);
+		setY (y);
 	}
 	
 	@Override

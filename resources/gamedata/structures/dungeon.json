@@ -1,5 +1,6 @@
 {
 "entities": [
+	{"type":"Chest","x":40,"y":40,"data":{"loot":"dungeon"}}
 ],
 "tiles": {
 	"base":	[[44,44,44,44,44,44,44],

@@ -1,6 +1,7 @@
 package gameObjects;
 
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
 
 import json.JSONObject;
 import resources.Sprite;
@@ -187,6 +188,33 @@ public class Furnace extends Container {
 			}
 		}
 		return true;
+	}
+	
+	@Override
+	public void initPairedEntity (Entity e) {
+		HashMap<String, String> furnaceMap = e.getProperties ();
+		furnaceMap.put ("type", "Furnace");
+		furnaceMap.put ("s0", "0x0");
+		furnaceMap.put ("s1", "0x0");
+		furnaceMap.put ("s2", "0x0");
+		furnaceMap.put ("fuel", "0");
+		furnaceMap.put ("maxFuel", "200");
+		furnaceMap.put ("time", "0");
+	}
+	
+	public static Entity getDefaultFurnaceEntity (int x, int y) {
+		HashMap<String, String> furnaceMap = Entity.getEntityMap ();
+		furnaceMap.put ("type", "Furnace");
+		furnaceMap.put ("s0", "0x0");
+		furnaceMap.put ("s1", "0x0");
+		furnaceMap.put ("s2", "0x0");
+		furnaceMap.put ("x", String.valueOf (x));
+		furnaceMap.put ("y", String.valueOf (y));
+		furnaceMap.put ("fuel", "0");
+		furnaceMap.put ("maxFuel", "200");
+		furnaceMap.put ("time", "0");
+		Entity furnaceEntity = new Entity (furnaceMap);
+		return furnaceEntity;
 	}
 
 }

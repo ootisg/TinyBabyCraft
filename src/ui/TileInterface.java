@@ -84,29 +84,16 @@ public class TileInterface extends GameObject {
 							World.setTile (workingId, getHoveredTileX (), getHoveredTileY ());
 							if (workingId == 26) {
 								//Furnace
-								HashMap<String, String> furnaceMap = Entity.getEntityMap ();
-								furnaceMap.put ("type", "Furnace");
-								furnaceMap.put ("s0", "0x0");
-								furnaceMap.put ("s1", "0x0");
-								furnaceMap.put ("s2", "0x0");
-								furnaceMap.put ("x", String.valueOf (getHoveredTileX () * 8));
-								furnaceMap.put ("y", String.valueOf (getHoveredTileY () * 8));
-								furnaceMap.put ("fuel", "0");
-								furnaceMap.put ("maxFuel", "200");
-								furnaceMap.put ("time", "0");
-								Entity furnaceEntity = new Entity (furnaceMap);
+								Entity furnaceEntity = new Entity ();
+								furnaceEntity.setPosition (getHoveredTileX () * 8, getHoveredTileY () * 8);
 								Furnace furnace = new Furnace (furnaceEntity);
+								furnace.initPairedEntity (furnaceEntity);
 								World.addEntity (furnaceEntity);
 							} else if (workingId == 42) {
-								HashMap<String, String> chestMap = Entity.getEntityMap ();
-								chestMap.put ("type", "Chest");
-								chestMap.put ("x", String.valueOf (getHoveredTileX () * 8));
-								chestMap.put ("y", String.valueOf (getHoveredTileY () * 8));
-								for (int i = 0; i < 15; i++) {
-									chestMap.put ("s" + i, "0x0");
-								}
-								Entity chestEntity = new Entity (chestMap);
+								Entity chestEntity = new Entity ();
+								chestEntity.setPosition (getHoveredTileX () * 8, getHoveredTileY () * 8);
 								Chest chest = new Chest (chestEntity);
+								chest.initPairedEntity (chestEntity);
 								World.addEntity (chestEntity);
 							}
 						}
@@ -135,7 +122,9 @@ public class TileInterface extends GameObject {
 						}
 					} else if (currentTile == 42) {
 						Entity e = World.getTileEntity (getHoveredTileX (), getHoveredTileY ());
-						System.out.println (getHoveredTileX () * 8 + ", " + getHoveredTileY () * 8 + ", " + e);
+						if (!e.getProperties ().get ("loot").equals ("null")) {
+							Chest.generateLoot (e);
+						}
 						GameObject eObj = e.getObject ();
 						if (eObj instanceof Chest) {
 							Inventory.setContainer ((Container)eObj);
