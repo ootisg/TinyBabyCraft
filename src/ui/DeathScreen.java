@@ -21,7 +21,7 @@ public class DeathScreen extends GameObject {
 	private boolean isHidden;
 	
 	public DeathScreen () {
-		isHidden = false;
+		isHidden = true;
 	}
 	
 	public void show () {
