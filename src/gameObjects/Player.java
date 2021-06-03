@@ -9,6 +9,8 @@ import java.util.HashMap;
 import main.GameObject;
 import resources.Sprite;
 import resources.Spritesheet;
+import ui.DeathScreen;
+import ui.Hud;
 import ui.Inventory;
 import ui.TileInterface;
 import world.Entity;
@@ -39,6 +41,8 @@ public class Player extends GameObject {
 	
 	private Inventory inventory;
 	private TileInterface tileInterface;
+	private Hud hud;
+	private DeathScreen deathScreen;
 	
 	private int uiState = 0;
 	private int storedUiState = 0;
@@ -46,15 +50,21 @@ public class Player extends GameObject {
 	private long lastMove = 0;
 	private int moveTime = 60;
 	
+	private double health = 100;
+	
 	private boolean noclip = false;
 	
 	public Player () {
 		setSprite (PLAYER_SPRITES);
 		getAnimationHandler ().setAnimationSpeed (0);
+		deathScreen = new DeathScreen ();
+		deathScreen.declare (0, 0);
 		inventory = new Inventory ();
 		inventory.declare (0, 0);
 		tileInterface = new TileInterface ();
 		tileInterface.declare (0, 0);
+		hud = new Hud ();
+		hud.declare (0, 0);
 	}
 	
 	public Player (HashMap<String, String> attributes) {
@@ -120,6 +130,11 @@ public class Player extends GameObject {
 		
 		//Load/unload important stuff about the player
 		World.refreshLoadAround ((int)(getX () / 8));
+		
+		//Handle death
+		if (health <= 0) {
+			deathScreen.show ();
+		}
 	}
 	
 	public void doMove (int xOffset, int yOffset) {
@@ -154,6 +169,9 @@ public class Player extends GameObject {
 					//Tile 9 is a ladder
 					offs += 1;
 				}
+				if (offs > 5) {
+					damage ((offs - 5) * 5);
+				} //Fall damage
 				forceMove (0, (offs - 1) * 8); //Falling
 			}
 		}
@@ -303,6 +321,28 @@ public class Player extends GameObject {
 		int loadLeft = (int)(getX () / 8) - World.LOAD_SIZE / 2;
 		int loadRight = loadLeft + World.LOAD_SIZE;
 		World.setLoadBounds (loadLeft, loadRight);
+	}
+	
+	public double getHealth () {
+		return health;
+	}
+	
+	public void setHealth (double health) {
+		this.health = health;
+	}
+	
+	public void damage (double amount) {
+		health -= amount;
+		if (health < 0) {
+			health = 0;
+		}
+	}
+	
+	public void heal (double amount) {
+		health += amount;
+		if (health > 100) {
+			health = 100; //TODO adjustable max health cap
+		}
 	}
 	
 	public void save () {
