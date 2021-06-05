@@ -6,7 +6,7 @@
 			{"odds":0.25,"attempts":3,"id":257,"minAmt":2,"maxAmt":5},
 			{"odds":0.25,"attempts":3,"id":258,"minAmt":1,"maxAmt":2},
 			{"odds":0.5,"attempts":1,"id":10,"minAmt":16,"maxAmt":32},
-			{"odds":0.1,"attempts":1,"id":260,"minAmt":1,"maxAmt":3},
+			{"odds":0.1,"attempts":1,"id":260,"minAmt":1,"maxAmt":3}
 		]
 	}
 }

@@ -67,6 +67,7 @@
 "10":{
 	"name":"Torch",
 	"type":"wood",
+	"solid":false,
 	"toughness":0,
 	"light":8
 },
@@ -74,6 +75,7 @@
 	"name":"Water",
 	"type":"water",
 	"fluid":true,
+	"solid":false,
 	"unbreakable":true,
 	"transparent":true
 },
@@ -81,6 +83,7 @@
 	"name":"Flowing Water",
 	"type":"water",
 	"fluid":true,
+	"solid":false,
 	"unbreakable":true,
 	"transparent":true
 },
@@ -88,6 +91,7 @@
 	"name":"Lava",
 	"type":"lava",
 	"fluid":true,
+	"solid":false,
 	"unbreakable":true,
 	"light":8
 },
@@ -95,6 +99,7 @@
 	"name":"Flowing Lava",
 	"type":"lava",
 	"fluid":true,
+	"solid":false,
 	"unbreakable":true,
 	"light":8
 },
@@ -266,12 +271,14 @@
 "45":{
 	"name":"Torch Left",
 	"type":"wood",
+	"solid":false,
 	"toughness":0,
 	"light":8
 },
 "46":{
 	"name":"Torch Right",
 	"type":"wood",
+	"solid":false,
 	"toughness":0,
 	"light":8
 },
