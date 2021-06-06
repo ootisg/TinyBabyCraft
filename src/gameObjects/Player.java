@@ -279,7 +279,32 @@ public class Player extends GameObject {
 	}
 	
 	public int useSelectedItem () {
-		return inventory.useSelectedItem ();
+		if (inventory.getSelectedItem () >= 256) {
+			//This is an item
+			if (doUseItem (inventory.getSelectedItem ())) {
+				return inventory.useSelectedItem ();
+			} else {
+				return 0;
+			}
+		} else {
+			//This is a tile
+			return inventory.useSelectedItem ();
+		}
+	}
+	
+	public boolean doUseItem (int id) {
+		switch (id) {
+			case 336:
+				//Apple
+				heal (20);
+				return true;
+			case 337:
+				//Golden apple
+				heal (100);
+				return true;
+			default:
+				return false;
+		}
 	}
 	
 	public Inventory getInventory () {

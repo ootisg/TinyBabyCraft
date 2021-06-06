@@ -50,7 +50,12 @@ public class Chest extends Container {
 								int id = curr.getInt ("id");
 								int minAmt = curr.getInt ("minAmt");
 								int maxAmt = curr.getInt ("maxAmt");
-								int amt = r.nextInt (maxAmt - minAmt) + minAmt;
+								int amt;
+								if (minAmt == maxAmt) {
+									amt = minAmt;
+								} else {
+									amt = r.nextInt (maxAmt - minAmt) + minAmt;
+								}
 								data.put ("s" + slot, id + "x" + amt);
 								spawns++;
 							}

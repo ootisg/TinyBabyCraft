@@ -27,10 +27,11 @@ public class TileInterface extends GameObject {
 	@Override
 	public void frameEvent () {
 		if (enabled) {
+			int workingId = World.getPlayer ().getSelectedItem ();
+			int currentTile = World.getTile (getHoveredTileX (), getHoveredTileY ());
+			JSONObject properties = World.getTileProperties (currentTile);
 			if (mouseButtonClicked (0)) {
-				int workingId = World.getPlayer ().getSelectedItem ();
-				int currentTile = World.getTile (getHoveredTileX (), getHoveredTileY ());
-				if (workingId == 0) {
+				if (currentTile != 24 && currentTile != 0 && !new Boolean(true).equals (properties.get ("fluid"))) {
 					
 					//Find the drop of the tile
 					String dropName = World.getTileProperties (currentTile).getString ("drop");
@@ -76,66 +77,69 @@ public class TileInterface extends GameObject {
 					}
 					World.doPlacementLightCalculation (0, getHoveredTileX (), getHoveredTileY ());
 					World.breakTile (getHoveredTileX (), getHoveredTileY ());
-				} else if (currentTile != 24) {
-					String placeScriptName = Inventory.itemProperties.getJSONObject (Integer.toString(workingId)).getString ("placeScript");
-					if (placeScriptName == null) {
-						if (World.getPlayer ().useSelectedItem () == 1) {
-							World.doPlacementLightCalculation (workingId, getHoveredTileX (), getHoveredTileY ());
-							World.setTile (workingId, getHoveredTileX (), getHoveredTileY ());
-							if (workingId == 26) {
-								//Furnace
-								Entity furnaceEntity = new Entity ();
-								furnaceEntity.setPosition (getHoveredTileX () * 8, getHoveredTileY () * 8);
-								Furnace furnace = new Furnace (furnaceEntity);
-								furnace.initPairedEntity (furnaceEntity);
-								World.addEntity (furnaceEntity);
-							} else if (workingId == 42) {
-								Entity chestEntity = new Entity ();
-								chestEntity.setPosition (getHoveredTileX () * 8, getHoveredTileY () * 8);
-								Chest chest = new Chest (chestEntity);
-								chest.initPairedEntity (chestEntity);
-								World.addEntity (chestEntity);
-							}
-						}
-					} else {
-						if (placeScripts == null) {
-							loadPlaceScripts ();
-						}
-						if (placeScripts.get (placeScriptName).doPlace (workingId, getHoveredTileX (), getHoveredTileY ())) {
-							World.getPlayer ().useSelectedItem ();
-						}
-					}
 				}
 			}
 			if (mouseButtonClicked (2)) {
-				int currentTile = World.getTile (getHoveredTileX (), getHoveredTileY ());
-				String useScriptId = World.getTileProperties (currentTile).getString ("useScript");
-				if (useScriptId == null) {
-					if (currentTile == 25) {
-						World.getPlayer ().open3x3CraftingGrid ();
-					} else if (currentTile == 26 || currentTile == 27) {
-						Entity e = World.getTileEntity (getHoveredTileX (), getHoveredTileY ());
-						GameObject eObj = e.getObject ();
-						if (eObj instanceof Furnace) {
-							Inventory.setContainer ((Container)eObj);
-							World.getPlayer ().openFurnace ();
+				if (workingId < 256) {
+					String useScriptId = World.getTileProperties (currentTile).getString ("useScript");
+					if (useScriptId == null) {
+						if (currentTile == 25) {
+							World.getPlayer ().open3x3CraftingGrid ();
+						} else if (currentTile == 26 || currentTile == 27) {
+							Entity e = World.getTileEntity (getHoveredTileX (), getHoveredTileY ());
+							GameObject eObj = e.getObject ();
+							if (eObj instanceof Furnace) {
+								Inventory.setContainer ((Container)eObj);
+								World.getPlayer ().openFurnace ();
+							}
+						} else if (currentTile == 42) {
+							Entity e = World.getTileEntity (getHoveredTileX (), getHoveredTileY ());
+							if (!e.getProperties ().get ("loot").equals ("null")) {
+								Chest.generateLoot (e);
+							}
+							GameObject eObj = e.getObject ();
+							if (eObj instanceof Chest) {
+								Inventory.setContainer ((Container)eObj);
+								World.getPlayer ().openChest ();
+							}
+						} else if (currentTile == 0 || new Boolean(true).equals (properties.get ("fluid"))) {
+							String placeScriptName = Inventory.itemProperties.getJSONObject (Integer.toString(workingId)).getString ("placeScript");
+							if (placeScriptName == null) {
+								if (World.getPlayer ().useSelectedItem () == 1) {
+									World.doPlacementLightCalculation (workingId, getHoveredTileX (), getHoveredTileY ());
+									World.setTile (workingId, getHoveredTileX (), getHoveredTileY ());
+									if (workingId == 26) {
+										//Furnace
+										Entity furnaceEntity = new Entity ();
+										furnaceEntity.setPosition (getHoveredTileX () * 8, getHoveredTileY () * 8);
+										Furnace furnace = new Furnace (furnaceEntity);
+										furnace.initPairedEntity (furnaceEntity);
+										World.addEntity (furnaceEntity);
+									} else if (workingId == 42) {
+										Entity chestEntity = new Entity ();
+										chestEntity.setPosition (getHoveredTileX () * 8, getHoveredTileY () * 8);
+										Chest chest = new Chest (chestEntity);
+										chest.initPairedEntity (chestEntity);
+										World.addEntity (chestEntity);
+									}
+								}
+							} else {
+								if (placeScripts == null) {
+									loadPlaceScripts ();
+								}
+								if (placeScripts.get (placeScriptName).doPlace (workingId, getHoveredTileX (), getHoveredTileY ())) {
+									World.getPlayer ().useSelectedItem ();
+								}
+							}
 						}
-					} else if (currentTile == 42) {
-						Entity e = World.getTileEntity (getHoveredTileX (), getHoveredTileY ());
-						if (!e.getProperties ().get ("loot").equals ("null")) {
-							Chest.generateLoot (e);
+					} else {
+						if (useScripts == null) {
+							loadUseScripts ();
 						}
-						GameObject eObj = e.getObject ();
-						if (eObj instanceof Chest) {
-							Inventory.setContainer ((Container)eObj);
-							World.getPlayer ().openChest ();
-						}
+						useScripts.get (useScriptId).doUse (currentTile, getHoveredTileX (), getHoveredTileY ());
 					}
 				} else {
-					if (useScripts == null) {
-						loadUseScripts ();
-					}
-					useScripts.get (useScriptId).doUse (currentTile, getHoveredTileX (), getHoveredTileY ());
+					World.getPlayer ().useSelectedItem ();
 				}
 			}
 		}

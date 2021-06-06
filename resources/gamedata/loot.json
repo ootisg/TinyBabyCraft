@@ -2,11 +2,12 @@
 	"dungeon":{
 		"minSpawns":4,
 		"items":[
-			{"odds":0.75,"attempts":2,"id":256,"minAmt":1,"maxAmt":8},
+			{"odds":0.75,"attempts":2,"id":336,"minAmt":1,"maxAmt":4},
 			{"odds":0.25,"attempts":3,"id":257,"minAmt":2,"maxAmt":5},
 			{"odds":0.25,"attempts":3,"id":258,"minAmt":1,"maxAmt":2},
 			{"odds":0.5,"attempts":1,"id":10,"minAmt":16,"maxAmt":32},
-			{"odds":0.1,"attempts":1,"id":260,"minAmt":1,"maxAmt":3}
+			{"odds":0.1,"attempts":1,"id":260,"minAmt":1,"maxAmt":3},
+			{"odds":0.15,"attempts":1,"id":337,"minAmt":1,"maxAmt":1},
 		]
 	}
 }
