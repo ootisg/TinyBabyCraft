@@ -75,4 +75,19 @@ public abstract class PlaceScript {
 		
 	}
 	
+	public static class Sapling extends PlaceScript {
+
+		@Override
+		public boolean doPlace(int id, int x, int y) {
+			int soilId = World.getTile (x, y + 1);
+			if (soilId == 1 || soilId == 2) {
+				World.setTile (80, x, y);
+				return true;
+			} else {
+				return false;
+			}
+		}
+		
+	}
+	
 }

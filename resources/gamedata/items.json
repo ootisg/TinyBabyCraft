@@ -36,7 +36,8 @@
 },
 "5":{
 	"name":"Leaves",
-	"placeable":true
+	"placeable":true,
+	"drop":"Leaves"
 },
 "6":{
 	"name":"Sand",
@@ -176,7 +177,8 @@
 },
 "38":{
 	"name":"Enchanted Leaves",
-	"placeable":true
+	"placeable":true,
+	"drop":"Enchanted Leaves"
 },
 "39":{
 	"name":"Cauldron",
@@ -232,6 +234,10 @@
 "66":{
 	"name":"Enchanted Planks Stairs",
 	"placeable":true
+},
+"80":{
+	"name":"Sapling",
+	"placeScript":"Sapling"
 },
 "256":{
 	"name":"Stick",
@@ -415,31 +421,37 @@
 "304":{
 	"name":"Wooden Hoe",
 	"tool":"hoe",
+	"useItemScript":"Hoe",
 	"durability":20
 },
 "305":{
 	"name":"Stone Hoe",
 	"tool":"hoe",
+	"useItemScript":"Hoe",
 	"durability":40
 },
 "306":{
 	"name":"Iron Hoe",
 	"tool":"hoe",
+	"useItemScript":"Hoe",
 	"durability":60
 },
 "307":{
 	"name":"Gold Hoe",
 	"tool":"hoe",
+	"useItemScript":"Hoe",
 	"durability":10
 },
 "308":{
 	"name":"Diamond Hoe",
 	"tool":"hoe",
+	"useItemScript":"Hoe",
 	"durability":100
 },
 "309":{
 	"name":"Adamantite Hoe",
 	"tool":"hoe",
+	"useItemScript":"Hoe",
 	"durability":400
 },
 "320":{
@@ -456,5 +468,26 @@
 },
 "324":{
 	"name":"Bottle of Air"
+},
+"336":{
+	"name":"Apple",
+	"useItemScript":"Apple"
+},
+"337":{
+	"name":"Golden Apple",
+	"useItemScript":"GoldenApple"
+},
+"338":{
+	"name":"Seeds",
+	"useItemScript":"Seeds"
+},
+"339":{
+	"name":"Wheat"
+},
+"340":{
+	"name":"Bread"
+},
+"341":{
+	"name":"Blueberries"
 }
 }

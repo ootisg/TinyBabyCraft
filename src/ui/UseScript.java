@@ -14,7 +14,6 @@ public abstract class UseScript {
 
 		@Override
 		public boolean doUse (int id, int x, int y) {
-			System.out.println ("DOOR INTERACT");
 			switch (id) {
 				case 60:
 					World.setTile (76, x, y);

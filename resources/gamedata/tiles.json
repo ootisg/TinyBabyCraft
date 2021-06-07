@@ -42,6 +42,7 @@
 	"name":"Leaves",
 	"type":"leaves",
 	"transparent":true,
+	"drop":"Leaves",
 	"toughness":2
 },
 "6":{
@@ -236,6 +237,8 @@
 "38":{
 	"name":"Enchanted Leaves",
 	"type":"leaves",
+	"transparent":true,
+	"drop":"Leaves",
 	"toughness":10
 },
 "39":{
@@ -461,5 +464,44 @@
 	"transparent":true,
 	"useScript":"DoorInteract",
 	"drop":"Wood Door"
+},
+"80":{
+	"name":"Sapling",
+	"type":"wood",
+	"toughness":1,
+	"solid":false,
+	"transparent":true
+}
+"81":{
+	"name":"Wheat 1",
+	"type":"crop",
+	"toughness":1,
+	"drop":"Seeds",
+	"solid":false,
+	"transparent":true
+},
+"82":{
+	"name":"Wheat 2",
+	"type":"crop",
+	"toughness":1,
+	"drop":"Seeds",
+	"solid":false,
+	"transparent":true
+},
+"83":{
+	"name":"Wheat 3",
+	"type":"crop",
+	"toughness":1,
+	"drop":"Seeds",
+	"solid":false,
+	"transparent":true
+},
+"84":{
+	"name":"Wheat Grown",
+	"type":"crop",
+	"toughness":1,
+	"drop":"Wheat",
+	"solid":false,
+	"transparent":true
 }
 }

@@ -183,6 +183,7 @@ public class TileInterface extends GameObject {
 		placeScripts.put ("Stair", new PlaceScript.Stair ());
 		placeScripts.put ("Slab", new PlaceScript.Slab ());
 		placeScripts.put ("Door", new PlaceScript.Door ());
+		placeScripts.put ("Sapling", new PlaceScript.Sapling ());
 		
 	}
 	

@@ -6,6 +6,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 
+import json.JSONObject;
+import json.JSONUtil;
 import main.GameObject;
 import resources.Sprite;
 import resources.Spritesheet;
@@ -13,6 +15,7 @@ import ui.DeathScreen;
 import ui.Hud;
 import ui.Inventory;
 import ui.TileInterface;
+import ui.UseItemScript;
 import world.Entity;
 import world.World;
 
@@ -53,6 +56,8 @@ public class Player extends GameObject {
 	private double health = 100;
 	
 	private boolean noclip = false;
+	
+	private HashMap<String, UseItemScript> useItemScripts;
 	
 	public Player () {
 		setSprite (PLAYER_SPRITES);
@@ -293,18 +298,21 @@ public class Player extends GameObject {
 	}
 	
 	public boolean doUseItem (int id) {
-		switch (id) {
-			case 336:
-				//Apple
-				heal (20);
-				return true;
-			case 337:
-				//Golden apple
-				heal (100);
-				return true;
-			default:
-				return false;
+		
+		//Init the use item scripts if null
+		if (useItemScripts == null) {
+			loadUseItemScripts ();
 		}
+		
+		//Run the item's script (if it has one)
+		JSONObject itemProperties = Inventory.itemProperties.getJSONObject (Integer.toString(id));
+		String script = (String)itemProperties.get ("useItemScript");
+		boolean used = false;
+		if (script != null && useItemScripts.containsKey (script)) {
+			used = useItemScripts.get (script).doUse (id, TileInterface.getHoveredTileX (), TileInterface.getHoveredTileY ());
+		}
+		return used;
+		
 	}
 	
 	public Inventory getInventory () {
@@ -384,6 +392,19 @@ public class Player extends GameObject {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public void loadUseItemScripts () {
+		
+		//Init the script map
+		useItemScripts = new HashMap<String, UseItemScript> ();
+		
+		//Init all the scripts
+		useItemScripts.put ("Seeds", new UseItemScript.Seeds ());
+		useItemScripts.put ("Apple", new UseItemScript.Apple ());
+		useItemScripts.put ("GoldenApple", new UseItemScript.GoldenApple ());
+		useItemScripts.put ("Hoe", new UseItemScript.Hoe ());
+		
 	}
 	
 	@Override

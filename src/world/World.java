@@ -981,6 +981,12 @@ public class World {
 				new Zombie (spawnX, spawnY);
 			}
 		}
+		
+		//Do random ticks
+		for (int i = 0; i < reigons.size (); i++) {
+			reigons.get (i).tickReigon ();
+		}
+		
 	}
 	
 	public static void tickNearby (int x, int y) {
@@ -1003,6 +1009,27 @@ public class World {
 			if (World.getTile (x, y - 1) - id != -1) {
 				World.setTile (0, x, y);
 			}
+		}
+		
+	}
+	
+	public static void doRandomTileTick (int x, int y) {
+		
+		//Get the id
+		int id = World.getTile (x, y);
+		
+		//Grow saplings
+		if (id == 80) {
+			if (Math.random () < .1) {
+				World.putStructure ("enchanted_tree", x * 8, y * 8);
+			} else {
+				World.putStructure ("tree", x * 8, y * 8);
+			}
+		}
+		
+		//Grow wheat by 1 stage
+		if (id >= 81 && id <= 83) {
+			World.setTile (id + 1, x, y);
 		}
 		
 	}
@@ -1223,6 +1250,16 @@ public class World {
 				}
 			}
 			return 255;
+		}
+		
+		public void tickReigon () {
+			int RANDOM_TICK_COUNT = 400;
+			for (int i = 0; i < RANDOM_TICK_COUNT; i++) {
+				int offsX = (int)(Math.random () * REIGON_SIZE);
+				int tickY = (int)(Math.random () * WORLD_HEIGHT);
+				int tickX = this.id * REIGON_SIZE + offsX;
+				doRandomTileTick (tickX, tickY);
+			}
 		}
 		
 		//ENTITY STUFF

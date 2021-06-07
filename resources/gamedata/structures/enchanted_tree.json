@@ -1,0 +1,21 @@
+{
+"entities": [
+],
+"tiles": {
+	"base":	[[0,38,38,38,0],
+			 [38,38,38,38,38],
+			 [38,38,38,38,38],
+			 [0,0,36,0,0],
+			 [0,0,36,0,0],
+			 [0,0,36,0,0]]
+},
+"meta": {
+	"name":"enchanted_tree",
+	"center":[2,5],
+	"width":5,
+	"height":6,
+	"spawn_type":"surface",
+	"min_attempts":0,
+	"max_attempts":0
+}
+}
