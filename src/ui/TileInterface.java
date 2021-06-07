@@ -57,7 +57,6 @@ public class TileInterface extends GameObject {
 								int minAmt = workingDrop.getInt ("min");
 								int maxAmt = workingDrop.getInt ("max");
 								int amt = minAmt + (int)(Math.random () * (maxAmt - minAmt));
-								System.out.println (amt);
 								int itemId = workingDrop.getInt ("id");
 								//Give the player the items
 								World.getPlayer ().addToInventory (itemId, amt);

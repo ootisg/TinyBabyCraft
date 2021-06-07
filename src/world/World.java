@@ -1253,7 +1253,7 @@ public class World {
 		}
 		
 		public void tickReigon () {
-			int RANDOM_TICK_COUNT = 400;
+			int RANDOM_TICK_COUNT = 10;
 			for (int i = 0; i < RANDOM_TICK_COUNT; i++) {
 				int offsX = (int)(Math.random () * REIGON_SIZE);
 				int tickY = (int)(Math.random () * WORLD_HEIGHT);
