@@ -177,7 +177,9 @@ public class TileInterface extends GameObject {
 		
 		toolMap = new HashMap<String, String> ();
 		toolMap.put ("stone", "pickaxe");
+		toolMap.put ("metal", "pickaxe");
 		toolMap.put ("soil", "shovel");
+		toolMap.put ("sand", "shovel");
 		toolMap.put ("wood", "axe");
 		toolMap.put ("leaves", "hoe");
 		
