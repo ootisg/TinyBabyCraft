@@ -54,6 +54,20 @@ public abstract class UseItemScript {
 		
 	}
 	
+	public static class Bread extends UseItemScript {
+
+		@Override
+		public boolean doUse(int id, int x, int y) {
+			Player player = World.getPlayer ();
+			if (player.getHealth () == 100) {
+				return false;
+			}
+			player.heal (30);
+			return true;
+		}
+		
+	}
+	
 	public static class Hoe extends UseItemScript {
 
 		@Override

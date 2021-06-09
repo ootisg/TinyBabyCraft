@@ -485,7 +485,8 @@
 	"name":"Wheat"
 },
 "340":{
-	"name":"Bread"
+	"name":"Bread",
+	"useItemScript":"Bread"
 },
 "341":{
 	"name":"Blueberries"

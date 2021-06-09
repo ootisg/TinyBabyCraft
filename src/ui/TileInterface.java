@@ -24,6 +24,16 @@ public class TileInterface extends GameObject {
 	private HashMap<String, PlaceScript> placeScripts;
 	private HashMap<String, UseScript> useScripts;
 	
+	private BlockCrack crackAnim;
+	
+	private HashMap<String, String> toolMap;
+	
+	public TileInterface () {
+		crackAnim = new BlockCrack ();
+		crackAnim.declare (-64, -64);
+		loadToolMap ();
+	}
+	
 	@Override
 	public void frameEvent () {
 		if (enabled) {
@@ -32,50 +42,17 @@ public class TileInterface extends GameObject {
 			JSONObject properties = World.getTileProperties (currentTile);
 			if (mouseButtonClicked (0)) {
 				if (currentTile != 24 && currentTile != 0 && !new Boolean(true).equals (properties.get ("fluid"))) {
-					
-					//Find the drop of the tile
-					String dropName = World.getTileProperties (currentTile).getString ("drop");
-					if (dropName == null) {
-						dropName = World.tileProperties.getJSONObject ("default").getString ("drop");
-					}
-					
-					//Apply drops
-					if (dropName.equals ("self")) {
-						//Drop itself
-						World.getPlayer ().addToInventory (currentTile, 1);
-					} else {
-						//Drop the appropriate drop table
-						JSONArray dropTable = World.getDropTable (dropName);
-						System.out.println(dropTable);
-						ArrayList<Object> drops = dropTable.getContents ();
-						for (int i = 0; i < drops.size (); i++) {
-							JSONObject workingDrop = (JSONObject)drops.get (i);
-							if (workingDrop.get ("special") != null) {
-								System.out.println ("SPECIAL STUFF HERE");
-							} else if (workingDrop.get ("min") != null && workingDrop.get ("max") != null) {
-								//Amount is in a range from min to max
-								int minAmt = workingDrop.getInt ("min");
-								int maxAmt = workingDrop.getInt ("max");
-								int amt = minAmt + (int)(Math.random () * (maxAmt - minAmt));
-								int itemId = workingDrop.getInt ("id");
-								//Give the player the items
-								World.getPlayer ().addToInventory (itemId, amt);
-							} else {
-								//Amount is fixed
-								Object objAmt = workingDrop.get ("count");
-								int intAmt = 0;
-								if (objAmt == null) {
-									intAmt = (Integer)World.dropList.getJSONObject ("default").get ("count");
-								} else {
-									intAmt = (Integer)objAmt;
-								}
-								int itemId = workingDrop.getInt ("id");
-								World.getPlayer ().addToInventory (itemId, intAmt);
-							}
+					World.doPlacementLightCalculation (0, getHoveredTileX (), getHoveredTileY ());
+					String tileType = World.getTileProperties (currentTile).getString ("type");
+					String toolType = Inventory.itemProperties.getJSONObject (Integer.toString(workingId)).getString ("tool");
+					Integer hitStrength = 2;
+					if (tileType != null && toolType != null && toolMap.containsKey (tileType) && toolType.equals (toolMap.get (tileType))) {
+						hitStrength = Inventory.itemProperties.getJSONObject (Integer.toString(workingId)).getInt ("power");
+						if (hitStrength == null) {
+							hitStrength = 2;
 						}
 					}
-					World.doPlacementLightCalculation (0, getHoveredTileX (), getHoveredTileY ());
-					World.breakTile (getHoveredTileX (), getHoveredTileY ());
+					crackAnim.breakTile (hitStrength, getHoveredTileX (), getHoveredTileY ());
 				}
 			}
 			if (mouseButtonClicked (2)) {
@@ -193,6 +170,66 @@ public class TileInterface extends GameObject {
 		
 		//Init all the scripts
 		useScripts.put ("DoorInteract", new UseScript.DoorInteract ());
+		
+	}
+	
+	public void loadToolMap () {
+		
+		toolMap = new HashMap<String, String> ();
+		toolMap.put ("stone", "pickaxe");
+		toolMap.put ("soil", "shovel");
+		toolMap.put ("wood", "axe");
+		toolMap.put ("leaves", "hoe");
+		
+	}
+	
+	public void breakTile (int x, int y) {
+		
+		//Find the drop of the tile
+		int currentTile = World.getTile (x, y);
+		String dropName = World.getTileProperties (currentTile).getString ("drop");
+		if (dropName == null) {
+			dropName = World.tileProperties.getJSONObject ("default").getString ("drop");
+		}
+		
+		//Apply drops
+		if (dropName.equals ("self")) {
+			//Drop itself
+			World.getPlayer ().addToInventory (currentTile, 1);
+		} else {
+			//Drop the appropriate drop table
+			JSONArray dropTable = World.getDropTable (dropName);
+			System.out.println(dropTable);
+			ArrayList<Object> drops = dropTable.getContents ();
+			for (int i = 0; i < drops.size (); i++) {
+				JSONObject workingDrop = (JSONObject)drops.get (i);
+				if (workingDrop.get ("special") != null) {
+					System.out.println ("SPECIAL STUFF HERE");
+				} else if (workingDrop.get ("min") != null && workingDrop.get ("max") != null) {
+					//Amount is in a range from min to max
+					int minAmt = workingDrop.getInt ("min");
+					int maxAmt = workingDrop.getInt ("max");
+					int amt = minAmt + (int)(Math.random () * (maxAmt - minAmt));
+					int itemId = workingDrop.getInt ("id");
+					//Give the player the items
+					World.getPlayer ().addToInventory (itemId, amt);
+				} else {
+					//Amount is fixed
+					Object objAmt = workingDrop.get ("count");
+					int intAmt = 0;
+					if (objAmt == null) {
+						intAmt = (Integer)World.dropList.getJSONObject ("default").get ("count");
+					} else {
+						intAmt = (Integer)objAmt;
+					}
+					int itemId = workingDrop.getInt ("id");
+					World.getPlayer ().addToInventory (itemId, intAmt);
+				}
+			}
+		}
+		
+		World.setTile (0, x, y); //Replace with air
+		World.tickNearby (x, y);
 		
 	}
 	

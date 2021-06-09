@@ -68,6 +68,7 @@ public class Player extends GameObject {
 		inventory.declare (0, 0);
 		tileInterface = new TileInterface ();
 		tileInterface.declare (0, 0);
+		
 		hud = new Hud ();
 		hud.declare (0, 0);
 	}
@@ -403,8 +404,13 @@ public class Player extends GameObject {
 		useItemScripts.put ("Seeds", new UseItemScript.Seeds ());
 		useItemScripts.put ("Apple", new UseItemScript.Apple ());
 		useItemScripts.put ("GoldenApple", new UseItemScript.GoldenApple ());
+		useItemScripts.put ("Bread", new UseItemScript.Bread ());
 		useItemScripts.put ("Hoe", new UseItemScript.Hoe ());
 		
+	}
+	
+	public TileInterface getTileInterface () {
+		return tileInterface;
 	}
 	
 	@Override
