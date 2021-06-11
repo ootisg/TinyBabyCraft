@@ -490,5 +490,9 @@
 },
 "341":{
 	"name":"Blueberries"
+},
+"352":{
+	"name":"Zombie Spawn Egg",
+	"useItemScript":"ZombieEgg"
 }
 }

@@ -1,6 +1,7 @@
 package ui;
 
 import gameObjects.Player;
+import gameObjects.Zombie;
 import world.World;
 
 public abstract class UseItemScript {
@@ -80,6 +81,16 @@ public abstract class UseItemScript {
 				return false;
 			}
 			return false;
+		}
+		
+	}
+	
+	public static class ZombieEgg extends UseItemScript {
+		
+		@Override
+		public boolean doUse (int id, int x, int y) {
+			new Zombie (x * 8, y * 8);
+			return true;
 		}
 		
 	}

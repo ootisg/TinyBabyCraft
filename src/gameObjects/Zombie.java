@@ -35,12 +35,24 @@ public class Zombie extends EntityObject {
 	
 	@Override
 	public void aiStep () {
+		//Do despawning
 		if (Math.abs (this.getX () - World.getPlayer ().getX ()) > 160) {
 			if (Math.random () < .02) {
 				//1 in 25 chance to despawn
 				this.forget ();
 			}
 		}
+		
+		//Fall
+		int tileX = (int)(getX () / 8);
+		int wy = (int)(getY () / 8) + 1;
+		while (!World.isSolid (World.getTile (tileX, wy)) && wy < 256) {
+			wy++;
+		}
+		wy--;
+		setPosition (getX (), wy * 8);
+		
+		//Chase after the player
 		int prevX = (int)this.getX ();
 		ai.aiStep ();
 		if (getX () > prevX) {
@@ -50,7 +62,13 @@ public class Zombie extends EntityObject {
 			animState &= ~(0x1);
 			animState |= 0x2;
 		} else {
-			animState &= ~(0x2);
+			if (Math.abs (getX () - World.getPlayer ().getX ()) != 8) {
+				//Idle
+				animState &= ~(0x2);
+			} else {
+				//Attack
+				World.getPlayer ().damage (15);
+			}
 		}
 	}
 	
