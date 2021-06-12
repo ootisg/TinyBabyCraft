@@ -407,6 +407,7 @@ public class Player extends GameObject {
 		useItemScripts.put ("Bread", new UseItemScript.Bread ());
 		useItemScripts.put ("Hoe", new UseItemScript.Hoe ());
 		useItemScripts.put ("ZombieEgg", new UseItemScript.ZombieEgg ());
+		useItemScripts.put ("SkeletonEgg", new UseItemScript.SkeletonEgg ());
 		
 	}
 	

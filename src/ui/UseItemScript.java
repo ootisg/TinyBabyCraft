@@ -1,6 +1,8 @@
 package ui;
 
+import gameObjects.Arrow;
 import gameObjects.Player;
+import gameObjects.Skeleton;
 import gameObjects.Zombie;
 import world.World;
 
@@ -90,6 +92,16 @@ public abstract class UseItemScript {
 		@Override
 		public boolean doUse (int id, int x, int y) {
 			new Zombie (x * 8, y * 8);
+			return true;
+		}
+		
+	}
+	
+	public static class SkeletonEgg extends UseItemScript {
+	
+		@Override
+		public boolean doUse (int id, int x, int y) {
+			new Skeleton (x * 8, y * 8);
 			return true;
 		}
 		

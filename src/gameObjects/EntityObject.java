@@ -11,6 +11,7 @@ public class EntityObject extends GameObject {
 	private Entity pairedEntity;
 	
 	private int aiTime = 0;
+	private long prevAiTime = 0;
 	
 	public EntityObject (double x, double y) {
 		pairedEntity = new Entity ();
@@ -75,8 +76,9 @@ public class EntityObject extends GameObject {
 	
 	@Override
 	public void frameEvent () {
-		if (aiTime != 0 && World.getWorldTime () % aiTime < 33) {
+		if (prevAiTime == 0 || (World.getWorldTime () - prevAiTime >= aiTime)) {
 			if (World.inLoadBounds ((int)getX () / 8)) {
+				prevAiTime = World.getWorldTime ();
 				aiStep ();
 			}
 		}

@@ -274,6 +274,26 @@
 "266":{
 	"name":"Air Crystal"
 },
+"268":{
+	"name":"Leather Cap",
+	"armorType":"helmet",
+	"protection":2
+},
+"269":{
+	"name":"Leather Vest",
+	"armorType":"chestplate",
+	"protection":4
+},
+"270":{
+	"name":"Leather Pants",
+	"armorType":"leggings",
+	"protection":3
+},
+"271":{
+	"name":"Leather Boots",
+	"armorType":"boots",
+	"protection":2
+},
 "272":{
 	"name":"Wooden Sword",
 	"tool":"sword",
@@ -345,6 +365,26 @@
 	"tool":"pickaxe",
 	"power":10,
 	"durability":400
+},
+"284":{
+	"name":"Iron Helmet",
+	"armorType":"helmet",
+	"protection":3
+},
+"285":{
+	"name":"Iron Chestplate",
+	"armorType":"chestplate",
+	"protection":5
+},
+"286":{
+	"name":"Iron Leggings",
+	"armorType":"leggings",
+	"protection":4
+},
+"287":{
+	"name":"Iron Boots",
+	"armorType":"boots",
+	"protection":3
 },
 "288":{
 	"name":"Wooden Axe",
@@ -418,6 +458,26 @@
 	"power":10,
 	"durability":400
 },
+"300":{
+	"name":"Gold Helmet",
+	"armorType":"helmet",
+	"protection":3
+},
+"301":{
+	"name":"Gold Chestplate",
+	"armorType":"chestplate",
+	"protection":4
+},
+"302":{
+	"name":"Gold Leggings",
+	"armorType":"leggings",
+	"protection":3
+},
+"303":{
+	"name":"Gold Boots",
+	"armorType":"boots",
+	"protection":3
+},
 "304":{
 	"name":"Wooden Hoe",
 	"tool":"hoe",
@@ -454,6 +514,26 @@
 	"useItemScript":"Hoe",
 	"durability":400
 },
+"316":{
+	"name":"Diamond Helmet",
+	"armorType":"helmet",
+	"protection":5
+},
+"317":{
+	"name":"Diamond Chestplate",
+	"armorType":"chestplate",
+	"protection":7
+},
+"318":{
+	"name":"Diamond Leggings",
+	"armorType":"leggings",
+	"protection":5
+},
+"319":{
+	"name":"Diamond Boots",
+	"armorType":"boots",
+	"protection":5
+},
 "320":{
 	"name":"Bottle"
 },
@@ -468,6 +548,26 @@
 },
 "324":{
 	"name":"Bottle of Air"
+},
+"332":{
+	"name":"Adamantite Helmet",
+	"armorType":"helmet",
+	"protection":4
+},
+"333":{
+	"name":"Adamantite Chestplate",
+	"armorType":"chestplate",
+	"protection":5
+},
+"334":{
+	"name":"Adamantite Leggings",
+	"armorType":"leggings",
+	"protection":5
+},
+"335":{
+	"name":"Adamantite Boots",
+	"armorType":"boots",
+	"protection":4
 },
 "336":{
 	"name":"Apple",
@@ -494,5 +594,9 @@
 "352":{
 	"name":"Zombie Spawn Egg",
 	"useItemScript":"ZombieEgg"
+},
+"353":{
+	"name":"Skeleton Spawn Egg",
+	"useItemScript":"SkeletonEgg"
 }
 }

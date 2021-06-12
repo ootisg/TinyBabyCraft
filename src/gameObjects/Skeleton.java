@@ -1,33 +1,31 @@
 package gameObjects;
 
-import java.util.HashMap;
-
 import ai.ChaseAI;
 import resources.Sprite;
 import resources.Spritesheet;
 import world.Entity;
 import world.World;
 
-public class Zombie extends EntityObject {
+public class Skeleton extends EntityObject {
 
-	public static Spritesheet zombieSheet = new Spritesheet ("resources/sprites/zombie.png");
-	public static Sprite zombieSprites = new Sprite (zombieSheet, 8, 12);
+	public static Spritesheet skeletonSheet = new Spritesheet ("resources/sprites/skeleton.png");
+	public static Sprite skeletonSprites = new Sprite (skeletonSheet, 8, 12);
 	
 	ChaseAI ai;
 	
 	int animState = 0;
 	
-	public Zombie (double x, double y) {
+	public Skeleton (double x, double y) {
 		super (x, y);
-		setSprite (zombieSprites);
+		setSprite (skeletonSprites);
 		getAnimationHandler ().setAnimationSpeed (0);
 		ai = new ChaseAI (this);
 		setAiTime (1000);
 	}
 	
-	public Zombie (Entity entity) {
+	public Skeleton (Entity entity) {
 		super (entity);
-		setSprite (zombieSprites);
+		setSprite (skeletonSprites);
 		getAnimationHandler ().setAnimationSpeed (0);
 		ai = new ChaseAI (this);
 		setAiTime (1000);
@@ -52,22 +50,29 @@ public class Zombie extends EntityObject {
 		wy--;
 		setPosition (getX (), wy * 8);
 		
-		//Chase after the player
-		int prevX = (int)this.getX ();
-		ai.aiStep ();
-		if (getX () > prevX) {
-			animState |= 0x1;
-			animState |= 0x2;
-		} else if (getX () < prevX) {
-			animState &= ~(0x1);
-			animState |= 0x2;
-		} else {
-			if (Math.abs (getX () - World.getPlayer ().getX ()) != 8) {
-				//Idle
-				animState &= ~(0x2);
+		if (getY () != World.getPlayer ().getY ()) {
+			//Chase after the player
+			int prevX = (int)this.getX ();
+			ai.aiStep ();
+			if (getX () > prevX) {
+				animState |= 0x1;
+				animState |= 0x2;
+			} else if (getX () < prevX) {
+				animState &= ~(0x1);
+				animState |= 0x2;
 			} else {
-				//Attack
-				World.getPlayer ().damage (15);
+				if (Math.abs (getX () - World.getPlayer ().getX ()) != 8) {
+					//Idle
+					animState &= ~(0x2);
+				}
+			}
+		} else {
+			//Shoot
+			Arrow arrow = new Arrow (getX (), getY () - 4);
+			if (World.getPlayer ().getX () < getX ()) {
+				arrow.setDirection (0);
+			} else {
+				arrow.setDirection (1);
 			}
 		}
 	}
@@ -80,4 +85,5 @@ public class Zombie extends EntityObject {
 		super.draw ();
 		setY (this.getY () + 4);
 	}
+
 }
