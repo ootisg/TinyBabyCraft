@@ -40,6 +40,24 @@ public class Player extends GameObject {
 	public static Spritesheet PLAYER_SHEET = new Spritesheet ("resources/sprites/steve.png");
 	public static Sprite PLAYER_SPRITES = new Sprite (PLAYER_SHEET, 8, 12);
 	
+	public static Spritesheet HELMET_SHEET = new Spritesheet ("resources/sprites/helmets.png");
+	public static Spritesheet CHESTPLATE_SHEET = new Spritesheet ("resources/sprites/chestplates.png");
+	public static Spritesheet LEGGINGS_SHEET = new Spritesheet ("resources/sprites/leggings.png");
+	public static Spritesheet BOOTS_SHEET = new Spritesheet ("resources/sprites/boots.png");
+	public static Spritesheet HELMET_INV_SHEET = new Spritesheet ("resources/sprites/helmets_inv.png");
+	public static Spritesheet CHESTPLATE_INV_SHEET = new Spritesheet ("resources/sprites/chestplates_inv.png");
+	public static Spritesheet LEGGINGS_INV_SHEET = new Spritesheet ("resources/sprites/leggings_inv.png");
+	public static Spritesheet BOOTS_INV_SHEET = new Spritesheet ("resources/sprites/boots_inv.png");
+	
+	public static Sprite HELMET_SPRITE = new Sprite (HELMET_SHEET, 4, 4);
+	public static Sprite CHESTPLATE_SPRITE = new Sprite (CHESTPLATE_SHEET, 4, 4);
+	public static Sprite LEGGINGS_SPRITE = new Sprite (LEGGINGS_SHEET, 4, 3);
+	public static Sprite BOOTS_SPRITE = new Sprite (BOOTS_SHEET, 4, 1);
+	public static Sprite HELMET_INV_SPRITE = new Sprite (HELMET_INV_SHEET, 8, 8);
+	public static Sprite CHESTPLATE_INV_SPRITE = new Sprite (CHESTPLATE_INV_SHEET, 8, 8);
+	public static Sprite LEGGINGS_INV_SPRITE = new Sprite (LEGGINGS_INV_SHEET, 8, 6);
+	public static Sprite BOOTS_INV_SPRITE = new Sprite (BOOTS_INV_SHEET, 8, 2);
+	
 	private int state = 0;
 	
 	private Inventory inventory;
@@ -56,6 +74,11 @@ public class Player extends GameObject {
 	private double health = 100;
 	
 	private boolean noclip = false;
+	
+	public static final int[] helmetIds = {0, 268, 285, 300, 316, 332};
+	public static final int[] chestplateIds = {0, 269, 286, 301, 317, 333};
+	public static final int[] leggingsIds = {0, 270, 287, 302, 318, 334};
+	public static final int[] bootsIds = {0, 271, 288, 303, 319, 335};
 	
 	private HashMap<String, UseItemScript> useItemScripts;
 	
@@ -366,7 +389,22 @@ public class Player extends GameObject {
 	}
 	
 	public void damage (double amount) {
-		health -= amount;
+		//Calculate armor
+		int helmetId = getInventory ().getItemByIndex (20).id;
+		int chestplateId = getInventory ().getItemByIndex (21).id;
+		int leggingsId = getInventory ().getItemByIndex (22).id;
+		int bootsId = getInventory ().getItemByIndex (23).id;
+		JSONObject helmetStats = Inventory.itemProperties.getJSONObject (Integer.toString(helmetId));
+		JSONObject chestplateStats = Inventory.itemProperties.getJSONObject (Integer.toString(chestplateId));
+		JSONObject leggingsStats = Inventory.itemProperties.getJSONObject (Integer.toString(leggingsId));
+		JSONObject bootsStats = Inventory.itemProperties.getJSONObject (Integer.toString(bootsId));
+		int helmetDefense = helmetStats.get ("protection") == null ? 0 : helmetStats.getInt ("protection");
+		int chestplateDefense = chestplateStats.get ("protection") == null ? 0 : chestplateStats.getInt ("protection");
+		int leggingsDefense = leggingsStats.get ("protection") == null ? 0 : leggingsStats.getInt ("protection");
+		int bootsDefense = bootsStats.get ("protection") == null ? 0 : bootsStats.getInt ("protection");
+		int totalDefense = helmetDefense + chestplateDefense + leggingsDefense + bootsDefense;
+		double scalar = 1 - ((double)totalDefense / 30); //Max protection is 22, maxes out at ~73% damage reduction
+		health -= amount * scalar;
 		if (health < 0) {
 			health = 0;
 		}
@@ -422,10 +460,54 @@ public class Player extends GameObject {
 		setY (this.getY () - 4);
 		super.draw ();
 		setY (this.getY () + 4);
+		
+		//Set the correct armor sprites
+		HELMET_SPRITE.setFrame (indexSearch (helmetIds, World.getPlayer ().getInventory ().getItemByIndex (20).id));
+		CHESTPLATE_SPRITE.setFrame (indexSearch (chestplateIds, World.getPlayer ().getInventory ().getItemByIndex (21).id));
+		LEGGINGS_SPRITE.setFrame (indexSearch (leggingsIds, World.getPlayer ().getInventory ().getItemByIndex (22).id));
+		BOOTS_SPRITE.setFrame (indexSearch (bootsIds, World.getPlayer ().getInventory ().getItemByIndex (23).id));
+		//Flip the helmet if applicable
+		if ((state & STATE_MASK_DIRECTION) == STATE_FACING_RIGHT) {
+			HELMET_SPRITE.setFrame (HELMET_SPRITE.getFrame () + 6);
+		}
+		//Use the weilding chestplate variant if applicable
+		if ((state & STATE_MASK_WIELDING) != 0) {
+			CHESTPLATE_SPRITE.setFrame (CHESTPLATE_SPRITE.getFrame () + 6);
+		}
+		
+		//Draw the armor
+		HELMET_SPRITE.draw ((int)getX () - World.getViewX () * 8 + 2, (int)getY () - World.getViewY () * 8 - 4);
+		CHESTPLATE_SPRITE.draw ((int)getX () - World.getViewX () * 8 + 2, (int)getY () - World.getViewY () * 8);
+		LEGGINGS_SPRITE.draw ((int)getX () - World.getViewX () * 8 + 2, (int)getY () - World.getViewY () * 8 + 4);
+		BOOTS_SPRITE.draw ((int)getX () - World.getViewX () * 8 + 2, (int)getY () - World.getViewY () * 8 + 7);
+		
+		//Draw the inventory
 		inventory.drawHotbar (); //Hotbar is always visible
 		if (uiState == 1 || uiState == 2 || uiState == 3 ||  uiState == 4) {
 			inventory.drawMenu ();
+			//Draw the armor on the player, in the inventory
+			HELMET_INV_SPRITE.setFrame (HELMET_SPRITE.getFrame () - (HELMET_SPRITE.getFrame () >= 6 ? 6 : 0));
+			CHESTPLATE_INV_SPRITE.setFrame (CHESTPLATE_SPRITE.getFrame ());
+			LEGGINGS_INV_SPRITE.setFrame (LEGGINGS_SPRITE.getFrame ());
+			BOOTS_INV_SPRITE.setFrame (BOOTS_SPRITE.getFrame ());
+			int invX = Inventory.menuOffsetX + Inventory.ARMOR_DISPLAY_START_X;
+			int invY = Inventory.menuOffsetY + Inventory.ARMOR_DISPLAY_START_Y;
+			HELMET_INV_SPRITE.draw (invX, invY);
+			CHESTPLATE_INV_SPRITE.draw (invX, invY + 8);
+			LEGGINGS_INV_SPRITE.draw (invX, invY + 16);
+			BOOTS_INV_SPRITE.draw (invX, invY + 22);
 		}
+		
+	}
+	
+	private int indexSearch (int[] arr, int val) {
+		int idx = 0;
+		for (int i = 0; i < arr.length; i++) {
+			if (arr[i] == val) {
+				idx = i;
+			}
+		}
+		return idx;
 	}
 	
 }

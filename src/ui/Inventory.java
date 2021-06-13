@@ -65,6 +65,8 @@ public class Inventory extends GameObject {
 	
 	public static int ARMOR_START_X = 8;
 	public static int ARMOR_START_Y = 17;
+	public static int ARMOR_DISPLAY_START_X = 43;
+	public static int ARMOR_DISPLAY_START_Y = 17;
 	
 	public static int HB_START_X = 2;
 	public static int HB_START_Y = 1;
@@ -566,6 +568,10 @@ public class Inventory extends GameObject {
 			}
 		}
 		return total;
+	}
+	
+	public Item getItemByIndex (int idx) {
+		return items[idx];
 	}
 	
 	public void predictCraft () {
