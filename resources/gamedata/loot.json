@@ -8,6 +8,7 @@
 			{"odds":0.5,"attempts":1,"id":10,"minAmt":16,"maxAmt":32},
 			{"odds":0.1,"attempts":1,"id":260,"minAmt":1,"maxAmt":3},
 			{"odds":0.15,"attempts":1,"id":337,"minAmt":1,"maxAmt":1},
+			{"odds":0.05,"attempts":1,"id":341,"minAmt":1,"maxAmt":1}
 		]
 	}
 }
