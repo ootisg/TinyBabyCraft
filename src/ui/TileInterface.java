@@ -40,82 +40,84 @@ public class TileInterface extends GameObject {
 			int workingId = World.getPlayer ().getSelectedItem ();
 			int currentTile = World.getTile (getHoveredTileX (), getHoveredTileY ());
 			JSONObject properties = World.getTileProperties (currentTile);
-			if (mouseButtonClicked (0)) {
-				if (currentTile != 24 && currentTile != 0 && !new Boolean(true).equals (properties.get ("fluid"))) {
-					World.doPlacementLightCalculation (0, getHoveredTileX (), getHoveredTileY ());
-					String tileType = World.getTileProperties (currentTile).getString ("type");
-					String toolType = Inventory.itemProperties.getJSONObject (Integer.toString(workingId)).getString ("tool");
-					Integer hitStrength = 2;
-					if (tileType != null && toolType != null && toolMap.containsKey (tileType) && toolType.equals (toolMap.get (tileType))) {
-						hitStrength = Inventory.itemProperties.getJSONObject (Integer.toString(workingId)).getInt ("power");
-						if (hitStrength == null) {
-							hitStrength = 2;
+			if (reachableFromPlayer (getHoveredTileX (), getHoveredTileY ())) {
+				if (mouseButtonClicked (0)) {
+					if (currentTile != 24 && currentTile != 0 && !Boolean.TRUE.equals (properties.get ("fluid"))) {
+						World.doPlacementLightCalculation (0, getHoveredTileX (), getHoveredTileY ());
+						String tileType = World.getTileProperties (currentTile).getString ("type");
+						String toolType = Inventory.itemProperties.getJSONObject (Integer.toString(workingId)).getString ("tool");
+						Integer hitStrength = 2;
+						if (tileType != null && toolType != null && toolMap.containsKey (tileType) && toolType.equals (toolMap.get (tileType))) {
+							hitStrength = Inventory.itemProperties.getJSONObject (Integer.toString(workingId)).getInt ("power");
+							if (hitStrength == null) {
+								hitStrength = 2;
+							}
 						}
+						crackAnim.breakTile (hitStrength, getHoveredTileX (), getHoveredTileY ());
 					}
-					crackAnim.breakTile (hitStrength, getHoveredTileX (), getHoveredTileY ());
 				}
-			}
-			if (mouseButtonClicked (2)) {
-				if (workingId < 256) {
-					String useScriptId = World.getTileProperties (currentTile).getString ("useScript");
-					if (useScriptId == null) {
-						if (currentTile == 25) {
-							World.getPlayer ().open3x3CraftingGrid ();
-						} else if (currentTile == 26 || currentTile == 27) {
-							Entity e = World.getTileEntity (getHoveredTileX (), getHoveredTileY ());
-							GameObject eObj = e.getObject ();
-							if (eObj instanceof Furnace) {
-								Inventory.setContainer ((Container)eObj);
-								World.getPlayer ().openFurnace ();
-							}
-						} else if (currentTile == 42) {
-							Entity e = World.getTileEntity (getHoveredTileX (), getHoveredTileY ());
-							if (!e.getProperties ().get ("loot").equals ("null")) {
-								Chest.generateLoot (e);
-							}
-							GameObject eObj = e.getObject ();
-							if (eObj instanceof Chest) {
-								Inventory.setContainer ((Container)eObj);
-								World.getPlayer ().openChest ();
-							}
-						} else if (currentTile == 0 || new Boolean(true).equals (properties.get ("fluid"))) {
-							String placeScriptName = Inventory.itemProperties.getJSONObject (Integer.toString(workingId)).getString ("placeScript");
-							if (placeScriptName == null) {
-								if (World.getPlayer ().useSelectedItem () == 1) {
-									World.doPlacementLightCalculation (workingId, getHoveredTileX (), getHoveredTileY ());
-									World.setTile (workingId, getHoveredTileX (), getHoveredTileY ());
-									if (workingId == 26) {
-										//Furnace
-										Entity furnaceEntity = new Entity ();
-										furnaceEntity.setPosition (getHoveredTileX () * 8, getHoveredTileY () * 8);
-										Furnace furnace = new Furnace (furnaceEntity);
-										furnace.initPairedEntity (furnaceEntity);
-										World.addEntity (furnaceEntity);
-									} else if (workingId == 42) {
-										Entity chestEntity = new Entity ();
-										chestEntity.setPosition (getHoveredTileX () * 8, getHoveredTileY () * 8);
-										Chest chest = new Chest (chestEntity);
-										chest.initPairedEntity (chestEntity);
-										World.addEntity (chestEntity);
+				if (mouseButtonClicked (2)) {
+					if (workingId < 256) {
+						String useScriptId = World.getTileProperties (currentTile).getString ("useScript");
+						if (useScriptId == null) {
+							if (currentTile == 25) {
+								World.getPlayer ().open3x3CraftingGrid ();
+							} else if (currentTile == 26 || currentTile == 27) {
+								Entity e = World.getTileEntity (getHoveredTileX (), getHoveredTileY ());
+								GameObject eObj = e.getObject ();
+								if (eObj instanceof Furnace) {
+									Inventory.setContainer ((Container)eObj);
+									World.getPlayer ().openFurnace ();
+								}
+							} else if (currentTile == 42) {
+								Entity e = World.getTileEntity (getHoveredTileX (), getHoveredTileY ());
+								if (!e.getProperties ().get ("loot").equals ("null")) {
+									Chest.generateLoot (e);
+								}
+								GameObject eObj = e.getObject ();
+								if (eObj instanceof Chest) {
+									Inventory.setContainer ((Container)eObj);
+									World.getPlayer ().openChest ();
+								}
+							} else if (currentTile == 0 || new Boolean(true).equals (properties.get ("fluid"))) {
+								String placeScriptName = Inventory.itemProperties.getJSONObject (Integer.toString(workingId)).getString ("placeScript");
+								if (placeScriptName == null) {
+									if (World.getPlayer ().useSelectedItem () == 1) {
+										World.doPlacementLightCalculation (workingId, getHoveredTileX (), getHoveredTileY ());
+										World.setTile (workingId, getHoveredTileX (), getHoveredTileY ());
+										if (workingId == 26) {
+											//Furnace
+											Entity furnaceEntity = new Entity ();
+											furnaceEntity.setPosition (getHoveredTileX () * 8, getHoveredTileY () * 8);
+											Furnace furnace = new Furnace (furnaceEntity);
+											furnace.initPairedEntity (furnaceEntity);
+											World.addEntity (furnaceEntity);
+										} else if (workingId == 42) {
+											Entity chestEntity = new Entity ();
+											chestEntity.setPosition (getHoveredTileX () * 8, getHoveredTileY () * 8);
+											Chest chest = new Chest (chestEntity);
+											chest.initPairedEntity (chestEntity);
+											World.addEntity (chestEntity);
+										}
+									}
+								} else {
+									if (placeScripts == null) {
+										loadPlaceScripts ();
+									}
+									if (placeScripts.get (placeScriptName).doPlace (workingId, getHoveredTileX (), getHoveredTileY ())) {
+										World.getPlayer ().useSelectedItem ();
 									}
 								}
-							} else {
-								if (placeScripts == null) {
-									loadPlaceScripts ();
-								}
-								if (placeScripts.get (placeScriptName).doPlace (workingId, getHoveredTileX (), getHoveredTileY ())) {
-									World.getPlayer ().useSelectedItem ();
-								}
 							}
+						} else {
+							if (useScripts == null) {
+								loadUseScripts ();
+							}
+							useScripts.get (useScriptId).doUse (currentTile, getHoveredTileX (), getHoveredTileY ());
 						}
 					} else {
-						if (useScripts == null) {
-							loadUseScripts ();
-						}
-						useScripts.get (useScriptId).doUse (currentTile, getHoveredTileX (), getHoveredTileY ());
+						World.getPlayer ().useSelectedItem ();
 					}
-				} else {
-					World.getPlayer ().useSelectedItem ();
 				}
 			}
 		}
@@ -126,9 +128,25 @@ public class TileInterface extends GameObject {
 		if (enabled) {
 			int tileX = getCursorX () / 8;
 			int tileY = getCursorY () / 8;
-			Graphics g = MainLoop.getWindow ().getBufferGraphics ();
-			g.setColor (cursorColor);
-			g.drawRect (tileX * 8, tileY * 8, 7, 7);
+			if (reachableFromPlayer (getHoveredTileX (), getHoveredTileY ())) {
+				Graphics g = MainLoop.getWindow ().getBufferGraphics ();
+				g.setColor (cursorColor);
+				g.drawRect (tileX * 8, tileY * 8, 7, 7);
+			}
+		}
+	}
+	
+	public static boolean reachableFromPlayer (int tileX, int tileY) {
+		int centerX = tileX * 8 + 4;
+		int centerY = tileY * 8 + 4;
+		int centerPlayerX = (int)World.getPlayer ().getX () + 4;
+		int centerPlayerY = ((int)World.getPlayer ().getY () - 4);
+		int diffX = centerPlayerX - centerX;
+		int diffY = centerPlayerY - centerY;
+		if (Math.sqrt (diffX * diffX + diffY * diffY) <= 32 || World.getPlayer ().noclipEnabled ()) { //4 tile reach
+			return true;
+		} else {
+			return false;
 		}
 	}
 	

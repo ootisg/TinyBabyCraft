@@ -453,6 +453,10 @@ public class Player extends GameObject {
 		return tileInterface;
 	}
 	
+	public boolean noclipEnabled () {
+		return noclip;
+	}
+	
 	@Override
 	public void draw () {
 		//Offset for drawing
