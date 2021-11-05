@@ -79,7 +79,7 @@ public class TileInterface extends GameObject {
 									Inventory.setContainer ((Container)eObj);
 									World.getPlayer ().openChest ();
 								}
-							} else if (currentTile == 0 || new Boolean(true).equals (properties.get ("fluid"))) {
+							} else if (currentTile == 0 || Boolean.TRUE.equals (properties.get ("fluid"))) {
 								String placeScriptName = Inventory.itemProperties.getJSONObject (Integer.toString(workingId)).getString ("placeScript");
 								if (placeScriptName == null) {
 									if (World.getPlayer ().useSelectedItem () == 1) {
@@ -248,8 +248,7 @@ public class TileInterface extends GameObject {
 			}
 		}
 		
-		World.setTile (0, x, y); //Replace with air
-		World.tickNearby (x, y);
+		World.breakTile (x, y); //Replace with air
 		
 	}
 	

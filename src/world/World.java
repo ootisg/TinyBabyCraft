@@ -718,7 +718,7 @@ public class World {
 			if (i < SEA_LEVEL) {
 				result [i] = 0;
 			} else if (i == SEA_LEVEL) {
-				result [i] = 12;
+				result [i] = 11;
 			} else {
 				result [i] = 11;
 			}
@@ -1008,6 +1008,25 @@ public class World {
 		if (id == 61 || id == 63 || id == 77 || id == 79) {
 			if (World.getTile (x, y - 1) - id != -1) {
 				World.setTile (0, x, y);
+			}
+		}
+		if (id == 11 || id == 12 || (id >= 112 && id <= 117)) {
+			if (World.getTile (x, y + 1) != 0) {
+				int wid = id;
+				if (id == 11) {
+					wid = 112;
+				}
+				if (id == 12) {
+					wid = 111;
+				}
+				if (World.getTile (x - 1, y) == 0) {
+					World.setTile (wid + 1, x - 1, y); //Flowing_Water_1+
+				}
+				if (World.getTile (x + 1, y) == 0) {
+					World.setTile (wid + 1, x + 1, y); //Flowing_Water_1+
+				}
+			} else {
+				World.setTile (12, x, y + 1); //Flowing_Water_0
 			}
 		}
 		
