@@ -79,6 +79,8 @@ public class World {
 	private static HashMap<String, Structure> structures;
 	
 	private static long worldTime;
+	private static int globalTickCount;
+	private static HashMap<Integer, ArrayList<Point>> schedTicks;
 	
 	public static JSONObject tileProperties;
 	public static JSONObject dropList;
@@ -103,6 +105,10 @@ public class World {
 			e.printStackTrace ();
 			System.exit (1);
 		}
+		
+		//Initialze the global tick count/sched ticks
+		globalTickCount = 0;
+		schedTicks = new HashMap<Integer, ArrayList<Point>> ();
 		
 		viewX = 0;
 		viewY = 0; //Initialize view
@@ -987,6 +993,17 @@ public class World {
 			reigons.get (i).tickReigon ();
 		}
 		
+		//Do sched ticks
+		ArrayList<Point> currSchedTicks = schedTicks.get (globalTickCount);
+		if (currSchedTicks != null) {
+			for (int i = 0; i < currSchedTicks.size (); i++) {
+				Point currTick = currSchedTicks.get (i);
+				doSchedTick (currTick.x, currTick.y);
+			}
+			schedTicks.remove (globalTickCount);
+		}
+		globalTickCount++;
+		
 	}
 	
 	public static void tickNearby (int x, int y) {
@@ -999,34 +1016,38 @@ public class World {
 	
 	public static void doTileTick (int x, int y) {
 		
+		//Nab the tile id
 		int id = World.getTile (x, y);
+		
+		//Door top
 		if (id == 60 || id == 62 || id == 76 || id == 78) {
 			if (World.getTile (x, y + 1) - id != 1) {
 				World.setTile (0, x, y);
 			}
 		}
+		
+		//Door bottom
 		if (id == 61 || id == 63 || id == 77 || id == 79) {
 			if (World.getTile (x, y - 1) - id != -1) {
 				World.setTile (0, x, y);
 			}
 		}
+		
+		//Water
 		if (id == 11 || id == 12 || (id >= 112 && id <= 117)) {
-			if (World.getTile (x, y + 1) != 0) {
-				int wid = id;
-				if (id == 11) {
-					wid = 112;
-				}
-				if (id == 12) {
-					wid = 111;
-				}
-				if (World.getTile (x - 1, y) == 0) {
-					World.setTile (wid + 1, x - 1, y); //Flowing_Water_1+
-				}
-				if (World.getTile (x + 1, y) == 0) {
-					World.setTile (wid + 1, x + 1, y); //Flowing_Water_1+
-				}
-			} else {
-				World.setTile (12, x, y + 1); //Flowing_Water_0
+			if (checkWaterPriority (id, World.getTile (x - 1, y))
+				|| checkWaterPriority (id, World.getTile (x + 1, y))
+				|| checkWaterPriority (id, World.getTile (x, y + 1))) {
+				schedTick (x, y, 5);
+			}
+		}
+		
+		//Lava
+		if (id == 13 || id == 14 || (id >= 119 && id <= 125)) {
+			if (checkLavaPriority (id, World.getTile (x - 1, y))
+				|| checkLavaPriority (id, World.getTile (x + 1, y))
+				|| checkLavaPriority (id, World.getTile (x, y + 1))) {
+				schedTick (x, y, 50);
 			}
 		}
 		
@@ -1051,6 +1072,186 @@ public class World {
 			World.setTile (id + 1, x, y);
 		}
 		
+	}
+	
+	public static void doSchedTick (int x, int y) {
+		
+		//Get the tile ID
+		int id = World.getTile (x, y);
+		
+		//Handle flowing water
+		if (id == 11 || id == 12 || (id >= 112 && id <= 117)) {
+			if (!checkWaterPriority (id, World.getTile (x, y + 1))) {
+				if (!isWater (World.getTile (x, y + 1))) {
+					int wid = id;
+					if (id == 11) {
+						wid = 112;
+					}
+					if (id == 12) {
+						wid = 111;
+					}
+					if (checkWaterPriority (id, World.getTile (x - 1, y))) {
+						World.setTile (wid + 1, x - 1, y); //Flowing_Water_1+
+						if (World.getTile (x - 1, y + 1) == 11) {
+							World.setTile (12, x - 1, y + 1);
+						}
+						tickNearby (x - 1, y);
+					}
+					if (checkWaterPriority (id, World.getTile (x + 1, y))) {
+						World.setTile (wid + 1, x + 1, y); //Flowing_Water_1+
+						if (World.getTile (x + 1, y + 1) == 11) {
+							World.setTile (12, x + 1, y + 1);
+						}
+						tickNearby (x + 1, y);
+					}
+				}
+			} else {
+				World.setTile (12, x, y + 1); //Flowing_Water_0
+				tickNearby (x, y + 1);
+			}
+		}
+		
+		//Handle flowing lava
+		if (id == 13 || id == 14 || (id >= 119 && id <= 124)) {
+			if (!checkLavaPriority (id, World.getTile (x, y + 1))) {
+				if (!isLava (World.getTile (x, y + 1))) {
+					int wid = id;
+					if (id == 13) {
+						wid = 119;
+					}
+					if (id == 14) {
+						wid = 118;
+					}
+					if (checkLavaPriority (id, World.getTile (x - 1, y))) {
+						World.setTile (wid + 1, x - 1, y); //Flowing_Lava_1+
+						if (World.getTile (x - 1, y + 1) == 13) {
+							World.setTile (14, x - 1, y + 1);
+						}
+						tickNearby (x - 1, y);
+					}
+					if (checkLavaPriority (id, World.getTile (x + 1, y))) {
+						World.setTile (wid + 1, x + 1, y); //Flowing_Lava_1+
+						if (World.getTile (x + 1, y + 1) == 13) {
+							World.setTile (14, x + 1, y + 1);
+						}
+						tickNearby (x + 1, y);
+					}
+				}
+			} else {
+				World.setTile (14, x, y + 1); //Flowing_Lava_0
+				tickNearby (x, y + 1);
+			}
+		}
+		
+	}
+	
+	public static void schedTick (int x, int y, int time) {
+
+		//Get the proper schedule time
+		int schedTime = globalTickCount + time;
+		
+		//Add a list of ticks if not already present
+		if (!schedTicks.containsKey (schedTime)) {
+			schedTicks.put (schedTime, new ArrayList<Point> ());
+		}
+		
+		//Schedule the tick
+		schedTicks.get (schedTime).add (new Point (x, y));
+		
+	}
+	
+	private static boolean checkWaterPriority (int src, int dest) {
+		
+		//Air
+		if (dest == 0) {
+			return true;
+		}
+		
+		//Water source or vertical flowing water
+		if (dest == 11 || dest == 12) {
+			return false;
+		}
+		
+		//All other flowing water
+		if (dest >= 112 && dest <= 118) {
+			//From downward flowing water
+			if (src == 12) {
+				if (dest == 112) {
+					return false;
+				} else {
+					return true;
+				}
+			}
+			//From water source
+			if (src == 11) {
+				if (dest <= 113) {
+					return false;
+				} else {
+					return true;
+				}
+			}
+			//From regular flowing water
+			if (src < dest - 1) {
+				return true;
+			}
+		}
+		
+		//Return false in all other cases
+		return false;
+		
+	}
+	
+	private static boolean checkLavaPriority (int src, int dest) {
+		
+		//Air
+		if (dest == 0) {
+			return true;
+		}
+		
+		//Water source or vertical flowing lava
+		if (dest == 13 || dest == 14) {
+			return false;
+		}
+		
+		//All other flowing lava
+		if (dest >= 119 && dest <= 125) {
+			//From downward flowing lava
+			if (src == 14) {
+				if (dest == 119) {
+					return false;
+				} else {
+					return true;
+				}
+			}
+			//From lava source
+			if (src == 13) {
+				if (dest <= 120) {
+					return false;
+				} else {
+					return true;
+				}
+			}
+			//From regular flowing lava
+			if (src < dest - 1) {
+				return true;
+			}
+		}
+		
+		//Return false in all other cases
+		return false;
+		
+	}
+	
+	private static boolean isWater (int tid) {
+		return tid == 11 || tid == 12 || (tid >= 112 && tid <= 118);
+	}
+	
+	private static boolean isFlowingWater (int tid) {
+		return tid == 12 || (tid >= 112 && tid <= 118);
+	}
+	
+	private static boolean isLava (int tid) {
+		return tid == 13 || tid == 14 || (tid >= 119 && tid <= 125);
 	}
 	
 	public static class WorldReigon {
