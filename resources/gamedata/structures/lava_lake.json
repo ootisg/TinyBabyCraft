@@ -1,0 +1,20 @@
+{
+"entities": [],
+"tiles": {
+	"base":	[[0, 0, 0, 0, 0, 0, 0],
+			 [0, 0, 0, 0, 0, 0, 0],
+			 [13,13,13,13,13,13,13]]
+},
+"meta": {
+	"name":"lava_lake",
+	"center":[3,1],
+	"width":7,
+	"height":3,
+	"replace":true,
+	"spawn_type":"regular",
+	"min_height":4,
+	"max_height":16,
+	"min_attempts":2,
+	"max_attempts":5
+}
+}
