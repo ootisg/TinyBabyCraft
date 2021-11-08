@@ -83,8 +83,7 @@ public class TileInterface extends GameObject {
 								String placeScriptName = Inventory.itemProperties.getJSONObject (Integer.toString(workingId)).getString ("placeScript");
 								if (placeScriptName == null) {
 									if (World.getPlayer ().useSelectedItem () == 1) {
-										World.doPlacementLightCalculation (workingId, getHoveredTileX (), getHoveredTileY ());
-										World.setTile (workingId, getHoveredTileX (), getHoveredTileY ());
+										World.placeTile (workingId, getHoveredTileX (), getHoveredTileY ());
 										if (workingId == 26) {
 											//Furnace
 											Entity furnaceEntity = new Entity ();

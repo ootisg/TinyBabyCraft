@@ -158,6 +158,10 @@ public class World {
 		//Make the player
 		spawnPlayer ();
 		initLighting ();
+		
+		//Init fluid ids
+		Fluids.initFluidIDs ();
+		
 	}
 	
 	public static void makeWorldGenResources () {
@@ -360,7 +364,18 @@ public class World {
 				int lightVal = getLightStrength (viewX + wx, viewY + wy);
 				
 				//Render the proper tile
-				PARSED_TILES.setFrame (tileId);
+				if (Fluids.isWaterSource (tileId) || Fluids.isLavaSource (tileId)) {
+					int upId = tiles.get (Math.floorMod (viewX + wx, LOAD_SIZE)).get (viewY + wy - 1);
+					if (Fluids.isWaterSource (tileId) && Fluids.isWater (upId)) {
+						PARSED_TILES.setFrame (Fluids.WATER_FLOWING_START_ID);
+					} else if (Fluids.isLavaSource (tileId) && Fluids.isLava (upId)) {
+						PARSED_TILES.setFrame (Fluids.LAVA_FLOWING_START_ID);
+					} else {
+						PARSED_TILES.setFrame (tileId);
+					}
+				} else {
+					PARSED_TILES.setFrame (tileId); //Draw normally
+				}
 				PARSED_TILES.draw (wx * 8, wy * 8);
 				
 				//Render the proper lighting
@@ -431,6 +446,15 @@ public class World {
 		} else {
 			return highestTile [realX];
 		}
+	}
+	
+	//Places AND ticks
+	public static void placeTile (int id, int x, int y) {
+		
+		doPlacementLightCalculation (id, x, y);
+		setTile (id, x, y);
+		tickNearby (x, y);
+		
 	}
 	
 	public static void setTile (int id, int x, int y) {
@@ -1034,21 +1058,13 @@ public class World {
 		}
 		
 		//Water
-		if (id == 11 || id == 12 || (id >= 112 && id <= 117)) {
-			if (checkWaterPriority (id, World.getTile (x - 1, y))
-				|| checkWaterPriority (id, World.getTile (x + 1, y))
-				|| checkWaterPriority (id, World.getTile (x, y + 1))) {
-				schedTick (x, y, 5);
-			}
+		if (Fluids.isWater (id) && checkForFluidUpdate (x, y)) {
+			schedTick (x, y, 5);
 		}
 		
 		//Lava
-		if (id == 13 || id == 14 || (id >= 119 && id <= 125)) {
-			if (checkLavaPriority (id, World.getTile (x - 1, y))
-				|| checkLavaPriority (id, World.getTile (x + 1, y))
-				|| checkLavaPriority (id, World.getTile (x, y + 1))) {
-				schedTick (x, y, 50);
-			}
+		if (Fluids.isLava (id) && checkForFluidUpdate (x, y)) {
+			schedTick (x, y, 50);
 		}
 		
 	}
@@ -1079,113 +1095,63 @@ public class World {
 		//Get the tile ID
 		int id = World.getTile (x, y);
 		
-		//Handle flowing water
-		if (id == 11 || id == 12 || (id >= 112 && id <= 117)) {
+		//Handle flowing
+		if (Fluids.isFluid (id)) {
 			
-			//Stone-ify lava if necessary
-			if (isLava (World.getTile (x, y + 1))) {
-				transformLava (x, y + 1);
+			//Grab all the needed tile IDs
+			int tid = id;
+			int topId = World.getTile (x, y - 1);
+			int downId = World.getTile (x, y + 1);
+			int leftId = World.getTile (x - 1, y);
+			int rightId = World.getTile (x + 1, y);
+			
+			//Check if fluid should be removed
+			if (Fluids.isFlowingWater (tid)) {
+				if (!Fluids.isWater (topId) && 
+					(!(Fluids.isWater (leftId) && (Fluids.getFlowLevel (leftId) > Fluids.getFlowLevel (tid)))) && 
+					(!(Fluids.isWater (rightId) && (Fluids.getFlowLevel (rightId) > Fluids.getFlowLevel (tid))))) {
+						World.placeTile (0, x, y);
+						tickNearby (x, y);
+				}
 			}
-			if (isLava (World.getTile (x - 1, y))) {
-				transformLava (x - 1, y);
-			}
-			if (isLava (World.getTile (x + 1, y))) {
-				transformLava (x + 1, y);
+			if (Fluids.isFlowingLava (tid)) {
+				if (!Fluids.isLava (topId) && 
+					(!(Fluids.isLava (leftId) && (Fluids.getFlowLevel (leftId) > Fluids.getFlowLevel (tid)))) && 
+					(!(Fluids.isLava (rightId) && (Fluids.getFlowLevel (rightId) > Fluids.getFlowLevel (tid))))) {
+						World.placeTile (0, x, y);
+						tickNearby (x, y);
+				}
 			}
 			
-			if (!checkWaterPriority (id, World.getTile (x, y + 1))) {
-				if (!isWater (World.getTile (x, y + 1))) {
-					int wid = id;
-					if (id == 11) {
-						wid = 112;
-					}
-					if (id == 12) {
-						wid = 111;
-					}
-					if (checkWaterPriority (id, World.getTile (x - 1, y))) {
-						//Tile to the left
-						World.setTile (wid + 1, x - 1, y); //Flowing_Water_1+
-						if (World.getTile (x - 1, y + 1) == 11) { //Merge from above
-							World.setTile (12, x - 1, y + 1);
-						}
-						if (isLava (World.getTile (x - 1, y + 1))) { //Cool lava if needed
-							transformLava (x - 1, y + 1);
-						}
-						tickNearby (x - 1, y);
-					}
-					if (checkWaterPriority (id, World.getTile (x + 1, y))) {
-						//Tile to the right
-						World.setTile (wid + 1, x + 1, y); //Flowing_Water_1+
-						if (World.getTile (x + 1, y + 1) == 11) { //Merge from above
-							World.setTile (12, x + 1, y + 1);
-						}
-						if (isLava (World.getTile (x + 1, y + 1))) { //Cool lava if needed
-							transformLava (x + 1, y + 1);
-						}
-						tickNearby (x + 1, y);
-					}
+			//Check flowing down first
+			boolean canFlowSideways = true;
+			if ((Fluids.isWater (tid) && Fluids.isWater (downId) && Fluids.getFlowLevel (downId) >= 7) || (Fluids.isLava (tid) && Fluids.isLava (downId) && Fluids.getFlowLevel (downId) >= 7)) {
+				canFlowSideways = false;
+			}
+			if (Fluids.checkFluidPriority (tid, downId)) {
+				if (!((Fluids.isWater (tid) && Fluids.isLava (downId)) || (Fluids.isLava (tid) && Fluids.isWater (downId)))) {
+					canFlowSideways = false;
 				}
-			} else {
-				World.setTile (12, x, y + 1); //Flowing_Water_0
-				if (World.getTile (x, y + 2) == 11) { //Merge from above
-					World.setTile (12, x, y + 2);
-				}
+				World.flowTo (x, y, x, y + 1);
 				tickNearby (x, y + 1);
 			}
+			if (canFlowSideways) {
+				if (Fluids.canFlow (tid)) {
+					if (Fluids.checkFluidPriority (tid, leftId)) {
+						World.flowTo (x, y, x - 1, y);
+						tickNearby (x - 1, y);
+					}
+					if (Fluids.checkFluidPriority (tid, rightId)) {
+						World.flowTo (x, y, x + 1, y);
+						tickNearby (x + 1, y + 1);
+					}
+				}
+			}
+			
 		}
 		
+		
 		//Handle flowing lava
-		if (id == 13 || id == 14 || (id >= 119 && id <= 124)) {
-			
-			//Stone-ify water if necessary
-			if (isWater (World.getTile (x, y + 1))) {
-				World.setTile (16, x, y + 1);
-			}
-			if (isWater (World.getTile (x - 1, y))) {
-				World.setTile (23, x - 1, y);
-			}
-			if (isWater (World.getTile (x + 1, y))) {
-				World.setTile (23, x + 1, y);
-			}
-			
-			if (!checkLavaPriority (id, World.getTile (x, y + 1))) {
-				if (!isLava (World.getTile (x, y + 1))) {
-					int wid = id;
-					if (id == 13) {
-						wid = 119;
-					}
-					if (id == 14) {
-						wid = 118;
-					}
-					if (checkLavaPriority (id, World.getTile (x - 1, y))) {
-						World.setTile (wid + 1, x - 1, y); //Flowing_Lava_1+
-						if (World.getTile (x - 1, y + 1) == 13) { //Merge from above
-							World.setTile (14, x - 1, y + 1);
-						}
-						if (isWater (World.getTile (x - 1, y + 1))) { //Stone-fiy water if needed
-							World.setTile (16, x - 1, y + 1);
-						}
-						tickNearby (x - 1, y);
-					}
-					if (checkLavaPriority (id, World.getTile (x + 1, y))) {
-						World.setTile (wid + 1, x + 1, y); //Flowing_Lava_1+
-						if (World.getTile (x + 1, y + 1) == 13) { //Merge from above
-							World.setTile (14, x + 1, y + 1);
-						}
-						if (isWater (World.getTile (x + 1, y + 1))) { //Stone-fiy water if needed
-							World.setTile (16, x + 1, y + 1);
-						}
-						tickNearby (x + 1, y);
-					}
-				}
-			} else {
-				World.setTile (14, x, y + 1); //Flowing_Lava_0
-				if (World.getTile (x, y + 2) == 13) { //Merge from above
-					World.setTile (14, x, y + 2);
-				}
-				tickNearby (x, y + 1);
-			}
-		}
 		
 	}
 	
@@ -1204,39 +1170,50 @@ public class World {
 		
 	}
 	
-	private static boolean checkWaterPriority (int src, int dest) {
+	private static boolean checkForFluidUpdate (int x, int y) {
 		
-		//Air
-		if (dest == 0) {
-			return true;
+		//Grab all the needed tile IDs
+		int tid = World.getTile (x, y);
+		int topId = World.getTile (x, y - 1);
+		int downId = World.getTile (x, y + 1);
+		int leftId = World.getTile (x - 1, y);
+		int rightId = World.getTile (x + 1, y);
+		
+		//Check if flow is not possible
+		if (Fluids.isFlowingWater (tid)) {
+			if (!Fluids.isWater (topId) && 
+				(!(Fluids.isWater (leftId) && (Fluids.getFlowLevel (leftId) > Fluids.getFlowLevel (tid)))) && 
+				(!(Fluids.isWater (rightId) && (Fluids.getFlowLevel (rightId) > Fluids.getFlowLevel (tid))))) {
+					return true;
+			}
+		}
+		if (Fluids.isFlowingLava (tid)) {
+			if (!Fluids.isLava (topId) && 
+				(!(Fluids.isLava (leftId) && (Fluids.getFlowLevel (leftId) > Fluids.getFlowLevel (tid)))) && 
+				(!(Fluids.isLava (rightId) && (Fluids.getFlowLevel (rightId) > Fluids.getFlowLevel (tid))))) {
+					return true;
+			}
 		}
 		
-		//Water source or vertical flowing water
-		if (dest == 11 || dest == 12) {
-			return false;
+		//Check water priorities
+		if (Fluids.isWater (tid)) {
+			if (!(Fluids.isWater (downId) && Fluids.getFlowLevel (downId) >= 7)) {
+				if (Fluids.checkFluidPriority (tid, downId) ||
+					Fluids.checkFluidPriority (tid, leftId) ||
+					Fluids.checkFluidPriority (tid, rightId)) {
+						return true;
+				}
+			}
 		}
 		
-		//All other flowing water
-		if (dest >= 112 && dest <= 118) {
-			//From downward flowing water
-			if (src == 12) {
-				if (dest == 112) {
-					return false;
-				} else {
-					return true;
+		//Check lava priorities
+		if (Fluids.isLava (tid)) {
+			if (!(Fluids.isLava (downId) && Fluids.getFlowLevel (downId) >= 7)) {
+				if (Fluids.checkFluidPriority (tid, downId) ||
+					Fluids.checkFluidPriority (tid, leftId) ||
+					Fluids.checkFluidPriority (tid, rightId)) {
+						return true;
 				}
-			}
-			//From water source
-			if (src == 11) {
-				if (dest <= 113) {
-					return false;
-				} else {
-					return true;
-				}
-			}
-			//From regular flowing water
-			if (src < dest - 1) {
-				return true;
 			}
 		}
 		
@@ -1245,65 +1222,51 @@ public class World {
 		
 	}
 	
-	private static boolean checkLavaPriority (int src, int dest) {
+	private static void flowTo (int sourceX, int sourceY, int destX, int destY) {
 		
-		//Air
-		if (dest == 0) {
-			return true;
-		}
+		int sId = World.getTile (sourceX, sourceY);
+		int dId = World.getTile (destX, destY);
 		
-		//Water source or vertical flowing lava
-		if (dest == 13 || dest == 14) {
-			return false;
-		}
-		
-		//All other flowing lava
-		if (dest >= 119 && dest <= 125) {
-			//From downward flowing lava
-			if (src == 14) {
-				if (dest == 119) {
-					return false;
-				} else {
-					return true;
-				}
+		//Water into lava case
+		if (Fluids.isWater (sId) && Fluids.isLava (dId)) {
+			if (Fluids.isLavaSource (dId)) {
+				World.placeTile (15, destX, destY); //Obsidian
+			} else {
+				World.placeTile (23, destX, destY); //Cobble
 			}
-			//From lava source
-			if (src == 13) {
-				if (dest <= 120) {
-					return false;
-				} else {
-					return true;
-				}
-			}
-			//From regular flowing lava
-			if (src < dest - 1) {
-				return true;
-			}
+			return;
 		}
 		
-		//Return false in all other cases
-		return false;
-		
-	}
-	
-	private static boolean isWater (int tid) {
-		return tid == 11 || tid == 12 || (tid >= 112 && tid <= 118);
-	}
-	
-	private static boolean isFlowingWater (int tid) {
-		return tid == 12 || (tid >= 112 && tid <= 118);
-	}
-	
-	private static boolean isLava (int tid) {
-		return tid == 13 || tid == 14 || (tid >= 119 && tid <= 125);
-	}
-	
-	private static void transformLava (int x, int y) {
-		if (World.getTile (x, y) == 13) {
-			World.setTile (15, x, y);
-		} else {
-			World.setTile (23, x, y);
+		//Lava into water case
+		if (Fluids.isLava (sId) && Fluids.isWater (dId)) {
+			if (destX == sourceX || destY == sourceY + 1) {
+				World.placeTile (16, destX, destY); //Stone
+			} else {
+				World.placeTile (23, destX, destY); //Cobble
+			}
+			return;
 		}
+		
+		//Water general case
+		if (Fluids.isWater (sId)) {
+			if (destX == sourceX || destY == sourceY + 1) {
+				World.placeTile (Fluids.WATER_FLOWING_START_ID, destX, destY);
+			} else {
+				World.placeTile (Fluids.getNextFlowId (sId), destX, destY);
+			}
+			return;
+		}
+		
+		//Lava general case
+		if (Fluids.isLava (sId)) {
+			if (destX == sourceX || destY == sourceY + 1) {
+				World.placeTile (Fluids.LAVA_FLOWING_START_ID, destX, destY);
+			} else {
+				World.placeTile (Fluids.getNextFlowId (sId), destX, destY);
+			}
+			return;
+		}
+		
 	}
 	
 	public static class WorldReigon {

@@ -80,28 +80,13 @@
 	"unbreakable":true,
 	"transparent":true
 },
-"12":{
-	"name":"Flowing_Water_0",
-	"type":"water",
-	"fluid":true,
-	"solid":false,
-	"unbreakable":true,
-	"transparent":true
-},
 "13":{
 	"name":"Lava",
 	"type":"lava",
 	"fluid":true,
 	"solid":false,
 	"unbreakable":true,
-	"light":8
-},
-"14":{
-	"name":"Flowing_Lava_0",
-	"type":"lava",
-	"fluid":true,
-	"solid":false,
-	"unbreakable":true,
+	"transparent":true,
 	"light":8
 },
 "15":{
@@ -561,7 +546,7 @@
 	"transparent":true
 },
 "119":{
-	"name":"Flowing_Lava_1",
+	"name":"Flowing_Water_8",
 	"type":"water",
 	"fluid":true,
 	"solid":false,
@@ -569,51 +554,75 @@
 	"transparent":true
 },
 "120":{
-	"name":"Flowing_Lava_2",
-	"type":"water",
+	"name":"Flowing_Lava_1",
+	"type":"lava",
 	"fluid":true,
 	"solid":false,
 	"unbreakable":true,
-	"transparent":true
+	"transparent":true,
+	"light":8
 },
 "121":{
-	"name":"Flowing_Lava_3",
-	"type":"water",
+	"name":"Flowing_Lava_2",
+	"type":"lava",
 	"fluid":true,
 	"solid":false,
 	"unbreakable":true,
-	"transparent":true
+	"transparent":true,
+	"light":8
 },
 "122":{
-	"name":"Flowing_Lava_4",
-	"type":"water",
+	"name":"Flowing_Lava_3",
+	"type":"lava",
 	"fluid":true,
 	"solid":false,
 	"unbreakable":true,
-	"transparent":true
+	"transparent":true,
+	"light":8
 },
 "123":{
-	"name":"Flowing_Lava_5",
-	"type":"water",
+	"name":"Flowing_Lava_4",
+	"type":"lava",
 	"fluid":true,
 	"solid":false,
 	"unbreakable":true,
-	"transparent":true
+	"transparent":true,
+	"light":8
 },
 "124":{
-	"name":"Flowing_Lava_6",
-	"type":"water",
+	"name":"Flowing_Lava_5",
+	"type":"lava",
 	"fluid":true,
 	"solid":false,
 	"unbreakable":true,
-	"transparent":true
+	"transparent":true,
+	"light":8
 },
 "125":{
-	"name":"Flowing_Lava_7",
-	"type":"water",
+	"name":"Flowing_Lava_6",
+	"type":"lava",
 	"fluid":true,
 	"solid":false,
 	"unbreakable":true,
-	"transparent":true
+	"transparent":true,
+	"light":8
+},
+"126":{
+	"name":"Flowing_Lava_7",
+	"type":"lava",
+	"fluid":true,
+	"solid":false,
+	"unbreakable":true,
+	"transparent":true,
+	"light":8
+},
+"127":{
+	"name":"Flowing_Lava_8",
+	"type":"lava",
+	"fluid":true,
+	"solid":false,
+	"unbreakable":true,
+	"transparent":true,
+	"light":8
 }
 }
