@@ -33,7 +33,7 @@ public abstract class GameAPI {
 	 * @param charCode The character code to check for
 	 * @return Whether the given key was pressed
 	 */
-	public boolean keyPressed (int charCode) {
+	public static boolean keyPressed (int charCode) {
 		return MainLoop.getInputImage ().keyPressed (charCode);
 	}
 	
@@ -42,7 +42,7 @@ public abstract class GameAPI {
 	 * @param charCode The character code to check for
 	 * @return Whether the given key was released
 	 */
-	public boolean keyReleased (int charCode) {
+	public static boolean keyReleased (int charCode) {
 		return MainLoop.getInputImage ().keyReleased (charCode);
 	}
 	
@@ -51,7 +51,7 @@ public abstract class GameAPI {
 	 * @param charCode The character code to check for
 	 * @return Whether the given key is pressed down
 	 */
-	public boolean keyDown (int charCode) {
+	public static boolean keyDown (int charCode) {
 		return MainLoop.getInputImage ().keyDown (charCode);
 	}
 	
@@ -59,7 +59,7 @@ public abstract class GameAPI {
 	 * Gets a list of the keys currently pressed down, sorted from lowest to highest character code.
 	 * @return A char[] representing all the keys currently pressed down
 	 */
-	public char[] getKeysDown () {
+	public static char[] getKeysDown () {
 		return MainLoop.getInputImage ().getKeysDown ();
 	}
 	
@@ -67,7 +67,7 @@ public abstract class GameAPI {
 	 * Gets a list of all the keys events fired since the last call to resetKeyBuffers() in the order they were pressed.
 	 * @return A LinkedList representing all of the key events
 	 */
-	public LinkedList<KeyEvent> getKeyEvents () {
+	public static LinkedList<KeyEvent> getKeyEvents () {
 		return MainLoop.getInputImage ().getKeyEvents ();
 	}
 	
@@ -75,7 +75,7 @@ public abstract class GameAPI {
 	 * Gets a list of the text typed since the last call to resetKeyBuffers(); responds to key combinations.
 	 * @return The text typed since calling resetKeyBuffers
 	 */
-	public String getTyped () {
+	public static String getTyped () {
 		return MainLoop.getInputImage ().getTyped ();
 	}
 	
@@ -84,10 +84,10 @@ public abstract class GameAPI {
 	 * @param button The mouse button to check
 	 * @return Whether the button is clicked
 	 */
-	public boolean mouseButtonClicked (int button) {
+	public static boolean mouseButtonClicked (int button) {
 		return MainLoop.getInputImage ().mouseButtonClicked (button);
 	}
-	public boolean mouseButtonPressed(int button) {
+	public static boolean mouseButtonPressed(int button) {
 		return MainLoop.getInputImage().mouseButtonPressed(button);
 	}
 	/**
@@ -95,7 +95,7 @@ public abstract class GameAPI {
 	 * @param button The mouse button to check
 	 * @return Whether the button was released
 	 */
-	public boolean mouseButtonReleased (int button) {
+	public static boolean mouseButtonReleased (int button) {
 		return MainLoop.getInputImage ().mouseButtonReleased (button);
 	}
 	
@@ -104,7 +104,7 @@ public abstract class GameAPI {
 	 * @param button The mouse button to check
 	 * @return Whether the button is held down
 	 */
-	public boolean mouseButtonDown (int button) {
+	public static boolean mouseButtonDown (int button) {
 		return MainLoop.getInputImage ().mouseButtonDown (button);
 	}
 	
@@ -128,7 +128,7 @@ public abstract class GameAPI {
 	 * Gets a list of all the mosue events fired since the last call to resetKeyBuffers() in the order they were pressed.
 	 * @return A LinkedList representing all of the recent mouse events
 	 */
-	public LinkedList<MouseEvent> getMouseEvents () {
+	public static LinkedList<MouseEvent> getMouseEvents () {
 		return MainLoop.getInputImage ().getMouseEvents ();
 	}
 	

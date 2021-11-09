@@ -17,6 +17,7 @@
 	"min_height":0,
 	"max_height":16,
 	"min_attempts":5,
-	"max_attempts":10
+	"max_attempts":10,
+	"dimension":0
 }
 }

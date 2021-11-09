@@ -16,6 +16,7 @@
 	"height":6,
 	"spawn_type":"surface",
 	"min_attempts":2,
-	"max_attempts":7
+	"max_attempts":7,
+	"dimension":0
 }
 }

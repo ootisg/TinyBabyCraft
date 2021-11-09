@@ -33,6 +33,7 @@ import json.JSONArray;
 import json.JSONException;
 import json.JSONObject;
 import json.JSONUtil;
+import main.GameAPI;
 import main.GameObject;
 import main.MainLoop;
 import resources.Sprite;
@@ -80,6 +81,7 @@ public class World {
 	
 	private static long worldTime;
 	private static int globalTickCount;
+	private static int loadedDimension = 0;
 	private static HashMap<Integer, ArrayList<Point>> schedTicks;
 	
 	public static JSONObject tileProperties;
@@ -217,6 +219,12 @@ public class World {
 	
 	public static void worldFrame () {
 		worldTime = System.currentTimeMillis ();
+		if (GameAPI.keyPressed('Q')) {
+			savePlayer ();
+			unloadAll ();
+			loadedDimension = loadedDimension == 0 ? 1 : 0;
+			World.updateReigons ();
+		}
 	}
 	
 	public static void loadStructures () {
@@ -354,7 +362,18 @@ public class World {
 		
 		//Draw the background (sky)
 		Graphics g = MainLoop.getWindow ().getBufferGraphics ();
-		g.setColor (new Color (0x97ECEF));
+		switch (loadedDimension) {
+			case 0:
+				g.setColor (new Color (0x97ECEF));
+				break;
+			case 1:
+				g.setColor (new Color (0x600000));
+				break;
+			case 2:
+				break;
+			default:
+				break;
+		}
 		g.fillRect (0, 0, SCREEN_SIZE_H * 8, SCREEN_SIZE_V * 8);
 		
 		//Draw the tiles
@@ -666,20 +685,20 @@ public class World {
 	public static WorldReigon getReigon (int x) {
 		for (int i = 0; i < reigons.size (); i++) {
 			WorldReigon current = reigons.get (i);
-			if (getReigonId (x) == current.id) {
+			if (getReigonId (x) == current.id && current.dimension == loadedDimension) {
 				return current;
 			}
 		}
 		
 		//Reigon was not loaded, load it then return it
-		return loadReigon (getReigonId (x), 0);
+		return loadReigon (getReigonId (x), loadedDimension);
 	}
 	
 	public static boolean isReigonLoaded (int id, int dimension) {
 		//Copy-pasted code, eew
 		for (int i = 0; i < reigons.size (); i++) {
 			WorldReigon current = reigons.get (i);
-			if (id == current.id) {
+			if (id == current.id && current.dimension == loadedDimension) {
 				return true;
 			}
 		}
@@ -706,7 +725,7 @@ public class World {
 			int rgId = getReigonId (wx);
 			if (rgId != prevId || wx == loadLeft) {
 				if (!isReigonLoaded (rgId, 0)) {
-					loadReigon (rgId, 0);
+					loadReigon (rgId, loadedDimension);
 				}
 			}
 			prevId = rgId;
@@ -727,6 +746,7 @@ public class World {
 	public static WorldReigon loadReigon (int id, int dimension) {
 		WorldReigon rg = new WorldReigon (id, dimension);
 		reigons.add (rg);
+		rg.load ();
 		return rg;
 	}
 	
@@ -736,31 +756,69 @@ public class World {
 		}
 	}
 	
+	public static void unloadAll () {
+		for (int i = 0; i < reigons.size (); i++) {
+			reigons.get (i).unload ();
+		}
+	}
+	
 	public static void savePlayer () {
 		player.save ();
 	}
 	
-	public static ArrayList<Integer> generateColumn (int x) {
-		int SEA_LEVEL = 63;
+	public static ArrayList<Integer> generateColumn (int x, int dimension) {
+		
 		Integer[] result = new Integer[WORLD_HEIGHT];
-		int genHeight = heightGen.getTerrainHeight (x);
-		for (int i = 0; i < genHeight; i++) {
-			if (i < SEA_LEVEL) {
-				result [i] = 0;
-			} else if (i == SEA_LEVEL) {
-				result [i] = 11;
-			} else {
-				result [i] = 11;
+		ArrayList<Integer> arrList = new ArrayList<Integer> ();
+		
+		//Overworld
+		if (dimension == 0) {
+			int SEA_LEVEL = 63;
+			int genHeight = heightGen.getTerrainHeight (x);
+			for (int i = 0; i < genHeight; i++) {
+				if (i < SEA_LEVEL) {
+					result [i] = 0;
+				} else if (i == SEA_LEVEL) {
+					result [i] = 11;
+				} else {
+					result [i] = 11;
+				}
+			}
+			result[genHeight] = 1;
+			result[genHeight + 1] = 2;
+			for (int i = genHeight + 2; i < WORLD_HEIGHT; i++) {
+				result [i] = 16;
 			}
 		}
-		result[genHeight] = 1;
-		result[genHeight + 1] = 2;
-		for (int i = genHeight + 2; i < WORLD_HEIGHT; i++) {
-			result [i] = 16;
+		
+		//Nether
+		if (dimension == 1) {
+			int SEA_LEVEL = 63;
+			int genHeight = heightGen.getTerrainHeight (x);
+			for (int i = 0; i < genHeight; i++) {
+				if (i < SEA_LEVEL) {
+					result [i] = 0;
+				} else if (i == SEA_LEVEL) {
+					result [i] = 13;
+				} else {
+					result [i] = 13;
+				}
+			}
+			result[genHeight] = 31;
+			result[genHeight + 1] = 31;
+			for (int i = genHeight + 2; i < WORLD_HEIGHT; i++) {
+				result [i] = 31;
+			}
 		}
-		ArrayList<Integer> arrList = new ArrayList<Integer> ();
+		
+		//End
+		if (dimension == 2) {
+			
+		}
+		
 		Collections.addAll (arrList, result);
 		return arrList;
+		
 	}
 	
 	public static BufferedImage getItem (int id) {
@@ -954,7 +1012,6 @@ public class World {
 	}
 	
 	public static void populateReigon (WorldReigon rg) {
-		//Scatter some trees
 		
 		//Get the list of structures
 		Iterator<Entry<String, Structure>> iter = structures.entrySet ().iterator ();
@@ -968,30 +1025,32 @@ public class World {
 			
 			//Get the reigon x and make the RNG
 			int reigonX = rg.id * WorldReigon.REIGON_SIZE;
-			Random r = new Random (seed + rg.id * 49390927); //Prime number witchcraft
+			Random r = new Random (seed + rg.id * 49390927 + rg.dimension + 71111111); //Prime number witchcraft
 			
 			//Generate spawn attempt values for the struct
-			int minAttempts = (int)struct.getMetaProperty ("min_attempts");
-			int maxAttempts = (int)struct.getMetaProperty ("max_attempts");
-			int numAttempts = minAttempts + (int)(r.nextDouble () * (maxAttempts - minAttempts));
-			
-			//Spawn for surface structures
-			if (struct.getMetaProperty ("spawn_type").equals ("surface")) {
-				for (int i = 0; i < numAttempts; i++) {
-					int spawnX = r.nextInt (WorldReigon.REIGON_SIZE) + reigonX;
-					putStructure (structName, spawnX * 8, rg.getCeilingHeight (spawnX) * 8 - 8);
+			if ((int)struct.getMetaProperty ("dimension") == rg.dimension) {
+				int minAttempts = (int)struct.getMetaProperty ("min_attempts");
+				int maxAttempts = (int)struct.getMetaProperty ("max_attempts");
+				int numAttempts = minAttempts + (int)(r.nextDouble () * (maxAttempts - minAttempts));
+				
+				//Spawn for surface structures
+				if (struct.getMetaProperty ("spawn_type").equals ("surface")) {
+					for (int i = 0; i < numAttempts; i++) {
+						int spawnX = r.nextInt (WorldReigon.REIGON_SIZE) + reigonX;
+						putStructure (structName, spawnX * 8, rg.getCeilingHeight (spawnX) * 8 - 8);
+					}
 				}
-			}
-			
-			//Spawn for regular structures
-			else if (struct.getMetaProperty ("spawn_type").equals ("regular")) {
-				for (int i = 0; i < numAttempts; i++) {
-					//Get min and max y
-					int minHeight = WORLD_HEIGHT - (int)struct.getMetaProperty ("min_height");
-					int maxHeight = WORLD_HEIGHT - (int)struct.getMetaProperty ("max_height");
-					int randX = r.nextInt (WorldReigon.REIGON_SIZE) + reigonX;
-					int randY = r.nextInt (minHeight - maxHeight) + maxHeight;
-					putStructure (structName, randX * 8, randY * 8);
+				
+				//Spawn for regular structures
+				else if (struct.getMetaProperty ("spawn_type").equals ("regular")) {
+					for (int i = 0; i < numAttempts; i++) {
+						//Get min and max y
+						int minHeight = WORLD_HEIGHT - (int)struct.getMetaProperty ("min_height");
+						int maxHeight = WORLD_HEIGHT - (int)struct.getMetaProperty ("max_height");
+						int randX = r.nextInt (WorldReigon.REIGON_SIZE) + reigonX;
+						int randY = r.nextInt (minHeight - maxHeight) + maxHeight;
+						putStructure (structName, randX * 8, randY * 8);
+					}
 				}
 			}
 			
@@ -1275,6 +1334,7 @@ public class World {
 		
 		private int id;
 		private int dimension;
+		private boolean filled = false;
 		
 		public ArrayList<ArrayList<Integer>> data;
 		private ArrayList<Entity> entities;
@@ -1283,6 +1343,16 @@ public class World {
 		public WorldReigon (int id, int dimension) {
 			this.id = id;
 			this.dimension = dimension; //Save id and dimension for later use
+			this.filled = false;
+		}
+		
+		public void load () {
+			
+			//Create entities list/map
+			entities = new ArrayList<Entity> ();
+			entityMap = new HashMap<UUID, Entity> ();
+			
+			//Initialize stuff
 			data = new ArrayList<ArrayList<Integer>> (); //Initialize the data array
 			for (int i = 0; i < REIGON_SIZE; i++) {
 				data.add (null); //Fill the array to proper size
@@ -1310,15 +1380,13 @@ public class World {
 				s.close (); //Close the file
 			} else {
 				for (int wx = 0; wx < REIGON_SIZE; wx++) {
-					ArrayList<Integer> tiles = generateColumn (id * REIGON_SIZE + wx);
+					ArrayList<Integer> tiles = generateColumn (id * REIGON_SIZE + wx, dimension);
 					data.set (wx, tiles);
 				} //Generate the tiles
 				World.populateReigon (this); //Populate the reigon with structures
 			}
 			
 			//Load in the entities
-			entities = new ArrayList<Entity> ();
-			entityMap = new HashMap<UUID, Entity> ();
 			filepath = "saves/" + worldName + "/" + getEntityFileName (id, dimension);
 			f = new File (filepath); //Get the reigon file
 			if (f.exists ()) {
@@ -1350,6 +1418,7 @@ public class World {
 			} else {
 				//TODO spawn in entities
 			}
+			this.filled = true;
 		}
 		
 		public void unload () {

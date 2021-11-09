@@ -1,0 +1,22 @@
+{
+"entities": [
+],
+"tiles": {
+	"base":	[[0,15,15,15,0],
+			 [15,15,15,15,15],
+			 [15,15,15,15,15],
+			 [0,0,23,0,0],
+			 [0,0,23,0,0],
+			 [0,0,23,0,0]]
+},
+"meta": {
+	"name":"obsiditree",
+	"center":[2,5],
+	"width":5,
+	"height":6,
+	"spawn_type":"surface",
+	"min_attempts":2,
+	"max_attempts":7,
+	"dimension":1
+}
+}
