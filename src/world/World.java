@@ -1446,7 +1446,19 @@ public class World {
 				//If a run has been found
 				if (matchesReigon) {
 					if (working.getReigonId () == id) {
+						
+						//Remove the Entity from the world
 						iter.remove ();
+						
+						//Remove the Entity from the list of Tile Entities (if applicable)
+						JSONObject typeProperties = working.getTypeProperties ();
+						Boolean b = (Boolean)typeProperties.get ("tileEntity");
+						if (b != null && b) {
+							System.out.println (working);
+							Point p = new Point (working.getInt ("x"), working.getInt ("y"));
+							tileEntities.remove (p);
+						}
+						
 					} else {
 						break;
 					}

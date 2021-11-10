@@ -8,7 +8,7 @@ public class StructSpawner extends EntityObject {
 	public StructSpawner (Entity e) {
 		super (e);
 		if (World.inLoadBounds (e.getInt ("x") / 8)) {
-			spawnStructure ();
+			//spawnStructure ();
 		}
 		// TODO Auto-generated constructor stub
 	}
