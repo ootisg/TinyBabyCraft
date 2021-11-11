@@ -489,6 +489,19 @@
 	"solid":false,
 	"transparent":true
 },
+"96":{
+	"name":"Glowstone",
+	"type":"glass",
+	"toughness":10,
+	"transparent":true,
+	"drop":"Glowstone",
+	"light":15
+},
+"97":{
+	"name":"Nether Brick",
+	"type":"stone",
+	"toughness":40,
+},
 "112":{
 	"name":"Flowing_Water_1",
 	"type":"water",

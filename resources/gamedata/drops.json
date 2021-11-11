@@ -37,6 +37,13 @@
         "max":6
     }
 ],
+"Glowstone":[
+    {
+        "id":267,
+        "min":1,
+        "max":4
+    }
+]
 "Furnace":[
 	{
 		"id":26

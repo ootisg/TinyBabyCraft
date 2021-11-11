@@ -239,6 +239,14 @@
 	"name":"Sapling",
 	"placeScript":"Sapling"
 },
+"96":{
+	"name":"Glowstone",
+	"placeable":true
+},
+"97":{
+	"name":"Nether Brick",
+	"placeable":true
+},
 "256":{
 	"name":"Stick",
 	"fuelTime":1
@@ -273,6 +281,9 @@
 },
 "266":{
 	"name":"Air Crystal"
+},
+"267":{
+	"name":"Glowstone Dust"
 },
 "268":{
 	"name":"Leather Cap",
