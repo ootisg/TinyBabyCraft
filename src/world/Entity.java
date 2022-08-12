@@ -72,7 +72,7 @@ public class Entity implements Comparable<Entity> {
 	}
 	
 	public int getReigonId () {
-		return World.getReigonId ((int)obj.getX ());
+		return World.getReigonId ((int)obj.getX () / 8);
 	}
 	
 	public boolean isActive () {

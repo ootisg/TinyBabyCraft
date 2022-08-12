@@ -327,7 +327,7 @@ public class World {
 			FileWriter fw;
 			try {
 				fw = new FileWriter (f);
-				fw.append ("x:0\ny:496");
+				fw.append ("x:0\ny:496\ndimension:0");
 				fw.close ();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -353,6 +353,9 @@ public class World {
 				String[] split = working.split (":");
 				playerAttributes.put (split [0], split [1]);
 			} //Put attributes into a HashMap
+			
+			//Set the dimension to the dimension the player is currently in
+			loadedDimension = Integer.parseInt (playerAttributes.get ("dimension"));
 			
 			player = new Player (playerAttributes); //Make a player with the given attributes
 		}
@@ -404,6 +407,10 @@ public class World {
 				}
 			}
 		}
+	}
+	
+	public static int getLoadedDimension () {
+		return loadedDimension;
 	}
 	
 	public static int getViewX () {
@@ -757,8 +764,9 @@ public class World {
 	}
 	
 	public static void unloadAll () {
-		for (int i = 0; i < reigons.size (); i++) {
-			reigons.get (i).unload ();
+		//Unload all reigons
+		while (!reigons.isEmpty ()) {
+			reigons.get (0).unload ();
 		}
 	}
 	
@@ -1422,7 +1430,7 @@ public class World {
 		}
 		
 		public void unload () {
-			
+
 			//Sort for efficiency *puts on programmer sunglasses*
 			Collections.sort (World.entities);
 			
@@ -1448,15 +1456,17 @@ public class World {
 					if (working.getReigonId () == id) {
 						
 						//Remove the Entity from the world
+						working.getObject ().forget ();
 						iter.remove ();
 						
 						//Remove the Entity from the list of Tile Entities (if applicable)
 						JSONObject typeProperties = working.getTypeProperties ();
-						Boolean b = (Boolean)typeProperties.get ("tileEntity");
-						if (b != null && b) {
-							System.out.println (working);
-							Point p = new Point (working.getInt ("x"), working.getInt ("y"));
-							tileEntities.remove (p);
+						if (typeProperties != null) {
+							Boolean b = (Boolean)typeProperties.get ("tileEntity");
+							if (b != null && b) {
+								Point p = new Point (working.getInt ("x"), working.getInt ("y"));
+								tileEntities.remove (p);
+							}
 						}
 						
 					} else {

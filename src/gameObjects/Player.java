@@ -425,6 +425,7 @@ public class Player extends GameObject {
 			fw = new FileWriter (f);
 			fw.append ("x:" + (int)getX () + "\n");
 			fw.append ("y:" + (int)getY () + "\n");
+			fw.append ("dimension:" + World.getLoadedDimension ());
 			fw.append (inventory.toString ());
 			fw.close ();
 		} catch (IOException e) {
