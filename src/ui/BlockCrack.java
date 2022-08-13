@@ -18,7 +18,7 @@ public class BlockCrack extends GameObject {
 		setSprite (crackSprite);
 	}
 	
-	public void breakTile (int amt, int x, int y) {
+	public void breakTile (int amt, int x, int y, int layer) {
 		
 		//Do damage to the tile
 		if ((int)getX () == x * 8 && (int)getY () == y * 8) {
@@ -30,7 +30,7 @@ public class BlockCrack extends GameObject {
 		}
 		
 		//Calculate the toughness and the display frame
-		JSONObject tileProperties = World.getTileProperties (World.getTile (x, y));
+		JSONObject tileProperties = World.getTileProperties (World.getTile (x, y, layer));
 		int toughness = tileProperties.getInt ("toughness");
 		displayFrame = (int)((((double)(damage)) / toughness) * 3);
 		if (displayFrame >= 3) {

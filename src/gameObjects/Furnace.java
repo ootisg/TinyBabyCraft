@@ -168,10 +168,10 @@ public class Furnace extends Container {
 		}
 		
 		if (fuel == 0) {
-			World.setTile (26, (int)getX () / 8, (int)getY () / 8);
+			World.setTile (26, (int)getX () / 8, (int)getY () / 8, 0);
 			//time = 0; TODO stuff n things
 		} else {
-			World.setTile (27, (int)getX () / 8, (int)getY () / 8);
+			World.setTile (27, (int)getX () / 8, (int)getY () / 8, 0);
 		}
 		
 		getPairedEntity ().getProperties ().put ("fuel", String.valueOf (fuel));

@@ -46,7 +46,7 @@ public class Zombie extends EntityObject {
 		//Fall
 		int tileX = (int)(getX () / 8);
 		int wy = (int)(getY () / 8) + 1;
-		while (!World.isSolid (World.getTile (tileX, wy)) && wy < 256) {
+		while (!World.isSolid (World.getTile (tileX, wy, 0)) && wy < 256) {
 			wy++;
 		}
 		wy--;

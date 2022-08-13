@@ -8,6 +8,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class InputManager {
 
@@ -34,17 +35,17 @@ public class InputManager {
 	/**
 	 * The buffer used for storing the keys which are currently pressed down
 	 */
-	private boolean[] keysDown = new boolean[256];
+	private boolean[] keysDown = new boolean[1024];
 	/**
 	 * The buffer used for storing the keys which were recently pressed down
 	 * WARNING: ACCESSED ACROSS MULTIPLE THREADS
 	 */
-	private boolean[] keysPressed = new boolean[256];
+	private boolean[] keysPressed = new boolean[1024];
 	/**
 	 * The buffer used for storing they keys which were recently released
 	 * WARNING: ACCESSED ACROSS MULTIPLE THREADS
 	 */
-	private boolean[] keysReleased = new boolean[256];
+	private boolean[] keysReleased = new boolean[1024];
 	/**
 	 * An ordered list of recent keyEvents
 	 * WARNING: ACCESSED ACROSS MULTIPLE THREADS
@@ -80,10 +81,9 @@ public class InputManager {
 	 */
 	private double cursorY;
 	/**
-	 * Whether or not the game is copying inputs
-	 * WARNING: ACCESSED ACROSS MULTIPLE THREADS
+	 * Mutex lock for copying inputs
 	 */
-	private volatile boolean copyingInputs = false;
+	private final ReentrantLock inputCopyLock = new ReentrantLock ();
 	
 	/**
 	 * Default no-arg constructor
@@ -129,7 +129,7 @@ public class InputManager {
 	 * @return An image of the current input state
 	 */
 	public InputManager createImage () {
-		copyingInputs = true;
+		inputCopyLock.lock ();
 		InputManager image = new InputManager ();
 		System.arraycopy (keysDown, 0, image.keysDown, 0, keysDown.length);
 		System.arraycopy (keysPressed, 0, image.keysPressed, 0, keysPressed.length);
@@ -151,7 +151,7 @@ public class InputManager {
 		image.cursorX = cursorX;
 		image.cursorY = cursorY;
 		image.isImage = true;
-		copyingInputs = false;
+		inputCopyLock.unlock ();
 		return image;
 	}
 	
@@ -159,25 +159,28 @@ public class InputManager {
 
 		@Override
 		public void keyPressed (KeyEvent e) {
-			lockIfCopying ();
+			inputCopyLock.lock ();
 			keysPressed [e.getKeyCode ()] = true;
 			keysDown [e.getKeyCode ()] = true;
 			keyEvents.add (e);
+			inputCopyLock.unlock ();
 		}
 
 		@Override
 		public void keyReleased (KeyEvent e) {
-			lockIfCopying ();
+			inputCopyLock.lock ();
 			keysReleased [e.getKeyCode ()] = true;
 			keysDown [e.getKeyCode ()] = false;
 			keyEvents.add (e);
+			inputCopyLock.unlock ();
 		}
 
 		@Override
 		public void keyTyped (KeyEvent e) {
-			lockIfCopying ();
+			inputCopyLock.lock ();
 			chars += e.getKeyChar ();
 			keyEvents.add (e);
+			inputCopyLock.unlock ();
 		}
 		
 	}
@@ -188,7 +191,7 @@ public class InputManager {
 		
 		@Override
 		public void mouseDragged (MouseEvent e) {
-			lockIfCopying ();
+			inputCopyLock.lock ();
 			mouseEvents.add (e);
 			int index = getButtonIndex (e.getButton ());
 			if (index != -1 && !wasDragged) {
@@ -197,13 +200,15 @@ public class InputManager {
 			}
 			wasDragged = true;
 			updateMouseCoords (e);
+			inputCopyLock.unlock ();
 		}
 
 		@Override
 		public void mouseMoved (MouseEvent e) {
-			lockIfCopying ();
+			inputCopyLock.lock ();
 			mouseEvents.add (e);
 			updateMouseCoords (e);
+			inputCopyLock.unlock ();
 		}
 
 		@Override
@@ -223,21 +228,23 @@ public class InputManager {
 
 		@Override
 		public void mouseEntered (MouseEvent e) {
-			lockIfCopying ();
+			inputCopyLock.lock ();
 			mouseEvents.add (e);
 			updateMouseCoords (e);
+			inputCopyLock.unlock ();
 		}
 
 		@Override
 		public void mouseExited (MouseEvent e) {
-			lockIfCopying ();
+			inputCopyLock.lock ();
 			mouseEvents.add (e);
 			updateMouseCoords (e);
+			inputCopyLock.unlock ();
 		}
 
 		@Override
 		public void mousePressed (MouseEvent e) {
-			lockIfCopying ();
+			inputCopyLock.lock ();
 			mouseEvents.add (e);
 			int index = getButtonIndex (e.getButton ());
 			if (index != -1) {
@@ -245,11 +252,12 @@ public class InputManager {
 				buttonsDown [index] = true;
 			}
 			updateMouseCoords (e);
+			inputCopyLock.unlock ();
 		}
 
 		@Override
 		public void mouseReleased (MouseEvent e) {
-			lockIfCopying ();
+			inputCopyLock.lock ();
 			mouseEvents.add (e);
 			int index = getButtonIndex (e.getButton ());
 			if (index != -1) {
@@ -259,6 +267,7 @@ public class InputManager {
 			}
 			updateMouseCoords (e);
 			wasDragged = false;
+			inputCopyLock.unlock ();
 		}
 		
 		private void updateMouseCoords (MouseEvent e) {
@@ -456,21 +465,23 @@ public class InputManager {
 	 * Resets all the buffers holding data for keystrokes, with the exception of the buffer holding the keys currently pressed down.
 	 */
 	public void resetKeyBuffers () {
-		lockIfCopying ();
+		inputCopyLock.lock ();
 		keysPressed = new boolean[255];
 		keysReleased = new boolean[255];
 		keyEvents = new LinkedList<KeyEvent> ();
 		chars = "";
+		inputCopyLock.unlock ();
 	}
 	
 	/**
 	 * Resets all the buffers holding data for mouse presses, with the exception of the buffer holding the mouse buttons currently pressed down.
 	 */
 	public void resetMouseBuffers () {
-		lockIfCopying ();
+		inputCopyLock.lock ();
 		clicks = new boolean[3];
 		buttonsReleased = new boolean[3];
 		mouseEvents = new LinkedList<MouseEvent> ();
+		inputCopyLock.unlock ();
 	}
 	
 	/**
@@ -480,17 +491,5 @@ public class InputManager {
 	public boolean isImage () {
 		return isImage;
 	}
-	
-	/**
-	 * Gets whether or not an image is currently being created from this InputManager
-	 * @return true if an image is being created; false otherwise
-	 */
-	public boolean isCopyingInputs () {
-		return copyingInputs;
-	}
-	
-	public void lockIfCopying () {
-		//TODO CHECK HERE FOR POTENTIAL DROPPED INPUTS
-		while (copyingInputs) {}
-	}
+
 }

@@ -24,7 +24,7 @@ public class Arrow extends EntityObject {
 		System.out.println (World.getPlayer ().getY () + ", " + getY ());
 		if (!stuck) {
 			setX (getX () + (direction == 0 ? -4 : 4));
-			if (World.isSolid (World.getTile ((int)(getX () / 8), (int)(getY () / 8)))) {
+			if (World.isSolid (World.getTile ((int)(getX () / 8), (int)(getY () / 8), 0))) {
 				forget ();
 			}
 		}

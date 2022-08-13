@@ -222,7 +222,7 @@ public class Player extends GameObject {
 	public int getTile (int xOffset, int yOffset) {
 		int tileX = (int)getX () / 8 + xOffset;
 		int tileY = (int)getY () / 8 + yOffset;
-		return World.getTile (tileX, tileY);
+		return World.getTile (tileX, tileY, 0); //For collision and logic, always use the foreground layer
 	}
 	
 	public int getUiState () {
@@ -425,7 +425,7 @@ public class Player extends GameObject {
 			fw = new FileWriter (f);
 			fw.append ("x:" + (int)getX () + "\n");
 			fw.append ("y:" + (int)getY () + "\n");
-			fw.append ("dimension:" + World.getLoadedDimension ());
+			fw.append ("dimension:" + World.getLoadedDimension () + "\n");
 			fw.append (inventory.toString ());
 			fw.close ();
 		} catch (IOException e) {

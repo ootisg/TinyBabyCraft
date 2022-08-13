@@ -38,7 +38,7 @@ public class TileInterface extends GameObject {
 	public void frameEvent () {
 		if (enabled) {
 			int workingId = World.getPlayer ().getSelectedItem ();
-			int currentTile = World.getTile (getHoveredTileX (), getHoveredTileY ());
+			int currentTile = World.getTile (getHoveredTileX (), getHoveredTileY (), 0); //TODO bg layer stuff
 			JSONObject properties = World.getTileProperties (currentTile);
 			if (reachableFromPlayer (getHoveredTileX (), getHoveredTileY ())) {
 				if (mouseButtonClicked (0)) {
@@ -53,7 +53,7 @@ public class TileInterface extends GameObject {
 								hitStrength = 2;
 							}
 						}
-						crackAnim.breakTile (hitStrength, getHoveredTileX (), getHoveredTileY ());
+						crackAnim.breakTile (hitStrength, getHoveredTileX (), getHoveredTileY (), 0); //TODO bg layer stuff
 					}
 				}
 				if (mouseButtonClicked (2)) {
@@ -83,7 +83,7 @@ public class TileInterface extends GameObject {
 								String placeScriptName = Inventory.itemProperties.getJSONObject (Integer.toString(workingId)).getString ("placeScript");
 								if (placeScriptName == null) {
 									if (World.getPlayer ().useSelectedItem () == 1) {
-										World.placeTile (workingId, getHoveredTileX (), getHoveredTileY ());
+										World.placeTile (workingId, getHoveredTileX (), getHoveredTileY (), 0); //TODO bg layer stuff
 										if (workingId == 26) {
 											//Furnace
 											Entity furnaceEntity = new Entity ();
@@ -103,7 +103,7 @@ public class TileInterface extends GameObject {
 									if (placeScripts == null) {
 										loadPlaceScripts ();
 									}
-									if (placeScripts.get (placeScriptName).doPlace (workingId, getHoveredTileX (), getHoveredTileY ())) {
+									if (placeScripts.get (placeScriptName).doPlace (workingId, getHoveredTileX (), getHoveredTileY (), 0)) { //TODO bg layer stuff
 										World.getPlayer ().useSelectedItem ();
 									}
 								}
@@ -205,7 +205,7 @@ public class TileInterface extends GameObject {
 	public void breakTile (int x, int y) {
 		
 		//Find the drop of the tile
-		int currentTile = World.getTile (x, y);
+		int currentTile = World.getTile (x, y, 0); //TODO bg layer stuff
 		String dropName = World.getTileProperties (currentTile).getString ("drop");
 		if (dropName == null) {
 			dropName = World.tileProperties.getJSONObject ("default").getString ("drop");
@@ -247,7 +247,7 @@ public class TileInterface extends GameObject {
 			}
 		}
 		
-		World.breakTile (x, y); //Replace with air
+		World.breakTile (x, y, 0); //Replace with air TODO bg layer stuff
 		
 	}
 	

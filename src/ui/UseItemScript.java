@@ -18,10 +18,10 @@ public abstract class UseItemScript {
 
 		@Override
 		public boolean doUse(int id, int x, int y) {
-			int curr = World.getTile (x, y);
-			int below = World.getTile (x, y + 1);
+			int curr = World.getTile (x, y, 0);
+			int below = World.getTile (x, y + 1, 0);
 			if (curr == 0 && (below == 1 || below == 2)) {
-				World.setTile (81, x, y);
+				World.setTile (81, x, y, 0);
 				return true;
 			}
 			return false;
@@ -75,8 +75,8 @@ public abstract class UseItemScript {
 
 		@Override
 		public boolean doUse(int id, int x, int y) {
-			if (World.getTile (x, y) == 1) {
-				World.setTile (2, x, y); //Replace with dirt
+			if (World.getTile (x, y, 0) == 1) {
+				World.setTile (2, x, y, 0); //Replace with dirt
 				if (Math.random () < .33) {
 					World.getPlayer ().addToInventory (338, 1);
 				}

@@ -55,8 +55,8 @@ public class World {
 	public static final Sprite PARSED_ITEMS = new Sprite (ITEM_SHEET, 8, 8);
 	public static final Sprite PARSED_LIGHTING = new Sprite (LIGHT_SHEET, 8, 8);
 	
-	private static ArrayList<ArrayList<Integer>> tiles;
-	private static ArrayList<ArrayList<Integer>> bgTiles;
+	private static ArrayList<ArrayList<Integer>> worldFgTiles;
+	private static ArrayList<ArrayList<Integer>> worldBgTiles;
 	private static ArrayList<ArrayList<Integer>> lighting;
 	private static ArrayList<ArrayList<ArrayList<Point>>> lights;
 	private static int[] xBuffer = new int[LOAD_SIZE];
@@ -132,10 +132,12 @@ public class World {
 		} //Makes the directory for the world if it wasn't already created
 		
 		reigons = new ArrayList<WorldReigon> ();
-		tiles = new ArrayList<ArrayList<Integer>> (); //Make the world tiles
+		worldFgTiles = new ArrayList<ArrayList<Integer>> ();
+		worldBgTiles = new ArrayList<ArrayList<Integer>> (); //Make the world tiles
 		lighting = new ArrayList<ArrayList<Integer>> (); //Make the lighting table
 		for (int i = 0; i < LOAD_SIZE; i++) {
-			tiles.add (null);
+			worldFgTiles.add (null);
+			worldBgTiles.add (null);
 			//Fill up the lighting table
 			ArrayList<Integer> lightVals = new ArrayList<Integer> ();
 			for (int j = 0; j < WORLD_HEIGHT; j++) {
@@ -151,6 +153,7 @@ public class World {
 		entities = new LinkedList<Entity> (); //Make the world entities list
 		tileEntities = new HashMap<Point, Entity> ();
 		
+		initLighting ();
 		updateReigons ();
 		updateWorld (); //Fill the world
 		xBuffer = new int[LOAD_SIZE];
@@ -159,7 +162,6 @@ public class World {
 		} //Initialize the x coordinate buffer
 		//Make the player
 		spawnPlayer ();
-		initLighting ();
 		
 		//Init fluid ids
 		Fluids.initFluidIDs ();
@@ -380,30 +382,37 @@ public class World {
 		g.fillRect (0, 0, SCREEN_SIZE_H * 8, SCREEN_SIZE_V * 8);
 		
 		//Draw the tiles
-		for (int wy = 0; wy < SCREEN_SIZE_V; wy++) {
-			for (int wx = 0; wx < SCREEN_SIZE_H; wx++) {
-				int tileId = tiles.get (Math.floorMod (viewX + wx, LOAD_SIZE)).get (viewY + wy);
-				int lightVal = getLightStrength (viewX + wx, viewY + wy);
-				
-				//Render the proper tile
-				if (Fluids.isWaterSource (tileId) || Fluids.isLavaSource (tileId)) {
-					int upId = tiles.get (Math.floorMod (viewX + wx, LOAD_SIZE)).get (viewY + wy - 1);
-					if (Fluids.isWaterSource (tileId) && Fluids.isWater (upId)) {
-						PARSED_TILES.setFrame (Fluids.WATER_FLOWING_START_ID);
-					} else if (Fluids.isLavaSource (tileId) && Fluids.isLava (upId)) {
-						PARSED_TILES.setFrame (Fluids.LAVA_FLOWING_START_ID);
-					} else {
-						PARSED_TILES.setFrame (tileId);
+		for (int currLayer = 1; currLayer >= 0; currLayer--) {
+			for (int wy = 0; wy < SCREEN_SIZE_V; wy++) {
+				for (int wx = 0; wx < SCREEN_SIZE_H; wx++) {
+					//System.out.println (worldBgTiles.get (Math.floorMod (viewX + wx, LOAD_SIZE)).get (viewY + wy));
+					int tileId = (currLayer == 0 ? worldFgTiles : worldBgTiles).get (Math.floorMod (viewX + wx, LOAD_SIZE)).get (viewY + wy);
+					int lightVal = getLightStrength (viewX + wx, viewY + wy);
+					if (currLayer == 1) {
+						lightVal -= 4;
+						lightVal = lightVal < 0 ? 0 : lightVal;
 					}
-				} else {
-					PARSED_TILES.setFrame (tileId); //Draw normally
-				}
-				PARSED_TILES.draw (wx * 8, wy * 8);
-				
-				//Render the proper lighting
-				if (tileId != 0) {
-					PARSED_LIGHTING.setFrame (lightVal);
-					PARSED_LIGHTING.draw (wx * 8, wy * 8);
+					
+					//Render the proper tile
+					if (Fluids.isWaterSource (tileId) || Fluids.isLavaSource (tileId)) {
+						int upId = worldFgTiles.get (Math.floorMod (viewX + wx, LOAD_SIZE)).get (viewY + wy - 1);
+						if (Fluids.isWaterSource (tileId) && Fluids.isWater (upId)) {
+							PARSED_TILES.setFrame (Fluids.WATER_FLOWING_START_ID);
+						} else if (Fluids.isLavaSource (tileId) && Fluids.isLava (upId)) {
+							PARSED_TILES.setFrame (Fluids.LAVA_FLOWING_START_ID);
+						} else {
+							PARSED_TILES.setFrame (tileId);
+						}
+					} else {
+						PARSED_TILES.setFrame (tileId); //Draw normally
+					}
+					PARSED_TILES.draw (wx * 8, wy * 8);
+					
+					//Render the proper lighting
+					if (tileId != 0) {
+						PARSED_LIGHTING.setFrame (lightVal);
+						PARSED_LIGHTING.draw (wx * 8, wy * 8);
+					}
 				}
 			}
 		}
@@ -425,11 +434,12 @@ public class World {
 		return worldName;
 	}
 	
-	public static int getTile (int x, int y) {
+	//0 for fg layer, 1 for bg layer
+	public static int getTile (int x, int y, int layer) {
 		if (y < 0 || y >= WORLD_HEIGHT) {
 			return 24;
 		}
-		return tiles.get (Math.floorMod (x, LOAD_SIZE)).get (y);
+		return (layer == 0 ? worldFgTiles : worldBgTiles).get (Math.floorMod (x, LOAD_SIZE)).get (y);
 	}
 	
 	public static boolean isSolid (int id) {
@@ -456,7 +466,7 @@ public class World {
 	public static int getCeilingHeight (int x) {
 		int realX = Math.floorMod (x, LOAD_SIZE);
 		if (highestTile [realX] == -1) {
-			ArrayList<Integer> column = tiles.get (realX);
+			ArrayList<Integer> column = worldFgTiles.get (realX);
 			for (int i = 0; i < column.size (); i++) {
 				if (tileTpTable [column.get (i)] == 0) {
 					//TODO allow skylight to pass through transparent tiles
@@ -475,18 +485,18 @@ public class World {
 	}
 	
 	//Places AND ticks
-	public static void placeTile (int id, int x, int y) {
+	public static void placeTile (int id, int x, int y, int layer) {
 		
 		doPlacementLightCalculation (id, x, y);
-		setTile (id, x, y);
+		setTile (id, x, y, layer);
 		tickNearby (x, y);
 		
 	}
 	
-	public static void setTile (int id, int x, int y) {
+	public static void setTile (int id, int x, int y, int layer) {
 		try {
 			int realX = Math.floorMod (x, LOAD_SIZE);
-			tiles.get (realX).set (y, id);
+			(layer == 0 ? worldFgTiles : worldBgTiles).get (realX).set (y, id);
 			WorldReigon rg = getReigon (id);
 			//UPDATE THE HEIGHT
 			highestTile [realX] = -1;
@@ -509,8 +519,8 @@ public class World {
 	}
 	
 	public static void doPlacementLightCalculation (int id, int x, int y) {
-		if (tileLightTable [getTile (x, y)] != 0) {
-			removeLightSource (tileLightTable [getTile (x, y)], x, y);
+		if (tileLightTable [getTile (x, y, 0)] != 0) {
+			removeLightSource (tileLightTable [getTile (x, y, 0)], x, y);
 		}
 		if (tileLightTable [id] != 0) {
 			putLightSource (tileLightTable [id], x, y);
@@ -549,7 +559,7 @@ public class World {
 	
 	public static void lightColumn (int x) {
 		int realX = Math.floorMod (x, LOAD_SIZE);
-		ArrayList<Integer> col = tiles.get (realX);
+		ArrayList<Integer> col = worldFgTiles.get (realX);
 		for (int i = 0; i < WORLD_HEIGHT; i++) {
 			if (tileLightTable [col.get (i)] != 0) {
 				putLightSource (tileLightTable [col.get (i)], x, i);
@@ -559,11 +569,12 @@ public class World {
 	
 	public static void unlightColumn (int x) {
 		int realX = Math.floorMod (x, LOAD_SIZE);
-		ArrayList<Integer> col = tiles.get (realX);
+		ArrayList<Integer> col = worldFgTiles.get (realX);
 		for (int i = 0; i < WORLD_HEIGHT; i++) {
 			if (tileLightTable [col.get (i)] != 0) {
 				removeLightSource (tileLightTable [col.get (i)], x, i);
 			}
+			lighting.get (realX).set (i, -1);
 		}
 	}
 	
@@ -598,7 +609,7 @@ public class World {
 			Point ls = lightList.get (i);
 			
 			//Get the light strength
-			int tId = getTile (ls.x, ls.y);
+			int tId = getTile (ls.x, ls.y, 0);
 			JSONObject properties = getTileProperties (tId);
 			int strength = tileLightTable [tId];
 			
@@ -627,10 +638,10 @@ public class World {
 		tileEntities.remove (p);
 	}
 	
-	public static void breakTile (int x, int y) {
+	public static void breakTile (int x, int y, int layer) {
 		
 		//Clear out the tile
-		setTile (0, x, y);
+		setTile (0, x, y, layer);
 		
 		//Remove tile entities, if applicable
 		Entity e = getTileEntity (x, y);
@@ -745,7 +756,8 @@ public class World {
 		for (int wx = loadLeft; wx < loadRight; wx++) {
 			int tileX = Math.floorMod (wx, LOAD_SIZE);
 			WorldReigon currRg = getReigon (wx);
-			tiles.set (tileX, currRg.getColumn (wx)); //Update the column of tiles to match the loaded reigon
+			worldFgTiles.set (tileX, currRg.getColumn (wx, 0));
+			worldBgTiles.set (tileX, currRg.getColumn (wx, 1)); //Update the column of tiles to match the loaded reigon
 			xBuffer [tileX] = wx;
 		}
 	}
@@ -774,26 +786,40 @@ public class World {
 		player.save ();
 	}
 	
-	public static ArrayList<Integer> generateColumn (int x, int dimension) {
+	//Layering: 0 for foreground, 1 for background
+	public static ArrayList<Integer> generateColumn (int x, int layer, int dimension) {
 		
 		Integer[] result = new Integer[WORLD_HEIGHT];
 		ArrayList<Integer> arrList = new ArrayList<Integer> ();
-		
 		//Overworld
 		if (dimension == 0) {
 			int SEA_LEVEL = 63;
 			int genHeight = heightGen.getTerrainHeight (x);
-			for (int i = 0; i < genHeight; i++) {
-				if (i < SEA_LEVEL) {
-					result [i] = 0;
-				} else if (i == SEA_LEVEL) {
-					result [i] = 11;
-				} else {
-					result [i] = 11;
+			if (layer == 0) {
+				for (int i = 0; i < genHeight; i++) {
+					if (i < SEA_LEVEL) {
+						result [i] = 0;
+					} else if (i == SEA_LEVEL) {
+						result [i] = 11;
+					} else {
+						result [i] = 11;
+					}
 				}
+				result[genHeight] = 1;
+				result[genHeight + 1] = 2;
+			} else if (layer == 1) {
+				for (int i = 0; i < genHeight; i++) {
+					if (i < SEA_LEVEL) {
+						result [i] = 0;
+					} else if (i == SEA_LEVEL) {
+						result [i] = 0;
+					} else {
+						result [i] = 0;
+					}
+				}
+				result[genHeight] = 2;
+				result[genHeight + 1] = 2;
 			}
-			result[genHeight] = 1;
-			result[genHeight + 1] = 2;
 			for (int i = genHeight + 2; i < WORLD_HEIGHT; i++) {
 				result [i] = 16;
 			}
@@ -873,6 +899,7 @@ public class World {
 		Random r = new Random ();
 		
 		//Spawn in the tiles
+		//TODO layers
 		for (int wx = 0; wx < s.getWidth (); wx++) {
 			int[] slice = s.getSlice (wx - origin.x);
 			for (int wy = 0; wy < s.getHeight (); wy++) {
@@ -882,10 +909,10 @@ public class World {
 					r.setSeed (seed + putY * 2860486313L + putX * 49390927L); //More prime number magic
 					//Big chungus of an if statement
 					if (
-							(spawnOver == -1 || spawnOver == getTile (putX, putY)) &&
+							(spawnOver == -1 || spawnOver == getTile (putX, putY, 0)) &&
 							(Double.isNaN (spawnOdds) || r.nextDouble () < spawnOdds)
 					) {
-						setTile (slice [wy], topLeft.x + wx, topLeft.y + wy);
+						setTile (slice [wy], topLeft.x + wx, topLeft.y + wy, 0);
 					}
 				}
 			}
@@ -1074,7 +1101,7 @@ public class World {
 		for (int i = 0; i < SPAWNING_ATTEMPTS; i++) {
 			int spawnX = (int)player.getX () + (r.nextInt (SECONDARY_LOAD_RADIUS * 2) - SECONDARY_LOAD_RADIUS) * 8;
 			int spawnY = r.nextInt (WORLD_HEIGHT) * 8;
-			if (getLightStrength (spawnX / 8, spawnY / 8) < 4 && getTile (spawnX / 8, spawnY / 8) == 0 && getTile (spawnX / 8, spawnY / 8 - 1) == 0 && getTile (spawnX / 8, spawnY / 8 + 1) != 0) {
+			if (getLightStrength (spawnX / 8, spawnY / 8) < 4 && getTile (spawnX / 8, spawnY / 8, 0) == 0 && getTile (spawnX / 8, spawnY / 8 - 1, 0) == 0 && getTile (spawnX / 8, spawnY / 8 + 1, 0) != 0) {
 				new Zombie (spawnX, spawnY);
 			}
 		}
@@ -1107,20 +1134,22 @@ public class World {
 	
 	public static void doTileTick (int x, int y) {
 		
+		//TODO determine whether tile ticks can happen in the background layer; as it stands, they do not
+		
 		//Nab the tile id
-		int id = World.getTile (x, y);
+		int id = World.getTile (x, y, 0);
 		
 		//Door top
 		if (id == 60 || id == 62 || id == 76 || id == 78) {
-			if (World.getTile (x, y + 1) - id != 1) {
-				World.setTile (0, x, y);
+			if (World.getTile (x, y + 1, 0) - id != 1) {
+				World.setTile (0, x, y, 0);
 			}
 		}
 		
 		//Door bottom
 		if (id == 61 || id == 63 || id == 77 || id == 79) {
-			if (World.getTile (x, y - 1) - id != -1) {
-				World.setTile (0, x, y);
+			if (World.getTile (x, y - 1, 0) - id != -1) {
+				World.setTile (0, x, y, 0);
 			}
 		}
 		
@@ -1139,7 +1168,7 @@ public class World {
 	public static void doRandomTileTick (int x, int y) {
 		
 		//Get the id
-		int id = World.getTile (x, y);
+		int id = World.getTile (x, y, 0);
 		
 		//Grow saplings
 		if (id == 80) {
@@ -1152,7 +1181,7 @@ public class World {
 		
 		//Grow wheat by 1 stage
 		if (id >= 81 && id <= 83) {
-			World.setTile (id + 1, x, y);
+			World.setTile (id + 1, x, y, 0);
 		}
 		
 	}
@@ -1160,24 +1189,24 @@ public class World {
 	public static void doSchedTick (int x, int y) {
 		
 		//Get the tile ID
-		int id = World.getTile (x, y);
+		int id = World.getTile (x, y, 0);
 		
 		//Handle flowing
 		if (Fluids.isFluid (id)) {
 			
 			//Grab all the needed tile IDs
 			int tid = id;
-			int topId = World.getTile (x, y - 1);
-			int downId = World.getTile (x, y + 1);
-			int leftId = World.getTile (x - 1, y);
-			int rightId = World.getTile (x + 1, y);
+			int topId = World.getTile (x, y - 1, 0);
+			int downId = World.getTile (x, y + 1, 0);
+			int leftId = World.getTile (x - 1, y, 0);
+			int rightId = World.getTile (x + 1, y, 0);
 			
 			//Check if fluid should be removed
 			if (Fluids.isFlowingWater (tid)) {
 				if (!Fluids.isWater (topId) && 
 					(!(Fluids.isWater (leftId) && (Fluids.getFlowLevel (leftId) > Fluids.getFlowLevel (tid)))) && 
 					(!(Fluids.isWater (rightId) && (Fluids.getFlowLevel (rightId) > Fluids.getFlowLevel (tid))))) {
-						World.placeTile (0, x, y);
+						World.placeTile (0, x, y, 0);
 						tickNearby (x, y);
 				}
 			}
@@ -1185,7 +1214,7 @@ public class World {
 				if (!Fluids.isLava (topId) && 
 					(!(Fluids.isLava (leftId) && (Fluids.getFlowLevel (leftId) > Fluids.getFlowLevel (tid)))) && 
 					(!(Fluids.isLava (rightId) && (Fluids.getFlowLevel (rightId) > Fluids.getFlowLevel (tid))))) {
-						World.placeTile (0, x, y);
+						World.placeTile (0, x, y, 0);
 						tickNearby (x, y);
 				}
 			}
@@ -1240,11 +1269,11 @@ public class World {
 	private static boolean checkForFluidUpdate (int x, int y) {
 		
 		//Grab all the needed tile IDs
-		int tid = World.getTile (x, y);
-		int topId = World.getTile (x, y - 1);
-		int downId = World.getTile (x, y + 1);
-		int leftId = World.getTile (x - 1, y);
-		int rightId = World.getTile (x + 1, y);
+		int tid = World.getTile (x, y, 0);
+		int topId = World.getTile (x, y - 1, 0);
+		int downId = World.getTile (x, y + 1, 0);
+		int leftId = World.getTile (x - 1, y, 0);
+		int rightId = World.getTile (x + 1, y, 0);
 		
 		//Check if flow is not possible
 		if (Fluids.isFlowingWater (tid)) {
@@ -1291,15 +1320,15 @@ public class World {
 	
 	private static void flowTo (int sourceX, int sourceY, int destX, int destY) {
 		
-		int sId = World.getTile (sourceX, sourceY);
-		int dId = World.getTile (destX, destY);
+		int sId = World.getTile (sourceX, sourceY, 0);
+		int dId = World.getTile (destX, destY, 0);
 		
 		//Water into lava case
 		if (Fluids.isWater (sId) && Fluids.isLava (dId)) {
 			if (Fluids.isLavaSource (dId)) {
-				World.placeTile (15, destX, destY); //Obsidian
+				World.placeTile (15, destX, destY, 0); //Obsidian
 			} else {
-				World.placeTile (23, destX, destY); //Cobble
+				World.placeTile (23, destX, destY, 0); //Cobble
 			}
 			return;
 		}
@@ -1307,9 +1336,9 @@ public class World {
 		//Lava into water case
 		if (Fluids.isLava (sId) && Fluids.isWater (dId)) {
 			if (destX == sourceX || destY == sourceY + 1) {
-				World.placeTile (16, destX, destY); //Stone
+				World.placeTile (16, destX, destY, 0); //Stone
 			} else {
-				World.placeTile (23, destX, destY); //Cobble
+				World.placeTile (23, destX, destY, 0); //Cobble
 			}
 			return;
 		}
@@ -1317,9 +1346,9 @@ public class World {
 		//Water general case
 		if (Fluids.isWater (sId)) {
 			if (destX == sourceX || destY == sourceY + 1) {
-				World.placeTile (Fluids.WATER_FLOWING_START_ID, destX, destY);
+				World.placeTile (Fluids.WATER_FLOWING_START_ID, destX, destY, 0);
 			} else {
-				World.placeTile (Fluids.getNextFlowId (sId), destX, destY);
+				World.placeTile (Fluids.getNextFlowId (sId), destX, destY, 0);
 			}
 			return;
 		}
@@ -1327,9 +1356,9 @@ public class World {
 		//Lava general case
 		if (Fluids.isLava (sId)) {
 			if (destX == sourceX || destY == sourceY + 1) {
-				World.placeTile (Fluids.LAVA_FLOWING_START_ID, destX, destY);
+				World.placeTile (Fluids.LAVA_FLOWING_START_ID, destX, destY, 0);
 			} else {
-				World.placeTile (Fluids.getNextFlowId (sId), destX, destY);
+				World.placeTile (Fluids.getNextFlowId (sId), destX, destY, 0);
 			}
 			return;
 		}
@@ -1344,8 +1373,9 @@ public class World {
 		private int dimension;
 		private boolean filled = false;
 		
-		public ArrayList<ArrayList<Integer>> data;
-		private ArrayList<Entity> entities;
+		public ArrayList<ArrayList<Integer>> fgTiles;
+		public ArrayList<ArrayList<Integer>> bgTiles;
+ 		private ArrayList<Entity> entities;
 		private HashMap<UUID, Entity> entityMap;
 		
 		public WorldReigon (int id, int dimension) {
@@ -1361,9 +1391,11 @@ public class World {
 			entityMap = new HashMap<UUID, Entity> ();
 			
 			//Initialize stuff
-			data = new ArrayList<ArrayList<Integer>> (); //Initialize the data array
+			fgTiles = new ArrayList<ArrayList<Integer>> ();
+			bgTiles = new ArrayList<ArrayList<Integer>> (); //Initialize the tile data
 			for (int i = 0; i < REIGON_SIZE; i++) {
-				data.add (null); //Fill the array to proper size
+				fgTiles.add (null); //Fill the array to proper size
+				bgTiles.add (null);
 			}
 			
 			//Load in the tiles
@@ -1373,23 +1405,27 @@ public class World {
 				Scanner s = null;
 				try {
 					s = new Scanner (f);
-					s.useDelimiter (",");
 				} catch (FileNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} //Make a scanner for the file
 				for (int wx = 0; wx < REIGON_SIZE; wx++) {
-					ArrayList<Integer> column = new ArrayList<Integer> ();
+					ArrayList<Integer> fgColumn = new ArrayList<Integer> ();
+					ArrayList<Integer> bgColumn = new ArrayList<Integer> ();
 					for (int wy = 0; wy < WORLD_HEIGHT; wy++) {
-						column.add (s.nextInt ());
+						fgColumn.add (s.nextInt ());
+						bgColumn.add (s.nextInt ());
 					}
-					data.set (wx, column);
+					fgTiles.set (wx, fgColumn);
+					bgTiles.set (wx, bgColumn);
 				} //Read all the tiles
 				s.close (); //Close the file
 			} else {
 				for (int wx = 0; wx < REIGON_SIZE; wx++) {
-					ArrayList<Integer> tiles = generateColumn (id * REIGON_SIZE + wx, dimension);
-					data.set (wx, tiles);
+					ArrayList<Integer> wFgTiles = generateColumn (id * REIGON_SIZE + wx, 0, dimension);
+					fgTiles.set (wx, wFgTiles);
+					ArrayList<Integer> wBgTiles = generateColumn (id * REIGON_SIZE + wx, 1, dimension);
+					bgTiles.set (wx, wBgTiles);
 				} //Generate the tiles
 				World.populateReigon (this); //Populate the reigon with structures
 			}
@@ -1500,12 +1536,8 @@ public class World {
 				FileWriter fw = new FileWriter (f);
 				for (int wx = 0; wx < REIGON_SIZE; wx++) {
 					for (int wy = 0; wy < WORLD_HEIGHT; wy++) {
-						if (wx == REIGON_SIZE - 1 && wy == WORLD_HEIGHT - 1) {
-							fw.append (Integer.toString (data.get (wx).get (wy)));
-						} else {
-							fw.append (Integer.toString (data.get (wx).get (wy)) + ",");
-						}
-						
+						fw.append (Integer.toString (fgTiles.get (wx).get (wy)) + " ");
+						fw.append (Integer.toString (bgTiles.get (wx).get (wy)) + " ");
 					}
 				} //Write the tiles to the file
 				fw.close ();
@@ -1551,25 +1583,25 @@ public class World {
 			return "reigon_entities_" + dimension + "_" + id + ".txt";
 		}
 		
-		public ArrayList<Integer> getColumn (int x) {
-			return data.get (Math.floorMod(x, REIGON_SIZE));
+		public ArrayList<Integer> getColumn (int x, int layer) {
+			return (layer == 0 ? fgTiles : bgTiles).get (Math.floorMod(x, REIGON_SIZE));
 		}
 		
 		public int getTile (int x, int y) {
 			if (y < 0 || y >= WORLD_HEIGHT) {
 				return 24;
 			}
-			return data.get (Math.floorMod(x, REIGON_SIZE)).get (y);
+			return fgTiles.get (Math.floorMod(x, REIGON_SIZE)).get (y);
 		}
 		
 		public void setTile (int id, int x, int y) {
-			data.get (Math.floorMod(x, REIGON_SIZE)).set (y, id);
+			fgTiles.get (Math.floorMod(x, REIGON_SIZE)).set (y, id);
 		}
 		
 		//Various generation stuffs
 		public int getCeilingHeight (int x) {
 			int realX = Math.floorMod (x, REIGON_SIZE);
-			ArrayList<Integer> column = data.get (realX);
+			ArrayList<Integer> column = fgTiles.get (realX);
 			for (int i = 0; i < column.size (); i++) {
 				if (tileTpTable [column.get (i)] == 0) {
 					return i;

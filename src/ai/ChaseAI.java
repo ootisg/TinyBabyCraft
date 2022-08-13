@@ -28,7 +28,7 @@ public class ChaseAI extends PathfindAI {
 
 	@Override
 	public boolean isValidStep (Point pt) {
-		return !World.isSolid (World.getTile (pt.x, pt.y)) && !World.isSolid (World.getTile (pt.x, pt.y - 1)) && World.isSolid (World.getTile (pt.x, pt.y + 1));
+		return !World.isSolid (World.getTile (pt.x, pt.y, 0)) && !World.isSolid (World.getTile (pt.x, pt.y - 1, 0)) && World.isSolid (World.getTile (pt.x, pt.y + 1, 0));
 	}
 
 	@Override
