@@ -28,6 +28,9 @@ public class TileInterface extends GameObject {
 	
 	private HashMap<String, String> toolMap;
 	
+	public static final int CLICK_COOLDOWN = 8;
+	private int clickCooldownTimer = 0;
+	
 	public TileInterface () {
 		crackAnim = new BlockCrack ();
 		crackAnim.declare (-64, -64);
@@ -41,7 +44,7 @@ public class TileInterface extends GameObject {
 			int currentTile = World.getTile (getHoveredTileX (), getHoveredTileY (), 0); //TODO bg layer stuff
 			JSONObject properties = World.getTileProperties (currentTile);
 			if (reachableFromPlayer (getHoveredTileX (), getHoveredTileY ())) {
-				if (mouseButtonClicked (0)) {
+				if (mouseButtonDown (0) && clickCooldownTimer == 0) {
 					if (currentTile != 24 && currentTile != 0 && !Boolean.TRUE.equals (properties.get ("fluid"))) {
 						World.doPlacementLightCalculation (0, getHoveredTileX (), getHoveredTileY ());
 						String tileType = World.getTileProperties (currentTile).getString ("type");
@@ -54,6 +57,7 @@ public class TileInterface extends GameObject {
 							}
 						}
 						crackAnim.breakTile (hitStrength, getHoveredTileX (), getHoveredTileY (), 0); //TODO bg layer stuff
+						clickCooldownTimer = CLICK_COOLDOWN;
 					}
 				}
 				if (mouseButtonClicked (2)) {
@@ -120,6 +124,12 @@ public class TileInterface extends GameObject {
 				}
 			}
 		}
+		
+		//Handle the click cooldown timer
+		if (clickCooldownTimer > 0) {
+			clickCooldownTimer--;
+		}
+		
 	}
 	
 	@Override
