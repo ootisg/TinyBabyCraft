@@ -1,0 +1,22 @@
+{
+"entities": [
+	{"type":"Chest","x":40,"y":40,"data":{"loot":"dungeon"}}
+],
+"tiles": {
+	"base":	[[0]]
+},
+"meta": {
+	"script":"FortressScript",
+	"name":"fortress",
+	"center":[0,0],
+	"width":1,
+	"height":1,
+	"replace":true,
+	"spawn_type":"fixed",
+	"spawn_x":4,
+	"spawn_y":64,
+	"min_attempts":1,
+	"max_attempts":1,
+	"dimension":1
+}
+}

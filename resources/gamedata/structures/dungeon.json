@@ -1,6 +1,7 @@
 {
 "entities": [
-	{"type":"Chest","x":40,"y":40,"data":{"loot":"dungeon"}}
+	{"type":"Chest","x":40,"y":40,"data":{"loot":"dungeon"}},
+	{"type":"StructSpawner","x":32,"y":40,"data":{"structName":"tree"}}
 ],
 "tiles": {
 	"base":	[[44,44,44,44,44,44,44],

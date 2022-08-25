@@ -38,6 +38,7 @@ import main.GameObject;
 import main.MainLoop;
 import resources.Sprite;
 import resources.Spritesheet;
+import scripts.StructureScript;
 import worldgen.TerrainHeightGen;
 
 public class World {
@@ -872,6 +873,11 @@ public class World {
 		//Get the structure
 		Structure s = structures.get (id);
 		
+		String scriptName = (String)s.getMetaProperty ("script");
+		System.out.println (scriptName);
+		if (scriptName != null) {
+		}
+		
 		//Coordinate stuff
 		Point origin = s.getOrigin ();
 		Point topLeft = new Point (x - origin.x, y - origin.y);
@@ -958,6 +964,7 @@ public class World {
 	}
 	
 	public static void putStructure (String id, int x, int y) {
+		Structure s = structures.get (id);
 		HashMap<String, String> em = Entity.getEntityMap ();
 		em.put ("type", "StructSpawner");
 		em.put ("x", String.valueOf (x));
@@ -966,6 +973,20 @@ public class World {
 		Entity et = new Entity (em);
 		StructSpawner sm = new StructSpawner (et);
 		World.addEntity (et);
+		//Run the script (if present)
+		if (s.getMetaProperty ("script") != null) {
+			String scriptName = (String)s.getMetaProperty ("script");
+			String className = "scripts." + scriptName;
+			Class<?> scriptClass;
+			try {
+				scriptClass = Class.forName (className);
+				StructureScript scriptObj = (StructureScript)scriptClass.getConstructor ().newInstance ();
+				scriptObj.run (et);
+			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public static void addEntity (Entity e) {
@@ -1063,28 +1084,38 @@ public class World {
 			Random r = new Random (seed + rg.id * 49390927 + rg.dimension + 71111111); //Prime number witchcraft
 			
 			//Generate spawn attempt values for the struct
-			if ((int)struct.getMetaProperty ("dimension") == rg.dimension) {
-				int minAttempts = (int)struct.getMetaProperty ("min_attempts");
-				int maxAttempts = (int)struct.getMetaProperty ("max_attempts");
-				int numAttempts = minAttempts + (int)(r.nextDouble () * (maxAttempts - minAttempts));
-				
-				//Spawn for surface structures
-				if (struct.getMetaProperty ("spawn_type").equals ("surface")) {
-					for (int i = 0; i < numAttempts; i++) {
-						int spawnX = r.nextInt (WorldReigon.REIGON_SIZE) + reigonX;
-						putStructure (structName, spawnX * 8, rg.getCeilingHeight (spawnX) * 8 - 8);
+			if (!struct.getMetaProperty ("spawn_type").equals ("none")) {
+				if ((int)struct.getMetaProperty ("dimension") == rg.dimension) {
+					int minAttempts = (int)struct.getMetaProperty ("min_attempts");
+					int maxAttempts = (int)struct.getMetaProperty ("max_attempts");
+					int numAttempts = minAttempts + (int)(r.nextDouble () * (maxAttempts - minAttempts));
+					
+					//Spawn for surface structures
+					if (struct.getMetaProperty ("spawn_type").equals ("surface")) {
+						for (int i = 0; i < numAttempts; i++) {
+							int spawnX = r.nextInt (WorldReigon.REIGON_SIZE) + reigonX;
+							putStructure (structName, spawnX * 8, rg.getCeilingHeight (spawnX) * 8 - 8);
+						}
 					}
-				}
-				
-				//Spawn for regular structures
-				else if (struct.getMetaProperty ("spawn_type").equals ("regular")) {
-					for (int i = 0; i < numAttempts; i++) {
-						//Get min and max y
-						int minHeight = WORLD_HEIGHT - (int)struct.getMetaProperty ("min_height");
-						int maxHeight = WORLD_HEIGHT - (int)struct.getMetaProperty ("max_height");
-						int randX = r.nextInt (WorldReigon.REIGON_SIZE) + reigonX;
-						int randY = r.nextInt (minHeight - maxHeight) + maxHeight;
-						putStructure (structName, randX * 8, randY * 8);
+					
+					//Spawn for regular structures
+					else if (struct.getMetaProperty ("spawn_type").equals ("regular")) {
+						for (int i = 0; i < numAttempts; i++) {
+							//Get min and max y
+							int minHeight = WORLD_HEIGHT - (int)struct.getMetaProperty ("min_height");
+							int maxHeight = WORLD_HEIGHT - (int)struct.getMetaProperty ("max_height");
+							int randX = r.nextInt (WorldReigon.REIGON_SIZE) + reigonX;
+							int randY = r.nextInt (minHeight - maxHeight) + maxHeight;
+							putStructure (structName, randX * 8, randY * 8);
+						}
+					}
+					
+					//Spawn for fixed position structures
+					else if (struct.getMetaProperty ("spawn_type").equals ("fixed")) {
+						System.out.println ("SPAWNING FIXED STRUCTURE");
+						int spawnX = (int)struct.getMetaProperty ("spawn_x") + reigonX;
+						int spawnY = (int)struct.getMetaProperty ("spawn_y");
+						putStructure (structName, spawnX * 8, spawnY * 8);
 					}
 				}
 			}
