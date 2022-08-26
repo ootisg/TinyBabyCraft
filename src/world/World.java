@@ -873,11 +873,6 @@ public class World {
 		//Get the structure
 		Structure s = structures.get (id);
 		
-		String scriptName = (String)s.getMetaProperty ("script");
-		System.out.println (scriptName);
-		if (scriptName != null) {
-		}
-		
 		//Coordinate stuff
 		Point origin = s.getOrigin ();
 		Point topLeft = new Point (x - origin.x, y - origin.y);

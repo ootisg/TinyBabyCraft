@@ -1,0 +1,23 @@
+{
+"entities": [
+	{"type":"FortressMarker","x":0,"y":0,"data":{}},
+	{"type":"Chest","x":8,"y":32,"data":{"loot":"dungeon"}}
+],
+"tiles": {
+	"base":	[[97,97,97,97,97,97,97],
+			 [97, 0, 0, 0, 0, 0, 0],
+			 [97, 0, 0, 0, 0, 0, 0],
+			 [97, 0, 0, 0, 0, 0, 0],
+			 [97,42, 0, 0, 0, 0, 0],
+			 [97,97,97,97,97,97,97],
+			 [97,97,97,97,97,97,97]]
+},
+"meta": {
+	"name":"fortress_end",
+	"center":[0,0],
+	"width":7,
+	"height":7,
+	"spawn_type":"none",
+	"dimension":1
+}
+}

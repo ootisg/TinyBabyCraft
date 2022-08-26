@@ -14,7 +14,7 @@
 	"replace":true,
 	"spawn_type":"fixed",
 	"spawn_x":4,
-	"spawn_y":64,
+	"spawn_y":50,
 	"min_attempts":1,
 	"max_attempts":1,
 	"dimension":1
