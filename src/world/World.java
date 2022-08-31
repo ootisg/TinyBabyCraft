@@ -46,6 +46,7 @@ public class World {
 	public static final int WORLD_HEIGHT = 128;
 	public static final int LOAD_SIZE = 256;
 	public static final int SECONDARY_LOAD_RADIUS = 64;
+	public static final int SECONDARY_UNLOAD_RADIUS = SECONDARY_LOAD_RADIUS + 8;
 	public static final int SCREEN_SIZE_H = 24; //Number of tiles that fit on the screen horizontally
 	public static final int SCREEN_SIZE_V = 18; //Number of tiles that fit on the screen vertically
 	
@@ -56,19 +57,13 @@ public class World {
 	public static final Sprite PARSED_ITEMS = new Sprite (ITEM_SHEET, 8, 8);
 	public static final Sprite PARSED_LIGHTING = new Sprite (LIGHT_SHEET, 8, 8);
 	
-	private static ArrayList<ArrayList<Integer>> worldFgTiles;
-	private static ArrayList<ArrayList<Integer>> worldBgTiles;
-	private static ArrayList<ArrayList<Integer>> lighting;
-	private static ArrayList<ArrayList<ArrayList<Point>>> lights;
-	private static int[] xBuffer = new int[LOAD_SIZE];
-	
 	private static int viewX;
 	private static int viewY;
 	
 	private static int loadLeft;
 	private static int loadRight;
 	
-	private static ArrayList<WorldReigon> reigons;
+	private static HashMap<Integer, WorldReigon> reigonsMap;
 	private static LinkedList<Entity> entities;
 	private static HashMap<Point, Entity> tileEntities;
 	
@@ -91,9 +86,6 @@ public class World {
 	private static int[] tileLightTable = new int[256];
 	private static int[] tileSolidTable = new int[256];
 	private static int[] tileTpTable = new int[256];
-	
-	private static int[] highestTile = new int[LOAD_SIZE];
-	private static boolean[] loaded = new boolean[LOAD_SIZE];
 	
 	private static int skylight = 15;
 	
@@ -132,20 +124,7 @@ public class World {
 			f.mkdir (); //TODO check if directory was not created
 		} //Makes the directory for the world if it wasn't already created
 		
-		reigons = new ArrayList<WorldReigon> ();
-		worldFgTiles = new ArrayList<ArrayList<Integer>> ();
-		worldBgTiles = new ArrayList<ArrayList<Integer>> (); //Make the world tiles
-		lighting = new ArrayList<ArrayList<Integer>> (); //Make the lighting table
-		for (int i = 0; i < LOAD_SIZE; i++) {
-			worldFgTiles.add (null);
-			worldBgTiles.add (null);
-			//Fill up the lighting table
-			ArrayList<Integer> lightVals = new ArrayList<Integer> ();
-			for (int j = 0; j < WORLD_HEIGHT; j++) {
-				lightVals.add (-1);
-			}
-			lighting.add (lightVals);
-		} //Size the tile list
+		reigonsMap = new HashMap<Integer, WorldReigon> ();
 		
 		//Init entity properties
 		Entity.initTypeProperties ();
@@ -157,10 +136,6 @@ public class World {
 		initLighting ();
 		updateReigons ();
 		updateWorld (); //Fill the world
-		xBuffer = new int[LOAD_SIZE];
-		for (int i = 0; i < LOAD_SIZE; i++) {
-			xBuffer [i] = i;
-		} //Initialize the x coordinate buffer
 		//Make the player
 		spawnPlayer ();
 		
@@ -174,19 +149,7 @@ public class World {
 	}
 	
 	public static void initLighting () {
-		lights = new ArrayList<ArrayList<ArrayList<Point>>> ();
-		for (int wx = 0; wx < LOAD_SIZE; wx++) {
-			ArrayList<ArrayList<Point>> column = new ArrayList<ArrayList<Point>> ();
-			for (int wy = 0; wy < WORLD_HEIGHT; wy++) {
-				ArrayList<Point> pts = new ArrayList<Point> ();
-				column.add (pts);
-			}
-			lights.add (column);
-		}
-		
-		for (int i = 0; i < LOAD_SIZE; i++) {
-			highestTile [i] = -1;
-		}
+		//TODO
 	}
 	
 	public static void populateTileProperties () {
@@ -382,41 +345,12 @@ public class World {
 		}
 		g.fillRect (0, 0, SCREEN_SIZE_H * 8, SCREEN_SIZE_V * 8);
 		
-		//Draw the tiles
-		for (int currLayer = 1; currLayer >= 0; currLayer--) {
-			for (int wy = 0; wy < SCREEN_SIZE_V; wy++) {
-				for (int wx = 0; wx < SCREEN_SIZE_H; wx++) {
-					//System.out.println (worldBgTiles.get (Math.floorMod (viewX + wx, LOAD_SIZE)).get (viewY + wy));
-					int tileId = (currLayer == 0 ? worldFgTiles : worldBgTiles).get (Math.floorMod (viewX + wx, LOAD_SIZE)).get (viewY + wy);
-					int lightVal = getLightStrength (viewX + wx, viewY + wy);
-					if (currLayer == 1) {
-						lightVal -= 4;
-						lightVal = lightVal < 0 ? 0 : lightVal;
-					}
-					
-					//Render the proper tile
-					if (Fluids.isWaterSource (tileId) || Fluids.isLavaSource (tileId)) {
-						int upId = worldFgTiles.get (Math.floorMod (viewX + wx, LOAD_SIZE)).get (viewY + wy - 1);
-						if (Fluids.isWaterSource (tileId) && Fluids.isWater (upId)) {
-							PARSED_TILES.setFrame (Fluids.WATER_FLOWING_START_ID);
-						} else if (Fluids.isLavaSource (tileId) && Fluids.isLava (upId)) {
-							PARSED_TILES.setFrame (Fluids.LAVA_FLOWING_START_ID);
-						} else {
-							PARSED_TILES.setFrame (tileId);
-						}
-					} else {
-						PARSED_TILES.setFrame (tileId); //Draw normally
-					}
-					PARSED_TILES.draw (wx * 8, wy * 8);
-					
-					//Render the proper lighting
-					if (tileId != 0) {
-						PARSED_LIGHTING.setFrame (lightVal);
-						PARSED_LIGHTING.draw (wx * 8, wy * 8);
-					}
-				}
-			}
+		//Draw the loaded reigons
+		Iterator<Entry<Integer, WorldReigon>> iter = reigonsMap.entrySet ().iterator ();
+		while (iter.hasNext ()) {
+			iter.next ().getValue ().draw ();
 		}
+
 	}
 	
 	public static int getLoadedDimension () {
@@ -440,7 +374,9 @@ public class World {
 		if (y < 0 || y >= WORLD_HEIGHT) {
 			return 24;
 		}
-		return (layer == 0 ? worldFgTiles : worldBgTiles).get (Math.floorMod (x, LOAD_SIZE)).get (y);
+		int rg = getReigonId (x);
+		int rgX = x - rg * WorldReigon.REIGON_SIZE;
+		return getReigon (rg).getTile (rgX, y, layer);
 	}
 	
 	public static boolean isSolid (int id) {
@@ -465,24 +401,8 @@ public class World {
 	}
 	
 	public static int getCeilingHeight (int x) {
-		int realX = Math.floorMod (x, LOAD_SIZE);
-		if (highestTile [realX] == -1) {
-			ArrayList<Integer> column = worldFgTiles.get (realX);
-			for (int i = 0; i < column.size (); i++) {
-				if (tileTpTable [column.get (i)] == 0) {
-					//TODO allow skylight to pass through transparent tiles
-					highestTile [realX] = i;
-					ArrayList<Integer> lightCol = lighting.get (realX);
-					for (int j = 0; j < column.size (); j++) {
-						lightCol.set (j, -1);
-					}
-					return i;
-				}
-			}
-			return 255;
-		} else {
-			return highestTile [realX];
-		}
+		int rx = Math.floorMod (x, LOAD_SIZE);
+		return getReigon (x).getCeilingHeight (rx);
 	}
 	
 	//Places AND ticks
@@ -496,12 +416,9 @@ public class World {
 	
 	public static void setTile (int id, int x, int y, int layer) {
 		try {
-			int realX = Math.floorMod (x, LOAD_SIZE);
-			(layer == 0 ? worldFgTiles : worldBgTiles).get (realX).set (y, id);
-			WorldReigon rg = getReigon (id);
-			//UPDATE THE HEIGHT
-			highestTile [realX] = -1;
-			getCeilingHeight (realX);
+			int rg = getReigonId (x);
+			int rgX = Math.floorMod (x, WorldReigon.REIGON_SIZE);
+			getReigon (rg).setTile (id, rgX, y, layer);
 		} catch (IndexOutOfBoundsException e) {
 			//Do nothing
 		}
@@ -529,71 +446,30 @@ public class World {
 	}
 	
 	public static void putLightSource (int strength, int x, int y) {
-		Point source = new Point (x, y);
-		for (int wx = -strength; wx <= strength; wx++) {
-			for (int wy = -strength; wy <= strength; wy++) {
-				int putX = x + wx;
-				int putY = y + wy;
-				if (putY >= 0 && putY < WORLD_HEIGHT) {
-					int realX = Math.floorMod (putX, LOAD_SIZE);
-					lights.get (realX).get (putY).add (source);
-					lighting.get (realX).set (putY, -1);
-				}
-			}
-		}
+		//TODO
 	}
 	
 	public static void removeLightSource (int strength, int x, int y) {
-		Point source = new Point (x, y);
-		for (int wx = -strength; wx <= strength; wx++) {
-			for (int wy = -strength; wy <= strength; wy++) {
-				int putX = x + wx;
-				int putY = y + wy;
-				if (putY >= 0 && putY < WORLD_HEIGHT) {
-					int realX = Math.floorMod (putX, LOAD_SIZE);
-					lights.get (realX).get (putY).remove (source);
-					lighting.get (realX).set (putY, -1);
-				}
-			}
-		}
+		//TODO
 	}
 	
 	public static void lightColumn (int x) {
-		int realX = Math.floorMod (x, LOAD_SIZE);
-		ArrayList<Integer> col = worldFgTiles.get (realX);
-		for (int i = 0; i < WORLD_HEIGHT; i++) {
-			if (tileLightTable [col.get (i)] != 0) {
-				putLightSource (tileLightTable [col.get (i)], x, i);
-			}
-		}
+		//TODO
 	}
 	
 	public static void unlightColumn (int x) {
-		int realX = Math.floorMod (x, LOAD_SIZE);
-		ArrayList<Integer> col = worldFgTiles.get (realX);
-		for (int i = 0; i < WORLD_HEIGHT; i++) {
-			if (tileLightTable [col.get (i)] != 0) {
-				removeLightSource (tileLightTable [col.get (i)], x, i);
-			}
-			lighting.get (realX).set (i, -1);
-		}
+		//TODO
 	}
 	
 	public static int getLightStrength (int x, int y) {
-		int realX = Math.floorMod (x, LOAD_SIZE);
-		int preLight = lighting.get (realX).get (y);
-		if (preLight != -1) {
-			return preLight;
-		} else {
-			int lightVal = computeLight (x, y);
-			lighting.get (realX).set (y, lightVal);
-			return lightVal;
-		}
+		//TODO
+		return 0;
 	}
 	
 	public static int computeLight (int x, int y) {
+		return 15;
 		//TODO add skylight computation
-		int realX = Math.floorMod (x, LOAD_SIZE);
+		/*int realX = Math.floorMod (x, LOAD_SIZE);
 		ArrayList<Point> lightList = lights.get (realX).get (y);
 		int totalLight;
 		int ceilingY = getCeilingHeight (x);
@@ -626,7 +502,7 @@ public class World {
 				}
 			}
 		}
-		return totalLight;
+		return totalLight;*/
 	}
 	
 	public static Entity getTileEntity (int x, int y) {
@@ -656,45 +532,50 @@ public class World {
 	}
 	
 	public static void refreshLoadAround (int x) {
-		for (int i = 0; i < LOAD_SIZE; i++) {
-			int colX = xBuffer [i];
+		//TODO this needs to be entirely re-done
+		for (int colX = x - SECONDARY_UNLOAD_RADIUS; colX < x + SECONDARY_UNLOAD_RADIUS; colX++) {
 			if (colX > x - SECONDARY_LOAD_RADIUS && colX < x + SECONDARY_LOAD_RADIUS) {
-				if (!loaded [i]) {
+				if (!columnLoaded (colX)) {
 					loadColumn (colX);
-					loaded [i] = true;
 				}
 			} else {
-				if (loaded [i]) {
+				if (columnLoaded (colX)) {
 					unloadColumn (colX);
-					loaded [i] = false;
 				}
 			}
 		}
 	}
 	
 	public static void loadColumn (int x) {
+		int rgX = Math.floorMod (x, WorldReigon.REIGON_SIZE);
 		for (int i = 0; i < WORLD_HEIGHT; i++) {
 			Point p = new Point (x * 8, i * 8);
 			if (tileEntities.get (p) != null && tileEntities.get (p).getObject () instanceof StructSpawner) {
 				((StructSpawner)tileEntities.get (p).getObject ()).spawnStructure ();
 			}
 		}
-		lightColumn (x);
+		getReigon (getReigonId (x)).loadColumn (rgX);
 	}
 	
 	public static void unloadColumn (int x) {
-		unlightColumn (x);
+		int rgX = Math.floorMod (x, WorldReigon.REIGON_SIZE);
+		getReigon (getReigonId (x)).unloadColumn (rgX);
+	}
+	
+	public static boolean columnLoaded (int x) {
+		int rgX = Math.floorMod (x, WorldReigon.REIGON_SIZE);
+		return getReigon (getReigonId (x)).columnLoaded (rgX);
 	}
 	
 	public static void unloadAllColumns () {
-		for (int i = 0; i < LOAD_SIZE; i++) {
-			loaded [i] = false;
-		}
+		//TODO this needs to be entirely re-done
+//		for (int i = 0; i < LOAD_SIZE; i++) {
+//			loaded [i] = false;
+//		}
 	}
 	
 	public static boolean inLoadBounds (int x) {
-		int realX = Math.floorMod (x, LOAD_SIZE);
-		return loaded [realX];
+		return columnLoaded (x);
 	}
 	
 	public static int getReigonId (int x) {
@@ -702,36 +583,33 @@ public class World {
 	}
 	
 	public static WorldReigon getReigon (int x) {
-		for (int i = 0; i < reigons.size (); i++) {
-			WorldReigon current = reigons.get (i);
-			if (getReigonId (x) == current.id && current.dimension == loadedDimension) {
-				return current;
-			}
+		
+		//Retrieve the reigon
+		WorldReigon rg = reigonsMap.get (x);
+		
+		if (rg == null) {
+			//Reigon was not loaded, load it then return it
+			return loadReigon (getReigonId (x), loadedDimension);
+		} else {
+			//Reigon was loaded, return it immediately
+			return rg;
 		}
 		
-		//Reigon was not loaded, load it then return it
-		return loadReigon (getReigonId (x), loadedDimension);
 	}
 	
 	public static boolean isReigonLoaded (int id, int dimension) {
-		//Copy-pasted code, eew
-		for (int i = 0; i < reigons.size (); i++) {
-			WorldReigon current = reigons.get (i);
-			if (id == current.id && current.dimension == loadedDimension) {
-				return true;
-			}
-		}
-		return false;
+		//TODO make dimension work here
+		return reigonsMap.containsKey (id);
 	}
 	
 	public static int unloadReigonsOutsideMap () {
-		//Works exactly as advertised
 		int count = 0;
-		for (int i = 0; i < reigons.size (); i++) {
-			WorldReigon current = reigons.get (i);
+		Iterator<Entry<Integer, WorldReigon>> iter = reigonsMap.entrySet ().iterator ();
+		while (iter.hasNext ()) {
+			WorldReigon current = iter.next ().getValue ();
 			if ((current.id + 1) * WorldReigon.REIGON_SIZE < loadLeft || current.id * WorldReigon.REIGON_SIZE > loadRight) {
 				current.unload ();
-				i--;
+				iter.remove ();
 				count++;
 			}
 		}
@@ -754,33 +632,32 @@ public class World {
 	}
 	
 	public static void updateWorld () {
-		for (int wx = loadLeft; wx < loadRight; wx++) {
-			int tileX = Math.floorMod (wx, LOAD_SIZE);
-			WorldReigon currRg = getReigon (wx);
-			worldFgTiles.set (tileX, currRg.getColumn (wx, 0));
-			worldBgTiles.set (tileX, currRg.getColumn (wx, 1)); //Update the column of tiles to match the loaded reigon
-			xBuffer [tileX] = wx;
-		}
+		//TODO this needs to be entirely re-done
 	}
 	
 	public static WorldReigon loadReigon (int id, int dimension) {
+		//TODO this needs to be entirely re-done or reconsidered
 		WorldReigon rg = new WorldReigon (id, dimension);
-		reigons.add (rg);
+		reigonsMap.put (id, rg);
 		rg.load ();
 		return rg;
 	}
 	
 	public static void saveReigons () {
-		for (int i = 0; i < reigons.size (); i++) {
-			reigons.get (i).save ();
+		Set<Entry<Integer, WorldReigon>> allRgs = reigonsMap.entrySet ();
+		Iterator<Entry<Integer, WorldReigon>> iter = allRgs.iterator ();
+		while (iter.hasNext ()) {
+			iter.next ().getValue ().save ();
 		}
 	}
 	
 	public static void unloadAll () {
-		//Unload all reigons
-		while (!reigons.isEmpty ()) {
-			reigons.get (0).unload ();
+		Set<Entry<Integer, WorldReigon>> allRgs = reigonsMap.entrySet ();
+		Iterator<Entry<Integer, WorldReigon>> iter = allRgs.iterator ();
+		while (iter.hasNext ()) {
+			iter.next ().getValue ().unload ();
 		}
+		reigonsMap = new HashMap<Integer, WorldReigon> ();
 	}
 	
 	public static void savePlayer () {
@@ -1017,9 +894,12 @@ public class World {
 		entities.remove (e);
 		
 		//Remove entity from its reigon
-		for (int i = 0; i < reigons.size (); i++) {
-			if (reigons.get (i).hasEntity (e.getUUID ())) {
-				reigons.get (i).removeEntity (e);
+		Set<Entry<Integer, WorldReigon>> allRgs = reigonsMap.entrySet ();
+		Iterator<Entry<Integer, WorldReigon>> iter = allRgs.iterator ();
+		while (iter.hasNext ()) {
+			WorldReigon curr = iter.next ().getValue ();
+			if (curr.hasEntity (e.getUUID ())) {
+				curr.removeEntity (e);
 			}
 		}
 		
@@ -1036,10 +916,12 @@ public class World {
 	public static void updateReigon (Entity e) {
 		
 		//Check reigons for the object
-		for (int i = 0; i < reigons.size (); i++) {
+		Set<Entry<Integer, WorldReigon>> allRgs = reigonsMap.entrySet ();
+		Iterator<Entry<Integer, WorldReigon>> iter = allRgs.iterator ();
+		while (iter.hasNext ()) {
 			
-			//Nab the working WorldReigon
-			WorldReigon r = reigons.get (i);
+			//Get the current reigon
+			WorldReigon r = iter.next ().getValue ();
 			
 			if (r.hasEntity (e.getUUID ())) {
 				//Reigon has the entity, check to remove
@@ -1089,7 +971,8 @@ public class World {
 					if (struct.getMetaProperty ("spawn_type").equals ("surface")) {
 						for (int i = 0; i < numAttempts; i++) {
 							int spawnX = r.nextInt (WorldReigon.REIGON_SIZE) + reigonX;
-							putStructure (structName, spawnX * 8, rg.getCeilingHeight (spawnX) * 8 - 8);
+							int rgX = Math.floorMod (spawnX, WorldReigon.REIGON_SIZE);
+							putStructure (structName, spawnX * 8, rg.getCeilingHeight (rgX) * 8 - 8);
 						}
 					}
 					
@@ -1133,8 +1016,10 @@ public class World {
 		}
 		
 		//Do random ticks
-		for (int i = 0; i < reigons.size (); i++) {
-			reigons.get (i).tickReigon ();
+		Set<Entry<Integer, WorldReigon>> allRgs = reigonsMap.entrySet ();
+		Iterator<Entry<Integer, WorldReigon>> iter = allRgs.iterator ();
+		while (iter.hasNext ()) {
+			iter.next ().getValue ().tickReigon ();
 		}
 		
 		//Do sched ticks
@@ -1401,6 +1286,12 @@ public class World {
 		
 		public ArrayList<ArrayList<Integer>> fgTiles;
 		public ArrayList<ArrayList<Integer>> bgTiles;
+		private ArrayList<Boolean> loadedColumns;
+		
+		public ArrayList<ArrayList<Point>> lights;
+		public ArrayList<ArrayList<Integer>> lighting;
+		public ArrayList<Integer> ceilingMap;
+		
  		private ArrayList<Entity> entities;
 		private HashMap<UUID, Entity> entityMap;
 		
@@ -1408,6 +1299,175 @@ public class World {
 			this.id = id;
 			this.dimension = dimension; //Save id and dimension for later use
 			this.filled = false;
+			
+			//Init lists
+			this.loadedColumns = new ArrayList<Boolean> ();
+			for (int i = 0; i < LOAD_SIZE; i++) {
+				this.loadedColumns.add (false);
+			}
+			
+			initLighting ();
+			
+		}
+		
+		public void initLighting () {
+			
+			//Init columns of point-lights
+			lights = new ArrayList<ArrayList<Point>> ();
+			for (int wx = 0; wx < REIGON_SIZE; wx++) {
+				ArrayList<Point> column = new ArrayList<Point> ();
+				lights.add (column);
+			}
+			
+			//Init the lighting
+			lighting = new ArrayList<ArrayList<Integer>> ();
+			for (int wx = 0; wx < REIGON_SIZE; wx++) {
+				ArrayList<Integer> lightingVals = new ArrayList<Integer> ();
+				for (int wy = 0; wy < WORLD_HEIGHT; wy++) {
+					lightingVals.add (-1);
+				}
+				lighting.add (lightingVals);
+			}
+			
+			//Init the ceiling map
+			ceilingMap = new ArrayList<Integer> ();
+			for (int i = 0; i < REIGON_SIZE; i++) {
+				ceilingMap.add (-1);
+			}
+			
+		}
+		
+		public void putLightSource (int strength, int x, int y) {
+			
+			//Add light source to column lights
+			Point source = new Point (x, y);
+			lights.get (x).add (source);
+			
+			//Invalidate all lighting values around the added light source
+			for (int wx = -strength; wx <= strength; wx++) {
+				for (int wy = -strength; wy <= strength; wy++) {
+					int putX = x + wx;
+					int putY = y + wy;
+					if (putY >= 0 && putY < WORLD_HEIGHT) {
+						lighting.get (x).set (putY, -1);
+					}
+				}
+			}
+			
+		}
+		
+		public void removeLightSource (int strength, int x, int y) {
+			
+			//Remove light source from column lights
+			Point source = new Point (x, y);
+			ArrayList<Point> columnLights = lights.get (x);
+			for (int i = 0; i < columnLights.size (); i++) {
+				Point curr = columnLights.get (i);
+				if (curr.x == x && curr.y == y) {
+					columnLights.remove (i);
+					break;
+				}
+			}
+			
+			//Invalidate all lighting values around the removed light source
+			for (int wx = -strength; wx <= strength; wx++) {
+				for (int wy = -strength; wy <= strength; wy++) {
+					int putX = x + wx;
+					int putY = y + wy;
+					if (putY >= 0 && putY < WORLD_HEIGHT) {
+						int realX = Math.floorMod (putX, LOAD_SIZE);
+						lighting.get (realX).set (putY, -1);
+					}
+				}
+			}
+			
+		}
+		
+		//Adds in light sources to an un-initialized column
+		public void lightColumn (int x) {
+			int realX = Math.floorMod (x, LOAD_SIZE);
+			ArrayList<Integer> col = fgTiles.get (realX);
+			for (int i = 0; i < WORLD_HEIGHT; i++) {
+				if (tileLightTable [col.get (i)] != 0) {
+					putLightSource (tileLightTable [col.get (i)], x, i);
+				}
+			}
+		}
+		
+		//Removes light sources from a column
+		public void unlightColumn (int x) {
+			int realX = Math.floorMod (x, LOAD_SIZE);
+			ArrayList<Integer> col = fgTiles.get (realX);
+			for (int i = 0; i < WORLD_HEIGHT; i++) {
+				if (tileLightTable [col.get (i)] != 0) {
+					removeLightSource (tileLightTable [col.get (i)], x, i);
+				}
+				lighting.get (realX).set (i, -1);
+			}
+		}
+		
+		public int getLightStrength (int x, int y) {
+			int preLight = lighting.get (x).get (y);
+			if (preLight != -1) {
+				return preLight;
+			} else {
+				int lightVal = computeLight (x, y);
+				lighting.get (y).set (y, lightVal);
+				return lightVal;
+			}
+		}
+		
+		public void loadColumn (int x) {
+			lightColumn (x);
+			loadedColumns.set (x, true);
+		}
+		
+		public void unloadColumn (int x) {
+			unlightColumn (x);
+			loadedColumns.set (x, false);
+		}
+		
+		public boolean columnLoaded (int x) {
+			return loadedColumns.get (x);
+		}
+		
+		public void draw () {
+			//Draw the tiles
+			for (int currLayer = 1; currLayer >= 0; currLayer--) {
+				for (int wy = 0; wy < SCREEN_SIZE_V; wy++) {
+					for (int wx = 0; wx < SCREEN_SIZE_H; wx++) {
+						if (getReigonId (viewX + wx) == this.id) {
+							int tileId = getTile (Math.floorMod (viewX + wx, REIGON_SIZE), viewY + wy, currLayer);
+							int lightVal = getLightStrength (Math.floorMod (viewX + wx, REIGON_SIZE), Math.floorMod (viewY + wy, REIGON_SIZE));
+							if (currLayer == 1) {
+								lightVal -= 4;
+								lightVal = lightVal < 0 ? 0 : lightVal;
+							}
+							
+							//Render the proper tile
+							if (Fluids.isWaterSource (tileId) || Fluids.isLavaSource (tileId)) {
+								int upId = getTile (Math.floorMod (viewX + wx, REIGON_SIZE), viewY + wy - 1, currLayer);
+								if (Fluids.isWaterSource (tileId) && Fluids.isWater (upId)) {
+									PARSED_TILES.setFrame (Fluids.WATER_FLOWING_START_ID);
+								} else if (Fluids.isLavaSource (tileId) && Fluids.isLava (upId)) {
+									PARSED_TILES.setFrame (Fluids.LAVA_FLOWING_START_ID);
+								} else {
+									PARSED_TILES.setFrame (tileId);
+								}
+							} else {
+								PARSED_TILES.setFrame (tileId); //Draw normally
+							}
+							PARSED_TILES.draw (wx * 8, wy * 8);
+							
+							//Render the proper lighting
+							if (tileId != 0) {
+								PARSED_LIGHTING.setFrame (lightVal);
+								PARSED_LIGHTING.draw (wx * 8, wy * 8);
+							}
+						}
+					}
+				}
+			}
 		}
 		
 		public void load () {
@@ -1539,7 +1599,7 @@ public class World {
 			
 			//Save this reigon and remove it from the World's list of loaded reigons
 			save ();
-			reigons.remove (this);
+			reigonsMap.remove (this); //TODO figure out what to do here
 			
 		}
 		
@@ -1609,31 +1669,38 @@ public class World {
 			return "reigon_entities_" + dimension + "_" + id + ".txt";
 		}
 		
-		public ArrayList<Integer> getColumn (int x, int layer) {
-			return (layer == 0 ? fgTiles : bgTiles).get (Math.floorMod(x, REIGON_SIZE));
+		public int getCeilingHeight (int x) {
+			if (ceilingMap.get (x) == -1) {
+				ArrayList<Integer> column = getColumn (x, 0);
+				for (int i = 0; i < column.size (); i++) {
+					if (tileTpTable [column.get (i)] == 0) {
+						ceilingMap.set (x, i);
+						//ArrayList<Integer> lightCol = lighting.get (realX); Shouldn't be computed here if possible
+						//for (int j = 0; j < column.size (); j++) {
+						//	lightCol.set (j, -1);
+						//}
+						return i;
+					}
+				}
+				return 255;
+			} else {
+				return ceilingMap.get (x);
+			}
 		}
 		
-		public int getTile (int x, int y) {
+		public ArrayList<Integer> getColumn (int x, int layer) {
+			return (layer == 0 ? fgTiles : bgTiles).get (x);
+		}
+		
+		public int getTile (int x, int y, int layer) {
 			if (y < 0 || y >= WORLD_HEIGHT) {
 				return 24;
 			}
-			return fgTiles.get (Math.floorMod(x, REIGON_SIZE)).get (y);
+			return (layer == 0 ? fgTiles : bgTiles).get (x).get (y);
 		}
 		
-		public void setTile (int id, int x, int y) {
-			fgTiles.get (Math.floorMod(x, REIGON_SIZE)).set (y, id);
-		}
-		
-		//Various generation stuffs
-		public int getCeilingHeight (int x) {
-			int realX = Math.floorMod (x, REIGON_SIZE);
-			ArrayList<Integer> column = fgTiles.get (realX);
-			for (int i = 0; i < column.size (); i++) {
-				if (tileTpTable [column.get (i)] == 0) {
-					return i;
-				}
-			}
-			return 255;
+		public void setTile (int id, int x, int y, int layer) {
+			(layer == 0 ? fgTiles : bgTiles).get (x).set (y, id);
 		}
 		
 		public void tickReigon () {
